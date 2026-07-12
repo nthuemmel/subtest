@@ -3,9 +3,11 @@ resolver = "3"
 members = [
     "subtest",
     "subtest-impl",
+    "subtest-examples",
 ]
 
 [workspace.dependencies]
+subtest = { path = "subtest" }
 subtest-impl = { path = "subtest-impl" }
 
 proc-macro2 = "1.0.106"

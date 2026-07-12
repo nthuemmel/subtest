@@ -330,6 +330,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "subtest-examples"
+version = "0.1.0"
+dependencies = [
+ "subtest",
+]
+
+[[package]]
 name = "subtest-impl"
 version = "0.1.0"
 dependencies = [
