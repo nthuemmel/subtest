@@ -1,3 +1,5 @@
+mod async_tests;
+
 #[cfg(test)]
 mod tests {
     use subtest::subtest;
