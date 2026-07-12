@@ -1,8 +1,7 @@
 use proc_macro2::TokenStream;
 use quote::quote;
-use syn::ItemFn;
 
-pub fn expand_subtest(input: ItemFn) -> TokenStream {
+pub fn expand_subtest_main_fn(input: TokenStream) -> TokenStream {
     quote! {
         #input
     }

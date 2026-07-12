@@ -1,0 +1,9 @@
+---
+source: subtest-impl/tests/expand.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand/no_subtests.rs
+---
+#[test]
+fn test() {
+    assert_eq!(1, 1);
+}

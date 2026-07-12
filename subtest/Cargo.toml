@@ -8,5 +8,3 @@ proc-macro = true
 
 [dependencies]
 subtest-impl = { workspace = true }
-
-syn = { workspace = true }
