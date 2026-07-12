@@ -8,3 +8,6 @@ proc-macro = true
 
 [dependencies]
 subtest-impl = { workspace = true }
+
+[dev-dependencies]
+macrotest = { workspace = true }

@@ -1,0 +1,18 @@
+/// Test that all fixtures in the directory 'expands' expand to an expected output snapshot when
+/// thrown at the subtest macro. Uses macrotest for snapshot management and assertions.
+#[test]
+pub fn test_snapshots() {
+    let pwd = std::env::current_dir().unwrap();
+    let pwd = pwd.to_str().unwrap();
+
+    // without the '--tests' flag, `cargo expand` would just remove functions annotated with #[test]
+    // without the '--remap-path-prefix', absolute paths to the input files would show up in the generated output snapshots
+    macrotest::expand_args(
+        "tests/expand/*.rs",
+        [
+            "--tests".to_string(),
+            "--config".to_string(),
+            format!("build.rustflags=[\"--remap-path-prefix={pwd}=.\"]"),
+        ],
+    );
+}
