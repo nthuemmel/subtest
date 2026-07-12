@@ -1,0 +1,14 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/missing_test_attr_is_added_automatically.rs
+---
+#[test]
+fn parent() {}
+mod parent_subtests {
+    use super::*;
+    #[test]
+    fn first() {}
+    #[test]
+    fn second() {}
+}

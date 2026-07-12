@@ -1,0 +1,62 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/tree.rs
+---
+#[test]
+fn level_0() {
+    let i = 1;
+}
+mod level_0_subtests {
+    use super::*;
+    #[test]
+    fn level_1a() {
+        let i = 1;
+        let level1 = "a";
+    }
+    mod level_1a_subtests {
+        use super::*;
+        #[test]
+        fn level_1a_2a() {
+            let i = 1;
+            let level1 = "a";
+            let level2 = "a";
+        }
+        #[test]
+        fn level_1a_2b() {
+            let i = 1;
+            let level1 = "a";
+            let level2 = "b";
+        }
+        mod level_1a_2b_subtests {
+            use super::*;
+            #[test]
+            fn level_1a_2b_3() {
+                let i = 1;
+                let level1 = "a";
+                let level2 = "b";
+                let level3 = "X";
+            }
+        }
+    }
+    #[test]
+    fn level_1b() {
+        let i = 1;
+        let level1 = "b";
+    }
+    mod level_1b_subtests {
+        use super::*;
+        #[test]
+        fn level_1b_2a() {
+            let i = 1;
+            let level1 = "b";
+            let level2 = "1ba";
+        }
+        #[test]
+        fn level_1b_2b() {
+            let i = 1;
+            let level1 = "b";
+            let level2 = "1bb";
+        }
+    }
+}

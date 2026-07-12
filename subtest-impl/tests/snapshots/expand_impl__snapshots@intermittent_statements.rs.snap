@@ -1,0 +1,25 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/intermittent_statements.rs
+---
+#[test]
+fn parent() {
+    let local_var = 1;
+    let local_var = local_var + 1;
+    let local_var = 24;
+}
+mod parent_subtests {
+    use super::*;
+    #[test]
+    fn first() {
+        let local_var = 1;
+        assert_eq!(local_var, 1);
+    }
+    #[test]
+    fn second() {
+        let local_var = 1;
+        let local_var = local_var + 1;
+        assert_eq!(local_var, 2);
+    }
+}

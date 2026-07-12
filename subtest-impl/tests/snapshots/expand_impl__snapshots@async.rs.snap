@@ -1,0 +1,12 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/async.rs
+---
+#[tokio::test]
+async fn async_test() {}
+mod async_test_subtests {
+    use super::*;
+    #[tokio::test]
+    async fn nested() {}
+}

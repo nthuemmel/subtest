@@ -1,0 +1,21 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/test_attr_override.rs
+---
+#[test]
+fn parent() {}
+mod parent_subtests {
+    use super::*;
+    #[test]
+    fn nested_sync() {}
+    #[tokio::test]
+    async fn nested_async() {}
+    #[rstest]
+    #[case(0, 0)]
+    #[case(1, 1)]
+    #[case(2, 1)]
+    #[case(3, 2)]
+    #[case(4, 3)]
+    fn nested_rstest(#[case] input: u32, #[case] expected: u32) {}
+}

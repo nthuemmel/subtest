@@ -1,0 +1,24 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/two_subtests.rs
+---
+#[test]
+fn two_subtests() {
+    let i = 1;
+}
+mod two_subtests_subtests {
+    use super::*;
+    #[test]
+    fn add() {
+        let i = 1;
+        let i = i + 1;
+        assert_eq!(i, 2);
+    }
+    #[test]
+    fn subtract() {
+        let i = 1;
+        let i = i - 1;
+        assert_eq!(i, 0);
+    }
+}
