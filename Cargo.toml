@@ -2,7 +2,12 @@
 resolver = "3"
 members = [
     "subtest",
+    "subtest-impl",
 ]
 
-dependencies = {
-}
+[workspace.dependencies]
+subtest-impl = { path = "subtest-impl" }
+
+proc-macro2 = "1.0.106"
+quote = "1.0.46"
+syn = { version = "2.0.118", features = ["full"] }
