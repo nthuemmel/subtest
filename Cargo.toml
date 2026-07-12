@@ -16,3 +16,4 @@ syn = { version = "2.0.118", features = ["full"] }
 insta = { version = "1.48.0", features = ["glob"] }
 prettyplease = "0.2.37"
 macrotest = "1.2.1"
+trybuild = "1.0.118"
