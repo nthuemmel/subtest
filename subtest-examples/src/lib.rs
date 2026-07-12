@@ -1,4 +1,5 @@
 mod async_tests;
+mod rstest_tests;
 
 #[cfg(test)]
 mod tests {

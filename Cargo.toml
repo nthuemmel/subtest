@@ -18,3 +18,4 @@ prettyplease = "0.2.37"
 macrotest = "1.2.1"
 trybuild = "1.0.118"
 tokio = { version = "1.52.3", default-features = false, features = ["macros", "rt"] }
+rstest = "0.26.1"

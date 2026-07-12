@@ -6,3 +6,4 @@ edition = "2024"
 [dependencies]
 subtest = { workspace = true }
 tokio = { workspace = true }
+rstest = { workspace = true }
