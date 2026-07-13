@@ -3,7 +3,6 @@ resolver = "3"
 members = [
     "subtest",
     "subtest-impl",
-    "subtest-examples",
 ]
 
 [workspace.dependencies]

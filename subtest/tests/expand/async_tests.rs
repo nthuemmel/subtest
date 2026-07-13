@@ -1,5 +1,3 @@
-#![cfg(test)]
-
 use subtest::subtest;
 
 #[subtest]

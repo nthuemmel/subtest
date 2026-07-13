@@ -1,5 +1,3 @@
-#![cfg(test)]
-
 use rstest::rstest;
 use subtest::subtest;
 

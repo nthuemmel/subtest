@@ -12,3 +12,5 @@ subtest-impl = { workspace = true }
 [dev-dependencies]
 macrotest = { workspace = true }
 trybuild = { workspace = true }
+tokio = { workspace = true }
+rstest = { workspace = true }

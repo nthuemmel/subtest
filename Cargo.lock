@@ -451,17 +451,10 @@ name = "subtest"
 version = "0.1.0"
 dependencies = [
  "macrotest",
- "subtest-impl",
- "trybuild",
-]
-
-[[package]]
-name = "subtest-examples"
-version = "0.1.0"
-dependencies = [
  "rstest",
- "subtest",
+ "subtest-impl",
  "tokio",
+ "trybuild",
 ]
 
 [[package]]

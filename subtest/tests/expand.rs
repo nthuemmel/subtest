@@ -19,6 +19,14 @@ pub fn test_snapshots() {
 
 /// Also actually run the tests for which we do snapshot testing above
 mod expand {
+    mod async_tests;
+    #[expect(
+        dead_code,
+        reason = "since #[test] is missing, the function should lead to a dead code warning, \
+                  like normal test functions which you forgot to annotate with #[test]"
+    )]
+    mod missing_test_attr;
     mod no_subtests;
+    mod rstest_tests;
     mod two_subtests;
 }
