@@ -16,3 +16,9 @@ pub fn test_snapshots() {
         ],
     );
 }
+
+/// Also actually run the tests for which we do snapshot testing above
+mod expand {
+    mod no_subtests;
+    mod two_subtests;
+}
