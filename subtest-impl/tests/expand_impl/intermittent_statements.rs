@@ -1,4 +1,5 @@
 #[subtest]
+#[test]
 fn parent() {
     let local_var = 1;
 

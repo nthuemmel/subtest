@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
-use syn::{Attribute, Block, Item, ItemFn, Stmt, parse_quote};
+use syn::{Attribute, Block, Item, ItemFn, Stmt};
 
 pub fn expand_subtest_main_fn(input: TokenStream) -> TokenStream {
     expand_subtest_main_fn_fallible(input).unwrap_or_else(|err| err.to_compile_error())
@@ -8,13 +8,7 @@ pub fn expand_subtest_main_fn(input: TokenStream) -> TokenStream {
 
 fn expand_subtest_main_fn_fallible(input: TokenStream) -> Result<TokenStream, syn::Error> {
     let input_fn: ItemFn = syn::parse2(input)?;
-
-    // This is the test attribute that will be added if a user just specifies #[subtest] and nothing
-    // else
-    let default_test_attr: Attribute = parse_quote!(#[test]);
-    let default_test_attributes = vec![default_test_attr];
-
-    Ok(Subtest::new(input_fn, vec![], &default_test_attributes)?.render())
+    Ok(Subtest::new(input_fn, vec![], &[])?.render())
 }
 
 struct Subtest {
@@ -26,12 +20,12 @@ impl Subtest {
     fn new(
         input_fn: ItemFn,
         parent_fn_statements: Vec<Stmt>,
-        default_test_fn_attrs: &Vec<Attribute>,
+        parent_fn_attrs: &[Attribute],
     ) -> Result<Self, syn::Error> {
         // If the subtest fn does not specify any attributes (#[subtest] itself excluded),
         // inherit attributes from the parent test fn
         let attrs = if input_fn.attrs.is_empty() {
-            default_test_fn_attrs.clone()
+            parent_fn_attrs.to_vec()
         } else {
             input_fn.attrs
         };

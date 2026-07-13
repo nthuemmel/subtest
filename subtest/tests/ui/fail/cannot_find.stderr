@@ -1,17 +1,11 @@
-error: cannot find attribute `stubtest` in this scope
- --> tests/ui/fail/cannot_find.rs:4:3
-  |
-4 | #[stubtest] // By default, successfully expanded test functions are removed because trybuild does not build test targets. Specify a s...
-  |   ^^^^^^^^
-
 error[E0425]: cannot find value `missing_var` in this scope
-  --> tests/ui/fail/cannot_find.rs:10:23
-   |
-10 |         let derived = missing_var + 1;
-   |                       ^^^^^^^^^^^ not found in this scope
+ --> tests/ui/fail/cannot_find.rs:9:23
+  |
+9 |         let derived = missing_var + 1;
+  |                       ^^^^^^^^^^^ not found in this scope
 
 error[E0425]: cannot find function `missing_fn` in this scope
- --> tests/ui/fail/cannot_find.rs:6:5
+ --> tests/ui/fail/cannot_find.rs:5:5
   |
-6 |     missing_fn();
+5 |     missing_fn();
   |     ^^^^^^^^^^ not found in this scope

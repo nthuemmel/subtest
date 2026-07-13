@@ -1,4 +1,5 @@
 #[subtest]
+#[test]
 fn parent() {
     #[subtest]
     #[test]
