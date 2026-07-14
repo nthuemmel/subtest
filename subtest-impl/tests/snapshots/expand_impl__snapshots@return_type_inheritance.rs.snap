@@ -1,0 +1,14 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/return_type_inheritance.rs
+---
+fn parent() -> anyhow::Result<()> {}
+mod parent_subtests {
+    use super::*;
+    fn child() -> anyhow::Result<()> {}
+    mod child_subtests {
+        use super::*;
+        fn grandchild() -> anyhow::Result<()> {}
+    }
+}

@@ -1,6 +1,7 @@
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
-use syn::{Attribute, Block, Item, ItemFn, Stmt};
+use syn::punctuated::Punctuated;
+use syn::{Attribute, Block, FnArg, Item, ItemFn, ReturnType, Signature, Stmt, Token};
 
 pub fn expand_subtest_main_fn(args: TokenStream, input: TokenStream) -> TokenStream {
     expand_subtest_main_fn_fallible(args, input).unwrap_or_else(|err| err.to_compile_error())
@@ -15,7 +16,16 @@ fn expand_subtest_main_fn_fallible(
     }
 
     let input_fn: ItemFn = syn::parse2(input)?;
-    Ok(Subtest::new(input_fn, vec![], &[])?.render())
+
+    let main_subtest = Subtest::new(
+        input_fn,
+        vec![],
+        &[],
+        &Punctuated::new(),
+        &ReturnType::Default,
+    )?;
+
+    Ok(main_subtest.render())
 }
 
 struct Subtest {
@@ -28,6 +38,8 @@ impl Subtest {
         input_fn: ItemFn,
         parent_fn_statements: Vec<Stmt>,
         parent_fn_attrs: &[Attribute],
+        parent_fn_params: &Punctuated<FnArg, Token![,]>,
+        parent_fn_return_type: &ReturnType,
     ) -> Result<Self, syn::Error> {
         // If the subtest fn does not specify any attributes (#[subtest] itself excluded),
         // inherit attributes from the parent test fn
@@ -37,10 +49,28 @@ impl Subtest {
             input_fn.attrs
         };
 
+        // Inherit function parameters if the subtest fn does not specify any
+        let fn_params = if input_fn.sig.inputs.is_empty() {
+            parent_fn_params.clone()
+        } else {
+            input_fn.sig.inputs
+        };
+
+        // Inherit function return type if the subtest fn does not specify any
+        let fn_return_type = if matches!(input_fn.sig.output, ReturnType::Default) {
+            parent_fn_return_type.clone()
+        } else {
+            input_fn.sig.output
+        };
+
         let mut function = ItemFn {
             attrs,
             vis: input_fn.vis,
-            sig: input_fn.sig,
+            sig: Signature {
+                inputs: fn_params,
+                output: fn_return_type,
+                ..input_fn.sig
+            },
             block: Box::new(Block {
                 brace_token: input_fn.block.brace_token,
                 // inherit all preceding statements from the parent
@@ -57,6 +87,8 @@ impl Subtest {
                         check_and_remove_subtest_attr(nested_fn)?,
                         function.block.stmts.clone(),
                         &function.attrs,
+                        &function.sig.inputs,
+                        &function.sig.output,
                     )?);
                 }
                 other => {

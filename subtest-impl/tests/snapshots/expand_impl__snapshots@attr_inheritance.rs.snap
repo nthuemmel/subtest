@@ -1,0 +1,20 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/attr_inheritance.rs
+---
+#[test]
+#[should_panic(expected = "my failure")]
+fn parent() {}
+mod parent_subtests {
+    use super::*;
+    #[test]
+    #[should_panic(expected = "my failure")]
+    fn child() {}
+    mod child_subtests {
+        use super::*;
+        #[test]
+        #[should_panic(expected = "my failure")]
+        fn grandchild() {}
+    }
+}
