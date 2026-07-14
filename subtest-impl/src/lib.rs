@@ -2,11 +2,18 @@ use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use syn::{Attribute, Block, Item, ItemFn, Stmt};
 
-pub fn expand_subtest_main_fn(input: TokenStream) -> TokenStream {
-    expand_subtest_main_fn_fallible(input).unwrap_or_else(|err| err.to_compile_error())
+pub fn expand_subtest_main_fn(args: TokenStream, input: TokenStream) -> TokenStream {
+    expand_subtest_main_fn_fallible(args, input).unwrap_or_else(|err| err.to_compile_error())
 }
 
-fn expand_subtest_main_fn_fallible(input: TokenStream) -> Result<TokenStream, syn::Error> {
+fn expand_subtest_main_fn_fallible(
+    args: TokenStream,
+    input: TokenStream,
+) -> Result<TokenStream, syn::Error> {
+    if !args.is_empty() {
+        return Err(syn::Error::new_spanned(args, "expected no arguments"));
+    }
+
     let input_fn: ItemFn = syn::parse2(input)?;
     Ok(Subtest::new(input_fn, vec![], &[])?.render())
 }
@@ -87,10 +94,16 @@ impl Subtest {
 
 fn check_and_remove_subtest_attr(mut from_fn: ItemFn) -> Result<ItemFn, syn::Error> {
     let mut subtest_attr_found = false;
+    let mut validation_error = None;
 
     from_fn.attrs.retain(|attr| {
         if attr.meta.path().is_ident("subtest") {
             subtest_attr_found = true;
+            if validation_error.is_none() {
+                validation_error = attr.meta.require_path_only().err().map(|_| {
+                    syn::Error::new_spanned(attr, "expected #[subtest] with no arguments")
+                });
+            }
             false
         } else {
             true
@@ -102,6 +115,10 @@ fn check_and_remove_subtest_attr(mut from_fn: ItemFn) -> Result<ItemFn, syn::Err
             from_fn,
             "function is missing the #[subtest] attribute",
         ));
+    }
+
+    if let Some(validation_error) = validation_error {
+        return Err(validation_error);
     }
 
     Ok(from_fn)

@@ -1,0 +1,5 @@
+error: expected no arguments
+ --> tests/ui/fail/wrong_subtest_attr_format_2.rs:3:20
+  |
+3 | #[subtest::subtest(arg1)]
+  |                    ^^^^

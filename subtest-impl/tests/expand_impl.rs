@@ -1,3 +1,4 @@
+use proc_macro2::TokenStream;
 use subtest_impl::expand_subtest_main_fn;
 
 /// Test that all fixtures in the directory 'expands' expand to an expected output snapshot when
@@ -16,7 +17,7 @@ fn test_snapshots() {
             syn::parse_str(&macro_input_without_attr).expect("macro input must be valid Rust");
 
         // Runs the actual macro:
-        let macro_output = expand_subtest_main_fn(macro_input_without_attr);
+        let macro_output = expand_subtest_main_fn(TokenStream::new(), macro_input_without_attr);
 
         let macro_output = syn::parse2(macro_output).expect("macro output must be valid Rust");
         let macro_output = prettyplease::unparse(&macro_output);

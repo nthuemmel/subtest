@@ -1,0 +1,11 @@
+error: key-value macro attributes are not supported
+ --> tests/ui/fail/wrong_subtest_attr_format_1.rs:3:1
+  |
+3 | #[subtest::subtest = "foo"]
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: expected no arguments
+ --> tests/ui/fail/wrong_subtest_attr_format_1.rs:3:22
+  |
+3 | #[subtest::subtest = "foo"]
+  |                      ^^^^^
