@@ -2,6 +2,7 @@
 name = "subtest"
 version = "0.1.0"
 edition = "2024"
+rust-version = "1.87"
 
 [lib]
 proc-macro = true
