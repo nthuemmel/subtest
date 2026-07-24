@@ -1,8 +1,13 @@
 [package]
 name = "subtest-impl"
+description = "Implementation detail of the `subtest` crate"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.87"
+authors = ["Nikolaus Thümmel <commit.nthuemmel@ntcomputer.de>"]
+license = "MIT OR Apache-2.0"
+homepage = "https://github.com/nthuemmel/subtest"
+repository = "https://github.com/nthuemmel/subtest"
 
 [dependencies]
 quote = { workspace = true }

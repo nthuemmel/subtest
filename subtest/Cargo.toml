@@ -1,8 +1,16 @@
 [package]
 name = "subtest"
+description = "macro to easily share test setup code between related test functions"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.87"
+authors = ["Nikolaus Thümmel <commit.nthuemmel@ntcomputer.de>"]
+license = "MIT OR Apache-2.0"
+readme = "../README.md"
+categories = ["development-tools::testing"]
+keywords = ["test", "macro", "fixture"]
+homepage = "https://github.com/nthuemmel/subtest"
+repository = "https://github.com/nthuemmel/subtest"
 
 [lib]
 proc-macro = true
