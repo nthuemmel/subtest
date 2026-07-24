@@ -2,11 +2,13 @@
 
 ## Run Tests
 
+You will need [cargo-expand](https://github.com/dtolnay/cargo-expand) (`cargo install cargo-expand`).
+
 ```
-cargo check --locked --all-targets
-cargo test --locked
+cargo check --locked --workspace --all-targets --all-features
+cargo test --locked --workspace --all-features 
 cargo fmt --all -- --check
-cargo clippy --locked --all-targets -- -D warnings
+cargo clippy --locked --workspace --all-targets --all-features -- -D warnings
 ```
 
 ### Fix Issues
