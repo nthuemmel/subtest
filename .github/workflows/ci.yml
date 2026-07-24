@@ -1,0 +1,117 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  schedule:
+    - cron: '25 10 * * 6'
+
+# Cancel superseded runs on the same ref (e.g. new push to a PR).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: 1
+  MSRV: "1.87"
+  CARGO_EXPAND_VERSION: "1.0.123"
+
+permissions:
+  contents: read
+
+jobs:
+  # === MSRV jobs: mandatory checks ===
+  msrv-test:
+    name: "MSRV: Test"
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.MSRV }}
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-expand@${{ env.CARGO_EXPAND_VERSION }}
+      - uses: Swatinem/rust-cache@v2
+      - name: Run tests
+        run: cargo test --locked --workspace --all-features
+
+  msrv-fmt:
+    name: "MSRV: Rustfmt"
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.MSRV }}
+          components: rustfmt
+      - name: Check formatting
+        run: cargo fmt --all --check
+
+  msrv-clippy:
+    name: "MSRV: Clippy"
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ env.MSRV }}
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Run clippy
+        run: cargo clippy --locked --workspace --all-targets --all-features -- -D warnings
+
+  # === Latest stable: mandatory checks ===
+  stable-check:
+    name: "stable: Check"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - name: Cargo check
+        run: cargo check --locked --workspace --all-targets --all-features
+
+  # === Latest stable: advisory checks ===
+  # New Rust releases can break unchanged code (macrotest, fmt and clippy can be
+  # somewhat brittle). continue-on-error ensures this still passes CI, but is at
+  # least somewhat noticeable.
+  stable-test:
+    name: "stable: Test (advisory)"
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-expand
+      - uses: Swatinem/rust-cache@v2
+      - name: Run tests
+        run: cargo test --locked --workspace --all-features
+
+  stable-fmt:
+    name: "stable: Rustfmt (advisory)"
+    runs-on: ubuntu-26.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: Check formatting
+        run: cargo fmt --all --check
+
+  stable-clippy:
+    name: "stable: Clippy (advisory)"
+    runs-on: ubuntu-26.04
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Run clippy
+        run: cargo clippy --locked --workspace --all-targets --all-features -- -D warnings
