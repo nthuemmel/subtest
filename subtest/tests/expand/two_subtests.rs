@@ -2,6 +2,7 @@
 #[test]
 fn two_subtests() {
     let i = 1;
+    assert_eq!(i, 1);
 
     #[subtest]
     fn add() {

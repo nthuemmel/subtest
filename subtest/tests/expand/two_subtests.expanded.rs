@@ -23,6 +23,19 @@ pub const two_subtests: test::TestDescAndFn = test::TestDescAndFn {
 };
 fn two_subtests() {
     let i = 1;
+    match (&i, &1) {
+        (left_val, right_val) => {
+            if !(*left_val == *right_val) {
+                let kind = ::core::panicking::AssertKind::Eq;
+                ::core::panicking::assert_failed(
+                    kind,
+                    &*left_val,
+                    &*right_val,
+                    ::core::option::Option::None,
+                );
+            }
+        }
+    };
 }
 mod two_subtests_subtests {
     use super::*;
@@ -35,9 +48,9 @@ mod two_subtests_subtests {
             ignore: false,
             ignore_message: ::core::option::Option::None,
             source_file: "./tests/expand/two_subtests.rs",
-            start_line: 7usize,
+            start_line: 8usize,
             start_col: 8usize,
-            end_line: 7usize,
+            end_line: 8usize,
             end_col: 11usize,
             compile_fail: false,
             no_run: false,
@@ -48,6 +61,19 @@ mod two_subtests_subtests {
     };
     fn add() {
         let i = 1;
+        match (&i, &1) {
+            (left_val, right_val) => {
+                if !(*left_val == *right_val) {
+                    let kind = ::core::panicking::AssertKind::Eq;
+                    ::core::panicking::assert_failed(
+                        kind,
+                        &*left_val,
+                        &*right_val,
+                        ::core::option::Option::None,
+                    );
+                }
+            }
+        };
         let i = i + 1;
         match (&i, &2) {
             (left_val, right_val) => {
@@ -72,9 +98,9 @@ mod two_subtests_subtests {
             ignore: false,
             ignore_message: ::core::option::Option::None,
             source_file: "./tests/expand/two_subtests.rs",
-            start_line: 13usize,
+            start_line: 14usize,
             start_col: 8usize,
-            end_line: 13usize,
+            end_line: 14usize,
             end_col: 16usize,
             compile_fail: false,
             no_run: false,
@@ -88,6 +114,19 @@ mod two_subtests_subtests {
     };
     fn subtract() {
         let i = 1;
+        match (&i, &1) {
+            (left_val, right_val) => {
+                if !(*left_val == *right_val) {
+                    let kind = ::core::panicking::AssertKind::Eq;
+                    ::core::panicking::assert_failed(
+                        kind,
+                        &*left_val,
+                        &*right_val,
+                        ::core::option::Option::None,
+                    );
+                }
+            }
+        };
         let i = i - 1;
         match (&i, &0) {
             (left_val, right_val) => {

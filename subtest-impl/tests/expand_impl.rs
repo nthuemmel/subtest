@@ -9,12 +9,12 @@ fn test_snapshots() {
         let macro_input = std::fs::read_to_string(path).unwrap();
         let macro_input_without_attr = macro_input.trim_start_matches("#[subtest]");
 
-        if macro_input_without_attr == &macro_input {
+        if macro_input_without_attr == macro_input {
             panic!("Fixture at {path:?} must start with #[subtest]");
         }
 
         let macro_input_without_attr =
-            syn::parse_str(&macro_input_without_attr).expect("macro input must be valid Rust");
+            syn::parse_str(macro_input_without_attr).expect("macro input must be valid Rust");
 
         // Runs the actual macro:
         let macro_output = expand_subtest_main_fn(TokenStream::new(), macro_input_without_attr);

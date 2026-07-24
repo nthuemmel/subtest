@@ -19,7 +19,7 @@ pub const test: test::TestDescAndFn = test::TestDescAndFn {
     testfn: test::StaticTestFn(#[coverage(off)] || test::assert_test_result(test())),
 };
 fn test() {
-    1 == 1;
+    let _ = 1 == 1;
 }
 #[rustc_main]
 #[coverage(off)]
