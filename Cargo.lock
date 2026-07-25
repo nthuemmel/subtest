@@ -448,7 +448,7 @@ checksum = "0c790de23124f9ab44544d7ac05d60440adc586479ce501c1d6d7da3cd8c9cf5"
 
 [[package]]
 name = "subtest"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "macrotest",
  "rstest",
@@ -459,7 +459,7 @@ dependencies = [
 
 [[package]]
 name = "subtest-impl"
-version = "0.1.0"
+version = "0.0.1"
 dependencies = [
  "insta",
  "prettyplease",
