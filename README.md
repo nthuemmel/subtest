@@ -6,7 +6,13 @@
 [![Apache 2.0 Licensed][license-apache-image]][license-apache-link]
 [![MIT Licensed][license-mit-image]][license-mit-link]
 
-`#[subtest]` is a Rust macro to easily share test setup code between related test functions.
+*Just continue writing tests.*
+
+Ever got to a point, were you felt extending a test would be much easier than writing a new one?
+But the thing you want to test is actually a different feature, and would warrant its own test?
+You *could* copy-paste the existing test's setup code, or you *could* refactor it to a shared test fixture, but you could also...
+
+... use `#[subtest]`: a Rust macro to easily use test setup code from one test function in another one.
 
 ## Example
 

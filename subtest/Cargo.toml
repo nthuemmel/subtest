@@ -1,6 +1,6 @@
 [package]
 name = "subtest"
-description = "macro to easily share test setup code between related test functions"
+description = "macro to easily use test setup code from one test function in another one"
 version = "0.0.1"
 edition = "2024"
 rust-version = "1.87"
