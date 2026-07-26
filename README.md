@@ -16,9 +16,68 @@ You *could* copy-paste the existing test's setup code, or you *could* refactor i
 
 ## Example
 
+**Let's say you have a TODO list app.**
+
+```rust
+use subtest::subtest;
+
+#[subtest]
+#[test]
+fn add_creates_pending_task() {
+    let mut list = TodoList::new();
+    let id = list.add("Buy milk");
+
+    #[subtest]
+    fn complete_marks_task_completed() {
+        list.complete(id).unwrap();
+        assert_eq!(list.get(id).unwrap().status, TaskStatus::Completed);
+    }
+
+    #[subtest]
+    fn cancel_marks_task_cancelled() {
+        list.cancel(id).unwrap();
+        assert_eq!(list.get(id).unwrap().status, TaskStatus::Cancelled);
+    }
+
+    let task = list.get(id).unwrap();
+    assert_eq!(task.status, TaskStatus::Pending);
+}
+```
+
 ## How it works
 
-statement copy
+* Statements preceding a nested `#[subtest]` function are **copied** into the nested function's body
+* This means you can freely use and mutate any local variables from the parent function in the nested function...
+* ... without affecting the parent function or sibling test functions
+
+**The above example gets expanded to:**
+
+```rust
+#[test]
+fn add_creates_pending_task() {
+    let mut list = TodoList::new();
+    let id = list.add("Buy milk");
+    let task = list.get(id).unwrap();
+    assert_eq!(task.status, TaskStatus::Pending);
+}
+mod add_creates_pending_task_subtests {
+    use super::*;
+    #[test]
+    fn complete_marks_task_completed() {
+        let mut list = TodoList::new();
+        let id = list.add("Buy milk");
+        list.complete(id).unwrap();
+        assert_eq!(list.get(id).unwrap().status, TaskStatus::Completed);
+    }
+    #[test]
+    fn cancel_marks_task_cancelled() {
+        let mut list = TodoList::new();
+        let id = list.add("Buy milk");
+        list.cancel(id).unwrap();
+        assert_eq!(list.get(id).unwrap().status, TaskStatus::Cancelled);
+    }
+}
+```
 
 ## What you can do
 
