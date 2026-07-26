@@ -23,14 +23,25 @@ permissions:
 
 jobs:
   # === MSRV jobs: mandatory checks ===
-  msrv-test:
-    name: "MSRV: Test"
+  msrv-check:
+    name: "MSRV: Check"
     runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ env.MSRV }}
+      - run: echo "RUSTUP_TOOLCHAIN=$MSRV" >> "$GITHUB_ENV"
+      - run: rustup toolchain install --profile minimal
+      - uses: Swatinem/rust-cache@v2
+      - name: Cargo check
+        run: cargo check --locked --workspace --all-targets --all-features
+
+  # === pinned toolchain: mandatory checks ===
+  # see ../../MAINTENANCE.md#pinned-toolchain
+  pinned-test:
+    name: "Pinned Toolchain: Test"
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+      - run: rustup toolchain install --profile minimal
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-expand@${{ env.CARGO_EXPAND_VERSION }}
@@ -38,27 +49,23 @@ jobs:
       - name: Run tests
         run: cargo test --locked --workspace --all-features
 
-  msrv-fmt:
-    name: "MSRV: Rustfmt"
+  pinned-fmt:
+    name: "Pinned Toolchain: Rustfmt"
     runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ env.MSRV }}
-          components: rustfmt
+      - run: rustup toolchain install --profile minimal
+      - run: rustup component add rustfmt
       - name: Check formatting
         run: cargo fmt --all --check
 
-  msrv-clippy:
-    name: "MSRV: Clippy"
+  pinned-clippy:
+    name: "Pinned Toolchain: Clippy"
     runs-on: ubuntu-26.04
     steps:
       - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ env.MSRV }}
-          components: clippy
+      - run: rustup toolchain install --profile minimal
+      - run: rustup component add clippy
       - uses: Swatinem/rust-cache@v2
       - name: Run clippy
         run: cargo clippy --locked --workspace --all-targets --all-features -- -D warnings
@@ -67,9 +74,11 @@ jobs:
   stable-check:
     name: "stable: Check"
     runs-on: ubuntu-latest
+    env:
+      RUSTUP_TOOLCHAIN: stable
     steps:
       - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
+      - run: rustup toolchain install --profile minimal
       - uses: Swatinem/rust-cache@v2
       - name: Cargo check
         run: cargo check --locked --workspace --all-targets --all-features
@@ -81,9 +90,11 @@ jobs:
   stable-test:
     name: "stable: Test (advisory)"
     runs-on: ubuntu-26.04
+    env:
+      RUSTUP_TOOLCHAIN: stable
     steps:
       - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
+      - run: rustup toolchain install --profile minimal
       - uses: taiki-e/install-action@v2
         with:
           tool: cargo-expand
@@ -95,11 +106,12 @@ jobs:
     name: "stable: Rustfmt (advisory)"
     runs-on: ubuntu-26.04
     continue-on-error: true
+    env:
+      RUSTUP_TOOLCHAIN: stable
     steps:
       - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt
+      - run: rustup toolchain install --profile minimal
+      - run: rustup component add rustfmt
       - name: Check formatting
         run: cargo fmt --all --check
 
@@ -107,11 +119,12 @@ jobs:
     name: "stable: Clippy (advisory)"
     runs-on: ubuntu-26.04
     continue-on-error: true
+    env:
+      RUSTUP_TOOLCHAIN: stable
     steps:
       - uses: actions/checkout@v7
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy
+      - run: rustup toolchain install --profile minimal
+      - run: rustup component add clippy
       - uses: Swatinem/rust-cache@v2
       - name: Run clippy
         run: cargo clippy --locked --workspace --all-targets --all-features -- -D warnings
