@@ -1,0 +1,32 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/readme_todo_list_nesting_example.rs
+---
+#[test]
+fn add_creates_pending_task() {
+    let mut list = TodoList::new();
+    let id = list.add("Buy milk");
+}
+mod add_creates_pending_task_subtests {
+    use super::*;
+    #[test]
+    fn cancel_marks_task_cancelled() {
+        let mut list = TodoList::new();
+        let id = list.add("Buy milk");
+        list.cancel(id).unwrap();
+        assert_eq!(list.get(id).unwrap().status, TaskStatus::Cancelled);
+    }
+    mod cancel_marks_task_cancelled_subtests {
+        use super::*;
+        #[test]
+        fn cannot_complete_already_cancelled_task() {
+            let mut list = TodoList::new();
+            let id = list.add("Buy milk");
+            list.cancel(id).unwrap();
+            assert_eq!(list.get(id).unwrap().status, TaskStatus::Cancelled);
+            let err = list.complete(id).unwrap_err();
+            assert!(matches!(err, TodoError::InvalidTransition { .. }));
+        }
+    }
+}

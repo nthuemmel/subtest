@@ -44,6 +44,8 @@ fn add_creates_pending_task() {
 }
 ```
 
+([Link to full example](subtest/tests/expand/readme_todo_list_example.rs))
+
 ## How it works
 
 * Statements preceding a nested `#[subtest]` function are **copied** into the nested function's body
@@ -81,7 +83,69 @@ mod add_creates_pending_task_subtests {
 
 ## What you can do
 
-* arbitrarily nest
+### Arbitrarily Nest Test Functions
+
+You can nest `#[subtest]` functions arbitrarily deeply:
+
+```rust
+#[subtest]
+#[test]
+fn add_creates_pending_task() {
+    let mut list = TodoList::new();
+    let id = list.add("Buy milk");
+
+    #[subtest]
+    fn cancel_marks_task_cancelled() {
+        list.cancel(id).unwrap();
+        assert_eq!(list.get(id).unwrap().status, TaskStatus::Cancelled);
+
+        #[subtest]
+        fn cannot_complete_already_cancelled_task() {
+            let err = list.complete(id).unwrap_err();
+            assert!(matches!(err, TodoError::InvalidTransition { .. }));
+        }
+    }
+}
+```
+
+Each `#[subtest]` inherits the code of all parent functions, in order, as its setup code.
+
+<details>
+
+<summary>Click to see expansion</summary>
+
+```rust
+#[test]
+fn add_creates_pending_task() {
+    let mut list = TodoList::new();
+    let id = list.add("Buy milk");
+}
+mod add_creates_pending_task_subtests {
+    use super::*;
+    #[test]
+    fn cancel_marks_task_cancelled() {
+        let mut list = TodoList::new();
+        let id = list.add("Buy milk");
+        list.cancel(id).unwrap();
+        assert_eq!(list.get(id).unwrap().status, TaskStatus::Cancelled);
+    }
+    mod cancel_marks_task_cancelled_subtests {
+        use super::*;
+        #[test]
+        fn cannot_complete_already_cancelled_task() {
+            let mut list = TodoList::new();
+            let id = list.add("Buy milk");
+            list.cancel(id).unwrap();
+            assert_eq!(list.get(id).unwrap().status, TaskStatus::Cancelled);
+            let err = list.complete(id).unwrap_err();
+            assert!(matches!(err, TodoError::InvalidTransition { .. }));
+        }
+    }
+}
+```
+
+</details>
+
 * use async
 * use rstest
 * upgrade sync -> async
@@ -127,4 +191,4 @@ at your option.
 
 [license-mit-image]: https://img.shields.io/badge/license-MIT-blue.svg
 
-[license-MIT-link]: LICENSE-MIT
+[license-mit-link]: LICENSE-MIT
