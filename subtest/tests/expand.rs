@@ -27,6 +27,7 @@ mod expand {
     )]
     mod missing_test_attr;
     mod no_subtests;
+    mod readme_async_example;
     mod readme_todo_list_example;
     mod rstest_tests;
     mod two_subtests;

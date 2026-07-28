@@ -1,0 +1,5 @@
+error: the `async` keyword is missing from the function declaration
+  --> tests/ui/fail/readme_async_downgrade_example_1.rs:12:5
+   |
+12 |     fn value_can_be_received() {
+   |     ^^

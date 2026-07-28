@@ -1,0 +1,22 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/readme_async_upgrade_example.rs
+---
+#[test]
+fn value_can_be_sent_sync() {
+    let (sender, receiver) = tokio::sync::mpsc::channel(5);
+    sender.try_send("Hello!").unwrap();
+    drop(receiver);
+}
+mod value_can_be_sent_sync_subtests {
+    use super::*;
+    #[tokio::test]
+    async fn value_can_be_received() {
+        let (sender, receiver) = tokio::sync::mpsc::channel(5);
+        sender.try_send("Hello!").unwrap();
+        let mut receiver = receiver;
+        let value = receiver.recv().await.unwrap();
+        assert_eq!(value, "Hello!");
+    }
+}

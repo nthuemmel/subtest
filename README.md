@@ -146,6 +146,57 @@ mod add_creates_pending_task_subtests {
 
 </details>
 
+### Use async tests
+
+Example:
+
+```rust
+#[subtest]
+#[tokio::test]
+async fn value_can_be_sent_async() {
+    let (sender, receiver) = tokio::sync::mpsc::channel(5);
+    sender.send("Hello!").await.unwrap();
+
+    #[subtest]
+    async fn value_can_be_received() {
+        let mut receiver = receiver;
+        let value = receiver.recv().await.unwrap();
+        assert_eq!(value, "Hello!");
+    }
+
+    drop(receiver);
+}
+```
+
+Make sure to mark nested `#[subtest]` functions `async` as well. You cannot downgrade from `async` back to sync.
+
+You can, however, upgrade from sync to `async`!
+
+<details>
+
+<summary>Click to show example</summary>
+
+```rust
+#[subtest]
+#[test]
+fn value_can_be_sent_sync() {
+    let (sender, receiver) = tokio::sync::mpsc::channel(5);
+    sender.try_send("Hello!").unwrap();
+
+    #[subtest]
+    #[tokio::test]
+    async fn value_can_be_received() {
+        let mut receiver = receiver;
+        let value = receiver.recv().await.unwrap();
+        assert_eq!(value, "Hello!");
+    }
+
+    drop(receiver);
+}
+```
+
+</details>
+
 * use async
 * use rstest
 * upgrade sync -> async
