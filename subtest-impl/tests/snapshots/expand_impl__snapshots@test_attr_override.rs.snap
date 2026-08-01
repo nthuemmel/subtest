@@ -10,7 +10,7 @@ mod parent_subtests {
     #[test]
     fn nested_sync() {}
     #[tokio::test]
-    async fn nested_async() {}
+    async fn nested_async() -> anyhow::Result<()> {}
     #[rstest]
     #[case(0, 0)]
     #[case(1, 1)]

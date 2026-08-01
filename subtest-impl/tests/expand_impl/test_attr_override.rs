@@ -7,7 +7,7 @@ fn parent() {
 
     #[subtest]
     #[tokio::test]
-    async fn nested_async() {}
+    async fn nested_async() -> anyhow::Result<()> {}
 
     #[subtest]
     #[rstest]

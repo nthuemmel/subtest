@@ -197,9 +197,104 @@ fn value_can_be_sent_sync() {
 
 </details>
 
-* use async
-* use rstest
-* upgrade sync -> async
+### Use rstest (or other Testing Frameworks)
+
+Example:
+
+```rust
+#[subtest]
+#[rstest]
+#[case::completed(TaskStatus::Completed)]
+#[case::cancelled(TaskStatus::Cancelled)]
+fn insert_finished_task(#[case] status: TaskStatus) {
+    let mut list = TodoList::new();
+    let id = 1;
+
+    list.tasks.push(Task {
+        id,
+        description: "example".to_string(),
+        status,
+    });
+
+    assert_eq!(list.get(id).unwrap().status, status);
+
+    #[subtest]
+    fn cannot_complete_already_finished_task() {
+        let err = list.complete(id).unwrap_err();
+        assert!(matches!(err, TodoError::InvalidTransition { .. }));
+    }
+
+    #[subtest]
+    fn cannot_cancel_already_finished_task() {
+        let err = list.cancel(id).unwrap_err();
+        assert!(matches!(err, TodoError::InvalidTransition { .. }));
+    }
+}
+```
+
+<details>
+
+<summary>Click to see expansion</summary>
+
+```rust
+#[test]
+#[rstest]
+#[case::completed(TaskStatus::Completed)]
+#[case::cancelled(TaskStatus::Cancelled)]
+fn insert_finished_task(#[case] status: TaskStatus) {
+    let mut list = TodoList::new();
+    let id = 1;
+    list.tasks
+        .push(Task {
+            id,
+            description: "example".to_string(),
+            status,
+        });
+    assert_eq!(list.get(id).unwrap().status, status);
+}
+mod insert_finished_task_subtests {
+    use super::*;
+    #[rstest]
+    #[case::completed(TaskStatus::Completed)]
+    #[case::cancelled(TaskStatus::Cancelled)]
+    fn cannot_complete_already_finished_task(#[case] status: TaskStatus) {
+        let mut list = TodoList::new();
+        let id = 1;
+        list.tasks
+            .push(Task {
+                id,
+                description: "example".to_string(),
+                status,
+            });
+        assert_eq!(list.get(id).unwrap().status, status);
+        let err = list.complete(id).unwrap_err();
+        assert!(matches!(err, TodoError::InvalidTransition { .. }));
+    }
+    #[rstest]
+    #[case::completed(TaskStatus::Completed)]
+    #[case::cancelled(TaskStatus::Cancelled)]
+    fn cannot_cancel_already_finished_task(#[case] status: TaskStatus) {
+        let mut list = TodoList::new();
+        let id = 1;
+        list.tasks
+            .push(Task {
+                id,
+                description: "example".to_string(),
+                status,
+            });
+        assert_eq!(list.get(id).unwrap().status, status);
+        let err = list.cancel(id).unwrap_err();
+        assert!(matches!(err, TodoError::InvalidTransition { .. }));
+    }
+}
+```
+
+</details>
+
+The `#[case]`s you define in the top-level test function are applied to nested `#[subtest]`s as well.
+Make sure to specify the `#[subtest]` attribute first, before `#[rstest]`.
+The same way you can use `rstest`, you can use any other testing framework as well.
+
 * omit attr, params, return type
 
 ## What you can't do

@@ -1,0 +1,54 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/readme_todo_list_rstest_example.rs
+---
+#[rstest]
+#[case::completed(TaskStatus::Completed)]
+#[case::cancelled(TaskStatus::Cancelled)]
+fn insert_finished_task(#[case] status: TaskStatus) {
+    let mut list = TodoList::new();
+    let id = 1;
+    list.tasks
+        .push(Task {
+            id,
+            description: "example".to_string(),
+            status,
+        });
+    assert_eq!(list.get(id).unwrap().status, status);
+}
+mod insert_finished_task_subtests {
+    use super::*;
+    #[rstest]
+    #[case::completed(TaskStatus::Completed)]
+    #[case::cancelled(TaskStatus::Cancelled)]
+    fn cannot_complete_already_finished_task(#[case] status: TaskStatus) {
+        let mut list = TodoList::new();
+        let id = 1;
+        list.tasks
+            .push(Task {
+                id,
+                description: "example".to_string(),
+                status,
+            });
+        assert_eq!(list.get(id).unwrap().status, status);
+        let err = list.complete(id).unwrap_err();
+        assert!(matches!(err, TodoError::InvalidTransition { .. }));
+    }
+    #[rstest]
+    #[case::completed(TaskStatus::Completed)]
+    #[case::cancelled(TaskStatus::Cancelled)]
+    fn cannot_cancel_already_finished_task(#[case] status: TaskStatus) {
+        let mut list = TodoList::new();
+        let id = 1;
+        list.tasks
+            .push(Task {
+                id,
+                description: "example".to_string(),
+                status,
+            });
+        assert_eq!(list.get(id).unwrap().status, status);
+        let err = list.cancel(id).unwrap_err();
+        assert!(matches!(err, TodoError::InvalidTransition { .. }));
+    }
+}

@@ -174,6 +174,7 @@ impl TodoList {
 }
 mod tests {
     use super::*;
+    use rstest::rstest;
     use subtest::subtest;
     extern crate test;
     #[rustc_test_marker = "tests::add_creates_pending_task"]
@@ -184,9 +185,9 @@ mod tests {
             ignore: false,
             ignore_message: ::core::option::Option::None,
             source_file: "./tests/expand/readme_todo_list_example.rs",
-            start_line: 128usize,
+            start_line: 129usize,
             start_col: 8usize,
-            end_line: 128usize,
+            end_line: 129usize,
             end_col: 32usize,
             compile_fail: false,
             no_run: false,
@@ -229,9 +230,9 @@ mod tests {
                 ignore: false,
                 ignore_message: ::core::option::Option::None,
                 source_file: "./tests/expand/readme_todo_list_example.rs",
-                start_line: 133usize,
+                start_line: 134usize,
                 start_col: 12usize,
-                end_line: 133usize,
+                end_line: 134usize,
                 end_col: 41usize,
                 compile_fail: false,
                 no_run: false,
@@ -272,9 +273,9 @@ mod tests {
                 ignore: false,
                 ignore_message: ::core::option::Option::None,
                 source_file: "./tests/expand/readme_todo_list_example.rs",
-                start_line: 139usize,
+                start_line: 140usize,
                 start_col: 12usize,
-                end_line: 139usize,
+                end_line: 140usize,
                 end_col: 39usize,
                 compile_fail: false,
                 no_run: false,
@@ -317,9 +318,9 @@ mod tests {
                     ignore: false,
                     ignore_message: ::core::option::Option::None,
                     source_file: "./tests/expand/readme_todo_list_example.rs",
-                    start_line: 144usize,
+                    start_line: 145usize,
                     start_col: 16usize,
-                    end_line: 144usize,
+                    end_line: 145usize,
                     end_col: 54usize,
                     compile_fail: false,
                     no_run: false,
@@ -361,6 +362,287 @@ mod tests {
             }
         }
     }
+    fn insert_finished_task(status: TaskStatus) {
+        {
+            let mut list = TodoList::new();
+            let id = 1;
+            list.tasks
+                .push(Task {
+                    id,
+                    description: "example".to_string(),
+                    status,
+                });
+            match (&list.get(id).unwrap().status, &status) {
+                (left_val, right_val) => {
+                    if !(*left_val == *right_val) {
+                        let kind = ::core::panicking::AssertKind::Eq;
+                        ::core::panicking::assert_failed(
+                            kind,
+                            &*left_val,
+                            &*right_val,
+                            ::core::option::Option::None,
+                        );
+                    }
+                }
+            };
+        }
+    }
+    mod insert_finished_task {
+        use super::*;
+        extern crate test;
+        #[rustc_test_marker = "tests::insert_finished_task::case_1_completed"]
+        #[doc(hidden)]
+        pub const case_1_completed: test::TestDescAndFn = test::TestDescAndFn {
+            desc: test::TestDesc {
+                name: test::StaticTestName(
+                    "tests::insert_finished_task::case_1_completed",
+                ),
+                ignore: false,
+                ignore_message: ::core::option::Option::None,
+                source_file: "./tests/expand/readme_todo_list_example.rs",
+                start_line: 159usize,
+                start_col: 8usize,
+                end_line: 159usize,
+                end_col: 28usize,
+                compile_fail: false,
+                no_run: false,
+                should_panic: test::ShouldPanic::No,
+                test_type: test::TestType::Unknown,
+            },
+            testfn: test::StaticTestFn(
+                #[coverage(off)]
+                || test::assert_test_result(case_1_completed()),
+            ),
+        };
+        fn case_1_completed() {
+            let status = TaskStatus::Completed;
+            insert_finished_task(status)
+        }
+        extern crate test;
+        #[rustc_test_marker = "tests::insert_finished_task::case_2_cancelled"]
+        #[doc(hidden)]
+        pub const case_2_cancelled: test::TestDescAndFn = test::TestDescAndFn {
+            desc: test::TestDesc {
+                name: test::StaticTestName(
+                    "tests::insert_finished_task::case_2_cancelled",
+                ),
+                ignore: false,
+                ignore_message: ::core::option::Option::None,
+                source_file: "./tests/expand/readme_todo_list_example.rs",
+                start_line: 159usize,
+                start_col: 8usize,
+                end_line: 159usize,
+                end_col: 28usize,
+                compile_fail: false,
+                no_run: false,
+                should_panic: test::ShouldPanic::No,
+                test_type: test::TestType::Unknown,
+            },
+            testfn: test::StaticTestFn(
+                #[coverage(off)]
+                || test::assert_test_result(case_2_cancelled()),
+            ),
+        };
+        fn case_2_cancelled() {
+            let status = TaskStatus::Cancelled;
+            insert_finished_task(status)
+        }
+    }
+    mod insert_finished_task_subtests {
+        use super::*;
+        fn cannot_complete_already_finished_task(status: TaskStatus) {
+            {
+                let mut list = TodoList::new();
+                let id = 1;
+                list.tasks
+                    .push(Task {
+                        id,
+                        description: "example".to_string(),
+                        status,
+                    });
+                match (&list.get(id).unwrap().status, &status) {
+                    (left_val, right_val) => {
+                        if !(*left_val == *right_val) {
+                            let kind = ::core::panicking::AssertKind::Eq;
+                            ::core::panicking::assert_failed(
+                                kind,
+                                &*left_val,
+                                &*right_val,
+                                ::core::option::Option::None,
+                            );
+                        }
+                    }
+                };
+                let err = list.complete(id).unwrap_err();
+                if !#[allow(non_exhaustive_omitted_patterns)]
+                match err {
+                    TodoError::InvalidTransition { .. } => true,
+                    _ => false,
+                } {
+                    ::core::panicking::panic(
+                        "assertion failed: matches!(err, TodoError::InvalidTransition { .. })",
+                    )
+                }
+            }
+        }
+        mod cannot_complete_already_finished_task {
+            use super::*;
+            extern crate test;
+            #[rustc_test_marker = "tests::insert_finished_task_subtests::cannot_complete_already_finished_task::case_1_completed"]
+            #[doc(hidden)]
+            pub const case_1_completed: test::TestDescAndFn = test::TestDescAndFn {
+                desc: test::TestDesc {
+                    name: test::StaticTestName(
+                        "tests::insert_finished_task_subtests::cannot_complete_already_finished_task::case_1_completed",
+                    ),
+                    ignore: false,
+                    ignore_message: ::core::option::Option::None,
+                    source_file: "./tests/expand/readme_todo_list_example.rs",
+                    start_line: 172usize,
+                    start_col: 12usize,
+                    end_line: 172usize,
+                    end_col: 49usize,
+                    compile_fail: false,
+                    no_run: false,
+                    should_panic: test::ShouldPanic::No,
+                    test_type: test::TestType::Unknown,
+                },
+                testfn: test::StaticTestFn(
+                    #[coverage(off)]
+                    || test::assert_test_result(case_1_completed()),
+                ),
+            };
+            fn case_1_completed() {
+                let status = TaskStatus::Completed;
+                cannot_complete_already_finished_task(status)
+            }
+            extern crate test;
+            #[rustc_test_marker = "tests::insert_finished_task_subtests::cannot_complete_already_finished_task::case_2_cancelled"]
+            #[doc(hidden)]
+            pub const case_2_cancelled: test::TestDescAndFn = test::TestDescAndFn {
+                desc: test::TestDesc {
+                    name: test::StaticTestName(
+                        "tests::insert_finished_task_subtests::cannot_complete_already_finished_task::case_2_cancelled",
+                    ),
+                    ignore: false,
+                    ignore_message: ::core::option::Option::None,
+                    source_file: "./tests/expand/readme_todo_list_example.rs",
+                    start_line: 172usize,
+                    start_col: 12usize,
+                    end_line: 172usize,
+                    end_col: 49usize,
+                    compile_fail: false,
+                    no_run: false,
+                    should_panic: test::ShouldPanic::No,
+                    test_type: test::TestType::Unknown,
+                },
+                testfn: test::StaticTestFn(
+                    #[coverage(off)]
+                    || test::assert_test_result(case_2_cancelled()),
+                ),
+            };
+            fn case_2_cancelled() {
+                let status = TaskStatus::Cancelled;
+                cannot_complete_already_finished_task(status)
+            }
+        }
+        fn cannot_cancel_already_finished_task(status: TaskStatus) {
+            {
+                let mut list = TodoList::new();
+                let id = 1;
+                list.tasks
+                    .push(Task {
+                        id,
+                        description: "example".to_string(),
+                        status,
+                    });
+                match (&list.get(id).unwrap().status, &status) {
+                    (left_val, right_val) => {
+                        if !(*left_val == *right_val) {
+                            let kind = ::core::panicking::AssertKind::Eq;
+                            ::core::panicking::assert_failed(
+                                kind,
+                                &*left_val,
+                                &*right_val,
+                                ::core::option::Option::None,
+                            );
+                        }
+                    }
+                };
+                let err = list.cancel(id).unwrap_err();
+                if !#[allow(non_exhaustive_omitted_patterns)]
+                match err {
+                    TodoError::InvalidTransition { .. } => true,
+                    _ => false,
+                } {
+                    ::core::panicking::panic(
+                        "assertion failed: matches!(err, TodoError::InvalidTransition { .. })",
+                    )
+                }
+            }
+        }
+        mod cannot_cancel_already_finished_task {
+            use super::*;
+            extern crate test;
+            #[rustc_test_marker = "tests::insert_finished_task_subtests::cannot_cancel_already_finished_task::case_1_completed"]
+            #[doc(hidden)]
+            pub const case_1_completed: test::TestDescAndFn = test::TestDescAndFn {
+                desc: test::TestDesc {
+                    name: test::StaticTestName(
+                        "tests::insert_finished_task_subtests::cannot_cancel_already_finished_task::case_1_completed",
+                    ),
+                    ignore: false,
+                    ignore_message: ::core::option::Option::None,
+                    source_file: "./tests/expand/readme_todo_list_example.rs",
+                    start_line: 178usize,
+                    start_col: 12usize,
+                    end_line: 178usize,
+                    end_col: 47usize,
+                    compile_fail: false,
+                    no_run: false,
+                    should_panic: test::ShouldPanic::No,
+                    test_type: test::TestType::Unknown,
+                },
+                testfn: test::StaticTestFn(
+                    #[coverage(off)]
+                    || test::assert_test_result(case_1_completed()),
+                ),
+            };
+            fn case_1_completed() {
+                let status = TaskStatus::Completed;
+                cannot_cancel_already_finished_task(status)
+            }
+            extern crate test;
+            #[rustc_test_marker = "tests::insert_finished_task_subtests::cannot_cancel_already_finished_task::case_2_cancelled"]
+            #[doc(hidden)]
+            pub const case_2_cancelled: test::TestDescAndFn = test::TestDescAndFn {
+                desc: test::TestDesc {
+                    name: test::StaticTestName(
+                        "tests::insert_finished_task_subtests::cannot_cancel_already_finished_task::case_2_cancelled",
+                    ),
+                    ignore: false,
+                    ignore_message: ::core::option::Option::None,
+                    source_file: "./tests/expand/readme_todo_list_example.rs",
+                    start_line: 178usize,
+                    start_col: 12usize,
+                    end_line: 178usize,
+                    end_col: 47usize,
+                    compile_fail: false,
+                    no_run: false,
+                    should_panic: test::ShouldPanic::No,
+                    test_type: test::TestType::Unknown,
+                },
+                testfn: test::StaticTestFn(
+                    #[coverage(off)]
+                    || test::assert_test_result(case_2_cancelled()),
+                ),
+            };
+            fn case_2_cancelled() {
+                let status = TaskStatus::Cancelled;
+                cannot_cancel_already_finished_task(status)
+            }
+        }
+    }
 }
 #[rustc_main]
 #[coverage(off)]
@@ -373,6 +655,12 @@ pub fn main() -> () {
             &cancel_marks_task_cancelled,
             &cannot_complete_already_cancelled_task,
             &complete_marks_task_completed,
+            &case_1_completed,
+            &case_2_cancelled,
+            &case_1_completed,
+            &case_2_cancelled,
+            &case_1_completed,
+            &case_2_cancelled,
         ],
     )
 }
