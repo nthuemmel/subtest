@@ -295,7 +295,84 @@ The `#[case]`s you define in the top-level test function are applied to nested `
 Make sure to specify the `#[subtest]` attribute first, before `#[rstest]`.
 The same way you can use `rstest`, you can use any other testing framework as well.
 
-* omit attr, params, return type
+### Omit or Override Attributes, Parameters, Return Types
+
+Nested `#[subtest]`s' function attributes, parameters and return type are inherited from the parent test function by default.
+
+The following:
+
+```rust
+#[subtest]
+#[tokio::test]
+async fn value_can_be_sent_async() -> anyhow::Result<()> {
+    let (sender, receiver) = tokio::sync::mpsc::channel(5);
+    sender.send("Hello!").await?;
+
+    #[subtest]
+    async fn value_can_be_received() { // <-- attribute and return type inherited from parent function
+        let mut receiver = receiver;
+        let value = receiver.try_recv()?;
+        assert_eq!(value, "Hello!");
+        Ok(())
+    }
+
+    drop(receiver);
+    Ok(())
+}
+```
+
+is semantically equivalent to:
+
+```rust
+#[subtest]
+#[tokio::test]
+async fn value_can_be_sent_async() -> anyhow::Result<()> {
+    let (sender, receiver) = tokio::sync::mpsc::channel(5);
+    sender.send("Hello!").await?;
+
+    #[subtest]
+    #[tokio::test] // <-- same attribute as parent function
+    async fn value_can_be_received() -> anyhow::Result<()> {  // <-- same return type as parent function
+        let mut receiver = receiver;
+        let value = receiver.try_recv()?;
+        assert_eq!(value, "Hello!");
+        Ok(())
+    }
+
+    drop(receiver);
+    Ok(())
+}
+```
+
+You may also override any of attributes, parameters and return types as needed, for example by adding `#[ignore]` or `#[should_panic]`:
+
+```rust
+#[subtest]
+#[test]
+fn value_can_be_sent_and_received() {
+    let (sender, mut receiver) = tokio::sync::mpsc::channel(5);
+    sender.try_send("Hello!").unwrap();
+    receiver.try_recv().unwrap();
+
+    #[subtest]
+    #[test] // <-- make sure to include test attribute when overriding attributes
+    #[should_panic(expected = "called `Result::unwrap()` on an `Err` value: Empty")]
+    fn value_cannot_be_received_a_second_time() {
+        receiver.try_recv().unwrap();
+    }
+
+    #[subtest]
+    #[test] // <-- make sure to include test attribute when overriding attributes
+    #[ignore]
+    fn value_can_be_sent_a_second_time() {
+        unimplemented!()
+    }
+
+    drop(receiver);
+}
+```
+
+**Note:** Overriding is all-or-nothing. If you add an attribute, you have to repeat the remaining relevant attributes from the parent function, in this case `#[test]`.
 
 ## What you can't do
 

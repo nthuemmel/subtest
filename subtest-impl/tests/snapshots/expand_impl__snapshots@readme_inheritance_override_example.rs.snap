@@ -1,0 +1,31 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/readme_inheritance_override_example.rs
+---
+#[test]
+fn value_can_be_sent_and_received() {
+    let (sender, mut receiver) = tokio::sync::mpsc::channel(5);
+    sender.try_send("Hello!").unwrap();
+    receiver.try_recv().unwrap();
+    drop(receiver);
+}
+mod value_can_be_sent_and_received_subtests {
+    use super::*;
+    #[test]
+    #[should_panic(expected = "called `Result::unwrap()` on an `Err` value: Empty")]
+    fn value_cannot_be_received_a_second_time() {
+        let (sender, mut receiver) = tokio::sync::mpsc::channel(5);
+        sender.try_send("Hello!").unwrap();
+        receiver.try_recv().unwrap();
+        receiver.try_recv().unwrap();
+    }
+    #[test]
+    #[ignore]
+    fn value_can_be_sent_a_second_time() {
+        let (sender, mut receiver) = tokio::sync::mpsc::channel(5);
+        sender.try_send("Hello!").unwrap();
+        receiver.try_recv().unwrap();
+        unimplemented!()
+    }
+}
