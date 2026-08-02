@@ -32,6 +32,7 @@ mod expand {
     mod readme_async_example;
     mod readme_inheritance_example;
     mod readme_todo_list_example;
+    mod readme_unused_variables_solution;
     mod rstest_tests;
     mod two_subtests;
 }

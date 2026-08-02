@@ -524,7 +524,58 @@ There are two possible solutions for this:
         }
     ```
 
-* unused variables
+### Unused variables in parent test function
+
+If you define a variable which is only used in nested subtests, but not in the parent test function, you will get an "unused variables" warning.
+Example:
+
+```rust
+#[subtest]
+#[test]
+fn value_can_be_sent() {
+    let (sender, receiver) = std::sync::mpsc::channel();
+    sender.send("Hello!").unwrap();
+
+    #[subtest]
+    fn value_can_be_received() {
+        let value = receiver.recv().unwrap();
+        assert_eq!(value, "Hello!");
+    }
+}
+```
+
+will lead to
+
+```
+warning: unused variable: `receiver`
+  --> tests/ui/fail/readme_unused_variables_example.rs:10:18
+   |
+10 |     let (sender, receiver) = std::sync::mpsc::channel();
+   |                  ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_receiver`
+   |
+```
+
+The solution is to
+
+* either avoid declaring unused variables in the parent test function, and move them directly into the subtest that needs them (preferred)
+* or, if this is not possible (like in the example shown above), explicitly drop them at the end of the parent test function's scope:
+
+    ```rust
+    #[subtest]
+    #[test]
+    fn value_can_be_sent() {
+        let (sender, receiver) = std::sync::mpsc::channel();
+        sender.send("Hello!").unwrap();
+  
+        #[subtest]
+        fn value_can_be_received() {
+            let value = receiver.recv().unwrap();
+            assert_eq!(value, "Hello!");
+        }
+  
+        drop(receiver);
+    }
+    ```
 
 ## Changelog
 
