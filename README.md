@@ -374,10 +374,53 @@ fn value_can_be_sent_and_received() {
 
 **Note:** Overriding is all-or-nothing. If you add an attribute, you have to repeat the remaining relevant attributes from the parent function, in this case `#[test]`.
 
-## What you can't do
+## Things to be aware of
 
-* omit top-level test attr
-* make async non-async again
+### Do not omit test attribute altogether
+
+Even when using `#[subtest]`, you still have to specify an "actual" test attribute - typically `#[test]`, or alternatively `#[tokio::test]` or `#[rstest]` (or whatever testing framework you intend to use) - at least for the top-level test function:
+
+```rust
+#[subtest]
+#[test] // <-- Do not omit this!
+fn top_level() {
+    // ...
+
+    #[subtest] // <-- here it is fine to omit #[test], since it is inherited
+    fn inherits_attributes() {
+        // ...
+    }
+  
+    #[subtest]
+    #[test] // <-- make sure to include #[test] attribute when overriding attributes, like adding #[should_panic]
+    #[should_panic]
+    fn overrides_attributes() {
+        // ...
+    }
+}
+```
+
+Just follow these rules:
+
+* If it is a top-level function with a `#[subtest]` attribute: **Specify a `#[test]` attribute as well!**
+* If it is a nested function with **just** a `#[subtest]` attribute: You can omit the `#[test]` attribute, it is inherited (see [Omit or Override Attributes, Parameters, Return Types](#omit-or-override-attributes-parameters-return-types))
+* If it is a nested function with added attributes like `#[should_panic]`: **Specify a `#[test]` attribute as well!** (see [Omit or Override Attributes, Parameters, Return Types](#omit-or-override-attributes-parameters-return-types))
+* Always put other attributes **after** `#[subtest]`
+
+In case you do ever forget the `#[test]` attribute, you will get the same compiler warning as if you forgot to annotate a regular test function with `#[test]`:
+
+```
+warning: function `parent` is never used
+ --> subtest/tests/expand/missing_test_attr.rs:2:4
+  |
+2 | fn parent() {
+  |    ^^^^^^
+  |
+  = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+```
+
+I recommend automatically running clippy with deny-warnings turned on (`cargo clippy --locked --all-targets --all-features -- -D warnings`), which catches these issues fairly quickly.
+
 * ambiguous assert macro import
 * unused variables
 
