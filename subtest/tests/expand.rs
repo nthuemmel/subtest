@@ -27,6 +27,8 @@ mod expand {
     )]
     mod missing_test_attr;
     mod no_subtests;
+    mod readme_ambiguous_assert_import_solution1;
+    mod readme_ambiguous_assert_import_solution2;
     mod readme_async_example;
     mod readme_inheritance_example;
     mod readme_todo_list_example;

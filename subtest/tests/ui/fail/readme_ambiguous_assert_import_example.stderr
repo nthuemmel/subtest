@@ -1,0 +1,20 @@
+error[E0659]: `assert` is ambiguous
+  --> tests/ui/fail/readme_ambiguous_assert_import_example.rs:15:9
+   |
+15 |         assert!(value == "Hello!");
+   |         ^^^^^^ ambiguous name
+   |
+   = note: ambiguous because of a conflict between a name from a glob import and an outer scope during import or macro resolution
+note: `assert` could refer to the macro imported here
+  --> tests/ui/fail/readme_ambiguous_assert_import_example.rs:6:1
+   |
+ 6 | #[subtest]
+   | ^^^^^^^^^^
+   = help: consider adding an explicit import of `assert` to disambiguate
+   = help: or use `self::assert` to refer to this macro unambiguously
+note: `assert` could also refer to the macro defined here
+  --> $RUST/std/src/prelude/mod.rs
+   |
+   |     pub use super::v1::*;
+   |             ^^^^^^^^^
+   = note: this error originates in the attribute macro `subtest` (in Nightly builds, run with -Z macro-backtrace for more info)

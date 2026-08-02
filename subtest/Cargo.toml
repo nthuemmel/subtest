@@ -24,3 +24,4 @@ trybuild = { workspace = true }
 tokio = { workspace = true }
 rstest = { workspace = true }
 anyhow = { workspace = true }
+assert2 = { workspace = true }

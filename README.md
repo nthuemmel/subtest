@@ -421,7 +421,109 @@ warning: function `parent` is never used
 
 I recommend automatically running clippy with deny-warnings turned on (`cargo clippy --locked --all-targets --all-features -- -D warnings`), which catches these issues fairly quickly.
 
-* ambiguous assert macro import
+### Ambiguous macro import
+
+If you happen to use `assert2`'s `assert` macro, or any other macro that has a name similar to a macro from the stdlib's auto-imported prelude, you will get a conflict compiler error when using the macro in a nested `#[subtest]`.
+
+Example: The following code:
+
+```rust
+use assert2::assert;
+use subtest::subtest;
+
+#[subtest]
+#[test]
+fn value_can_be_sent() {
+    let (sender, receiver) = std::sync::mpsc::channel();
+    sender.send("Hello!").unwrap();
+
+    #[subtest]
+    fn value_can_be_received() {
+        let value = receiver.recv().unwrap();
+        assert!(value == "Hello!");
+    }
+
+    drop(receiver);
+}
+```
+
+will lead to the following compiler error:
+
+```
+error[E0659]: `assert` is ambiguous
+  --> tests/ui/fail/readme_ambiguous_assert_import_example.rs:15:9
+   |
+15 |         assert!(value == "Hello!");
+   |         ^^^^^^ ambiguous name
+   |
+   = note: ambiguous because of a conflict between a name from a glob import and an outer scope during import or macro resolution
+note: `assert` could refer to the macro imported here
+  --> tests/ui/fail/readme_ambiguous_assert_import_example.rs:6:1
+   |
+ 6 | #[subtest]
+   | ^^^^^^^^^^
+   = help: consider adding an explicit import of `assert` to disambiguate
+   = help: or use `self::assert` to refer to this macro unambiguously
+note: `assert` could also refer to the macro defined here
+  --> $RUST/std/src/prelude/mod.rs
+   |
+   |     pub use super::v1::*;
+   |             ^^^^^^^^^
+   = note: this error originates in the attribute macro `subtest` (in Nightly builds, run with -Z macro-backtrace for more info)
+```
+
+This error is caused by the `use super::*` glob import in submodules generated for nested `#[subtest]` functions:
+
+<details>
+
+<summary>Click to see expansion</summary>
+
+```rust
+use assert2::assert;
+#[test]
+fn value_can_be_sent() {
+    let (sender, receiver) = std::sync::mpsc::channel();
+    sender.send("Hello!").unwrap();
+    drop(receiver);
+}
+mod value_can_be_sent_subtests {
+    use super::*; // <-- this causes the conflict
+    #[test]
+    fn value_can_be_received() {
+        let (sender, receiver) = std::sync::mpsc::channel();
+        sender.send("Hello!").unwrap();
+        let value = receiver.recv().unwrap();
+        assert!(value == "Hello!");
+    }
+}
+
+```
+
+</details>
+
+There are two possible solutions for this:
+
+* Either import the macro within the subtest itself:
+
+    ```rust
+        #[subtest]
+        fn value_can_be_received() {
+            use assert2::assert;
+            let value = receiver.recv().unwrap();
+            assert!(value == "Hello!");
+        }
+    ```
+
+* Or qualify the invocation with `super`:
+
+    ```rust
+        #[subtest]
+        fn value_can_be_received() {
+            let value = receiver.recv().unwrap();
+            super::assert!(value == "Hello!");
+        }
+    ```
+
 * unused variables
 
 ## Changelog

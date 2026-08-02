@@ -1,0 +1,21 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/readme_ambiguous_assert_import_example.rs
+---
+#[test]
+fn value_can_be_sent() {
+    let (sender, receiver) = std::sync::mpsc::channel();
+    sender.send("Hello!").unwrap();
+    drop(receiver);
+}
+mod value_can_be_sent_subtests {
+    use super::*;
+    #[test]
+    fn value_can_be_received() {
+        let (sender, receiver) = std::sync::mpsc::channel();
+        sender.send("Hello!").unwrap();
+        let value = receiver.recv().unwrap();
+        assert!(value == "Hello!");
+    }
+}
