@@ -579,6 +579,12 @@ The solution is to
 
 ## Changelog
 
+Refer to [CHANGELOG.md](CHANGELOG.md)
+
+## Maintenance
+
+If you are a contributor, refer to [MAINTENANCE.md](MAINTENANCE.md) for maintenance notes regarding this repository
+
 ## License
 
 Licensed under either of
