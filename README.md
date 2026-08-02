@@ -587,14 +587,12 @@ If you are a contributor, refer to [MAINTENANCE.md](MAINTENANCE.md) for maintena
 
 ## License
 
-Licensed under either of
+Licensed under either of [Apache License, Version 2.0][license-apache-link] or [MIT license][license-mit-link] at your option.
 
-* Apache License, Version 2.0
-  ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
-* MIT license
-  ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+Unless you explicitly state otherwise, any contribution intentionally submitted
+for inclusion in this crate by you, as defined in the Apache-2.0 license, shall
+be dual licensed as above, without any additional terms or conditions.
 
-at your option.
 
 [//]: # (links)
 
