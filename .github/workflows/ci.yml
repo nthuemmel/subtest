@@ -15,7 +15,7 @@ concurrency:
 env:
   CARGO_TERM_COLOR: always
   RUST_BACKTRACE: 1
-  MSRV: "1.87"
+  MSRV: "1.85"
   CARGO_EXPAND_VERSION: "1.0.123"
 
 permissions:
