@@ -80,6 +80,7 @@
 //! You can nest `#[subtest]` functions arbitrarily deeply:
 //!
 //! ```rust
+//! # use subtest::subtest;
 //! #[subtest]
 //! #[test]
 //! fn add_creates_pending_task() {
@@ -143,6 +144,7 @@
 //! Example:
 //!
 //! ```rust
+//! # use subtest::subtest;
 //! #[subtest]
 //! #[tokio::test]
 //! async fn value_can_be_sent_async() {
@@ -169,6 +171,7 @@
 //! <summary>Click to show example</summary>
 //!
 //! ```rust
+//! # use subtest::subtest;
 //! #[subtest]
 //! #[test]
 //! fn value_can_be_sent_sync() {
@@ -194,8 +197,9 @@
 //! Example:
 //!
 //! ```rust
+//! # use subtest::subtest;
 //! #[subtest]
-//! #[rstest]
+//! #[rstest::rstest]
 //! #[case::completed(TaskStatus::Completed)]
 //! #[case::cancelled(TaskStatus::Cancelled)]
 //! fn insert_finished_task(#[case] status: TaskStatus) {
@@ -229,8 +233,9 @@
 //! <summary>Click to see expansion</summary>
 //!
 //! ```rust
+//! # use rstest::rstest;
 //! #[test]
-//! #[rstest]
+//! #[rstest::rstest]
 //! #[case::completed(TaskStatus::Completed)]
 //! #[case::cancelled(TaskStatus::Cancelled)]
 //! fn insert_finished_task(#[case] status: TaskStatus) {
@@ -246,7 +251,7 @@
 //! }
 //! mod insert_finished_task_subtests {
 //!     use super::*;
-//!     #[rstest]
+//!     #[rstest::rstest]
 //!     #[case::completed(TaskStatus::Completed)]
 //!     #[case::cancelled(TaskStatus::Cancelled)]
 //!     fn cannot_complete_already_finished_task(#[case] status: TaskStatus) {
@@ -262,7 +267,7 @@
 //!         let err = list.complete(id).unwrap_err();
 //!         assert!(matches!(err, TodoError::InvalidTransition { .. }));
 //!     }
-//!     #[rstest]
+//!     #[rstest::rstest]
 //!     #[case::completed(TaskStatus::Completed)]
 //!     #[case::cancelled(TaskStatus::Cancelled)]
 //!     fn cannot_cancel_already_finished_task(#[case] status: TaskStatus) {
@@ -294,6 +299,7 @@
 //! The following:
 //!
 //! ```rust
+//! # use subtest::subtest;
 //! #[subtest]
 //! #[tokio::test]
 //! async fn value_can_be_sent_async() -> anyhow::Result<()> {
@@ -316,6 +322,7 @@
 //! is semantically equivalent to:
 //!
 //! ```rust
+//! # use subtest::subtest;
 //! #[subtest]
 //! #[tokio::test]
 //! async fn value_can_be_sent_async() -> anyhow::Result<()> {
@@ -339,6 +346,7 @@
 //! You may also override any of attributes, parameters and return types as needed, for example by adding `#[ignore]` or `#[should_panic]`:
 //!
 //! ```rust
+//! # use subtest::subtest;
 //! #[subtest]
 //! #[test]
 //! fn value_can_be_sent_and_received() {
@@ -373,6 +381,7 @@
 //! Even when using `#[subtest]`, you still have to specify an "actual" test attribute - typically `#[test]`, or alternatively `#[tokio::test]` or `#[rstest]` (or whatever testing framework you intend to use) - at least for the top-level test function:
 //!
 //! ```rust
+//! # use subtest::subtest;
 //! #[subtest]
 //! #[test] // <-- Do not omit this!
 //! fn top_level() {
@@ -401,7 +410,7 @@
 //!
 //! In case you do ever forget the `#[test]` attribute, you will get the same compiler warning as if you forgot to annotate a regular test function with `#[test]`:
 //!
-//! ```
+//! ```text
 //! warning: function `parent` is never used
 //!  --> subtest/tests/expand/missing_test_attr.rs:2:4
 //!   |
@@ -441,7 +450,7 @@
 //!
 //! will lead to the following compiler error:
 //!
-//! ```
+//! ```text
 //! error[E0659]: `assert` is ambiguous
 //!   --> tests/ui/fail/readme_ambiguous_assert_import_example.rs:15:9
 //!    |
@@ -498,22 +507,40 @@
 //! * Either import the macro within the subtest itself:
 //!
 //!     ```rust
+//!     # use assert2::assert;
+//!     # use subtest::subtest;
+//!     #
+//!     # #[subtest]
+//!     # #[test]
+//!     # fn value_can_be_sent() {
+//!     #    let (sender, receiver) = std::sync::mpsc::channel();
+//!     #    sender.send("Hello!").unwrap();
 //!         #[subtest]
 //!         fn value_can_be_received() {
 //!             use assert2::assert;
 //!             let value = receiver.recv().unwrap();
 //!             assert!(value == "Hello!");
 //!         }
+//!     # }
 //!     ```
 //!
 //! * Or qualify the invocation with `super`:
 //!
 //!     ```rust
+//!     # use assert2::assert;
+//!     # use subtest::subtest;
+//!     #
+//!     # #[subtest]
+//!     # #[test]
+//!     # fn value_can_be_sent() {
+//!     #    let (sender, receiver) = std::sync::mpsc::channel();
+//!     #    sender.send("Hello!").unwrap();
 //!         #[subtest]
 //!         fn value_can_be_received() {
 //!             let value = receiver.recv().unwrap();
 //!             super::assert!(value == "Hello!");
 //!         }
+//!     # }
 //!     ```
 //!
 //! ### Unused variables in parent test function
@@ -522,6 +549,7 @@
 //! Example:
 //!
 //! ```rust
+//! # use subtest::subtest;
 //! #[subtest]
 //! #[test]
 //! fn value_can_be_sent() {
@@ -538,7 +566,7 @@
 //!
 //! will lead to
 //!
-//! ```
+//! ```text
 //! warning: unused variable: `receiver`
 //!   --> tests/ui/fail/readme_unused_variables_example.rs:10:18
 //!    |
@@ -553,6 +581,7 @@
 //! * or, if this is not possible (like in the example shown above), explicitly drop them at the end of the parent test function's scope:
 //!
 //!     ```rust
+//!     # use subtest::subtest;
 //!     #[subtest]
 //!     #[test]
 //!     fn value_can_be_sent() {
