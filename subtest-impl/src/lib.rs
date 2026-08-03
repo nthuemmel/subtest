@@ -110,7 +110,7 @@ impl Subtest {
                     if nested_fn.attrs.iter().any(is_overriding_attr) =>
                 {
                     return Err(syn::Error::new_spanned(
-                        nested_fn,
+                        nested_fn.sig.ident,
                         "function is missing the #[subtest] attribute",
                     ));
                 }
