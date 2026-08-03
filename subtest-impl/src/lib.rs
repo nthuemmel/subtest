@@ -41,10 +41,13 @@ impl Subtest {
         parent_fn_params: &Punctuated<FnArg, Token![,]>,
         parent_fn_return_type: &ReturnType,
     ) -> Result<Self, syn::Error> {
-        // If the subtest fn does not specify any attributes (#[subtest] itself excluded),
+        // If the subtest fn does not specify any overriding attributes (#[subtest] itself,
+        // doc comments and lint & configuration attributes excluded),
         // inherit attributes from the parent test fn
-        let attrs = if input_fn.attrs.is_empty() {
-            parent_fn_attrs.to_vec()
+        let attrs = if !input_fn.attrs.iter().any(is_overriding_attr) {
+            let mut attrs = input_fn.attrs;
+            attrs.extend_from_slice(parent_fn_attrs);
+            attrs
         } else {
             input_fn.attrs
         };
@@ -80,13 +83,21 @@ impl Subtest {
 
         let mut subtests = Vec::new();
 
+        // Doc comments describe the function they are written on, so they are not passed down
+        let inheritable_attrs: Vec<Attribute> = function
+            .attrs
+            .iter()
+            .filter(|attr| !is_doc_attr(attr))
+            .cloned()
+            .collect();
+
         for statement in input_fn.block.stmts {
             match statement {
                 Stmt::Item(Item::Fn(nested_fn)) => {
                     subtests.push(Subtest::new(
                         check_and_remove_subtest_attr(nested_fn)?,
                         function.block.stmts.clone(),
-                        &function.attrs,
+                        &inheritable_attrs,
                         &function.sig.inputs,
                         &function.sig.output,
                     )?);
@@ -122,6 +133,32 @@ impl Subtest {
             #subtest_module
         }
     }
+}
+
+/// Whether an attribute of a subtest fn overrides the attributes inherited from the parent test fn.
+///
+/// Doc comments as well as lint & configuration attributes don't override, they are additive to the
+/// inherited attributes
+fn is_overriding_attr(attr: &Attribute) -> bool {
+    const NON_OVERRIDING_ATTRS: &[&str] = &[
+        "doc", "allow", "expect", "warn", "deny", "forbid", "cfg", "cfg_attr",
+    ];
+
+    let path = attr.meta.path();
+
+    let is_non_overriding = NON_OVERRIDING_ATTRS.iter().any(|name| path.is_ident(name))
+        // tool attributes such as #[rustfmt::skip]
+        || path
+            .segments
+            .first()
+            .is_some_and(|segment| segment.ident == "rustfmt");
+
+    !is_non_overriding
+}
+
+/// Whether an attribute is a doc comment (or an equivalent `#[doc = "..."]` attribute)
+fn is_doc_attr(attr: &Attribute) -> bool {
+    attr.meta.path().is_ident("doc")
 }
 
 fn check_and_remove_subtest_attr(mut from_fn: ItemFn) -> Result<ItemFn, syn::Error> {

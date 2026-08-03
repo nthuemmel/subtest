@@ -1,0 +1,34 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/lint_attr_inheritance.rs
+---
+#[test]
+fn parent() {}
+mod parent_subtests {
+    use super::*;
+    #[allow(clippy::eq_op)]
+    #[test]
+    fn child_with_allow_attr() {}
+    #[expect(clippy::eq_op)]
+    #[test]
+    fn child_with_expect_attr() {}
+    #[warn(unused)]
+    #[test]
+    fn child_with_warn_attr() {}
+    #[deny(unsafe_code)]
+    #[test]
+    fn child_with_deny_attr() {}
+    #[forbid(unsafe_code)]
+    #[test]
+    fn child_with_forbid_attr() {}
+    #[cfg(unix)]
+    #[test]
+    fn child_with_cfg_attr() {}
+    #[cfg_attr(miri, ignore)]
+    #[test]
+    fn child_with_conditional_attr() {}
+    #[rustfmt::skip]
+    #[test]
+    fn child_with_tool_attr() {}
+}

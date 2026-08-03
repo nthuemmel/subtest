@@ -1,0 +1,24 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/doc_comment_inheritance.rs
+---
+#[test]
+#[should_panic(expected = "my failure")]
+/// Documents the parent test fn.
+fn parent() {}
+mod parent_subtests {
+    use super::*;
+    /// Documents the child subtest fn.
+    ///
+    /// Doc comments must not count as an attribute override, and must not be inherited themselves.
+    #[test]
+    #[should_panic(expected = "my failure")]
+    fn child() {}
+    mod child_subtests {
+        use super::*;
+        #[test]
+        #[should_panic(expected = "my failure")]
+        fn grandchild() {}
+    }
+}

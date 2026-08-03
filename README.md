@@ -376,6 +376,8 @@ fn value_can_be_sent_and_received() {
 
 **Note:** Overriding is all-or-nothing. If you add an attribute, you have to repeat the remaining relevant attributes from the parent function, in this case `#[test]`.
 
+Doc comments and lint & configuration attributes (`#[allow]`, `#[expect]`, `#[warn]`, `#[deny]`, `#[forbid]`, `#[cfg]`, `#[cfg_attr]` and tool attributes such as `#[rustfmt::skip]`) are an exception: they do **not** count as an override, and are simply added on top of the inherited attributes.
+
 ## Things to be aware of
 
 ### Do not omit test attribute altogether
@@ -405,7 +407,7 @@ fn top_level() {
 Just follow these rules:
 
 * If it is a top-level function with a `#[subtest]` attribute: **Specify a `#[test]` attribute as well!**
-* If it is a nested function with **just** a `#[subtest]` attribute: You can omit the `#[test]` attribute, it is inherited (see [Omit or Override Attributes, Parameters, Return Types](#omit-or-override-attributes-parameters-return-types))
+* If it is a nested function with **just** a `#[subtest]` attribute (and optionally a doc comment or a lint attribute like `#[allow]`): You can omit the `#[test]` attribute, it is inherited (see [Omit or Override Attributes, Parameters, Return Types](#omit-or-override-attributes-parameters-return-types))
 * If it is a nested function with added attributes like `#[should_panic]`: **Specify a `#[test]` attribute as well!** (see [Omit or Override Attributes, Parameters, Return Types](#omit-or-override-attributes-parameters-return-types))
 * Always put other attributes **after** `#[subtest]`
 

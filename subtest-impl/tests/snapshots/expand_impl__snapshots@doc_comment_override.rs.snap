@@ -1,0 +1,14 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/doc_comment_override.rs
+---
+#[test]
+#[should_panic(expected = "my failure")]
+fn parent() {}
+mod parent_subtests {
+    use super::*;
+    /// A doc comment next to overriding attributes is kept, but does not affect the override.
+    #[test]
+    fn child() {}
+}
