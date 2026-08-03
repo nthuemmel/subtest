@@ -1,0 +1,5 @@
+error: #[subtest] functions must be declared directly in the body of their parent test function, not nested inside a block, an expression or another item
+ --> tests/ui/fail/misplaced_subtest_in_nested_subtest.rs:9:13
+  |
+9 |             #[subtest]
+  |             ^^^^^^^^^^

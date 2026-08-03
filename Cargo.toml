@@ -11,7 +11,7 @@ subtest-impl = { version = "0.0.1", path = "subtest-impl" }
 
 proc-macro2 = "1"
 quote = "1"
-syn = { version = "2", features = ["full"] }
+syn = { version = "2", features = ["full", "visit"] }
 insta = { version = "1.48.0", features = ["glob"] }
 prettyplease = "0.2.37"
 macrotest = "1.2.1"

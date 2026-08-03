@@ -1,6 +1,7 @@
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use syn::punctuated::Punctuated;
+use syn::visit::{self, Visit};
 use syn::{Attribute, Block, FnArg, Item, ItemFn, ReturnType, Signature, Stmt, Token};
 
 pub fn expand_subtest_main_fn(args: TokenStream, input: TokenStream) -> TokenStream {
@@ -103,6 +104,7 @@ impl Subtest {
                     )?);
                 }
                 other => {
+                    check_for_misplaced_subtests(&other)?;
                     function.block.stmts.push(other);
                 }
             }
@@ -161,12 +163,57 @@ fn is_doc_attr(attr: &Attribute) -> bool {
     attr.meta.path().is_ident("doc")
 }
 
+/// Reject `#[subtest]` functions which are not declared directly in the body of their parent test
+/// function.
+///
+/// Only the statements of a test function's body are searched for subtests, so a `#[subtest]`
+/// function nested inside an `if`, a loop, a block, a closure or another item, would
+/// keep its `#[subtest]` attribute and be expanded by the compiler as if it were a top-level test
+/// function, which is definitely not what we want.
+fn check_for_misplaced_subtests(statement: &Stmt) -> Result<(), syn::Error> {
+    #[derive(Default)]
+    struct MisplacedSubtestVisitor {
+        error: Option<syn::Error>,
+    }
+
+    impl<'ast> Visit<'ast> for MisplacedSubtestVisitor {
+        fn visit_item_fn(&mut self, item_fn: &'ast ItemFn) {
+            if let Some(attr) = item_fn.attrs.iter().find(|attr| is_subtest_attr(attr)) {
+                if self.error.is_none() {
+                    self.error = Some(syn::Error::new_spanned(
+                        attr,
+                        "#[subtest] functions must be declared directly in the body of their \
+                         parent test function, not nested inside a block, an expression or \
+                         another item",
+                    ));
+                }
+            }
+
+            visit::visit_item_fn(self, item_fn);
+        }
+    }
+
+    let mut visitor = MisplacedSubtestVisitor::default();
+    visitor.visit_stmt(statement);
+
+    if let Some(error) = visitor.error {
+        Err(error)
+    } else {
+        Ok(())
+    }
+}
+
+/// Whether an attribute is the `#[subtest]` attribute
+fn is_subtest_attr(attr: &Attribute) -> bool {
+    attr.meta.path().is_ident("subtest")
+}
+
 fn check_and_remove_subtest_attr(mut from_fn: ItemFn) -> Result<ItemFn, syn::Error> {
     let mut subtest_attr_found = false;
     let mut validation_error = None;
 
     from_fn.attrs.retain(|attr| {
-        if attr.meta.path().is_ident("subtest") {
+        if is_subtest_attr(attr) {
             subtest_attr_found = true;
             if validation_error.is_none() {
                 validation_error = attr.meta.require_path_only().err().map(|_| {
