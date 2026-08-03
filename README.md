@@ -85,7 +85,7 @@ mod add_creates_pending_task_subtests {
 
 ## What you can do
 
-### Arbitrarily Nest Test Functions
+### Arbitrarily nest test functions
 
 You can nest `#[subtest]` functions arbitrarily deeply:
 
@@ -199,7 +199,7 @@ fn value_can_be_sent_sync() {
 
 </details>
 
-### Use rstest (or other Testing Frameworks)
+### Use rstest (or other testing frameworks)
 
 Example:
 
@@ -297,7 +297,7 @@ The `#[case]`s you define in the top-level test function are applied to nested `
 Make sure to specify the `#[subtest]` attribute first, before `#[rstest]`.
 The same way you can use `rstest`, you can use any other testing framework as well.
 
-### Omit or Override Attributes, Parameters, Return Types
+### Omit or override attributes, parameters, return types
 
 Nested `#[subtest]`s' function attributes, parameters and return type are inherited from the parent test function by default.
 
