@@ -1,5 +1,17 @@
 # Maintenance
 
+## README Generation
+
+This project uses [cargo-rdme](https://github.com/orium/cargo-rdme) to automatically generate the [README.md](README.md) from the [crate-level documentation](subtest/src/lib.rs).
+
+Install it with `cargo install cargo-rdme`.
+
+When changing the documentation:
+
+1. Make your changes to the crate-level documentation in [subtest/src/lib.rs](subtest/src/lib.rs)
+2. Run `cargo rdme --workspace-project subtest --force`
+3. Commit the changes
+
 ## Test Setup
 
 As `subtest` itself is a testing framework, it's both incredibly important to make sure it works correctly, but a little bit more involved to test itself.
@@ -19,13 +31,17 @@ This repository contains 4 testing strategies:
 
 ## Run Tests
 
-You will need [cargo-expand](https://github.com/dtolnay/cargo-expand) (`cargo install cargo-expand`).
+You will need:
+
+* [cargo-expand](https://github.com/dtolnay/cargo-expand) (`cargo install cargo-expand`)
+* [cargo-rdme](https://github.com/orium/cargo-rdme) (`cargo install cargo-rdme`)
 
 ```
 cargo check --locked --workspace --all-targets --all-features
 cargo test --locked --workspace --all-features 
 cargo fmt --all -- --check
 cargo clippy --locked --workspace --all-targets --all-features -- -D warnings
+cargo rdme --check --workspace-project subtest
 ```
 
 ### Fix Issues

@@ -6,6 +6,8 @@
 [![Apache 2.0 Licensed][license-apache-image]][license-apache-link]
 [![MIT Licensed][license-mit-image]][license-mit-link]
 
+<!-- cargo-rdme start -->
+
 *Just continue writing tests.*
 
 Ever got to a point, were you felt extending a test would be much easier than writing a new one?
@@ -44,7 +46,7 @@ fn add_creates_pending_task() {
 }
 ```
 
-([Link to full example](subtest/tests/expand/readme_todo_list_example.rs))
+([Link to full example](https://github.com/nthuemmel/subtest/blob/master/subtest/tests/expand/readme_todo_list_example.rs))
 
 ## How it works
 
@@ -203,7 +205,7 @@ Example:
 
 ```rust
 #[subtest]
-#[rstest]
+#[rstest::rstest]
 #[case::completed(TaskStatus::Completed)]
 #[case::cancelled(TaskStatus::Cancelled)]
 fn insert_finished_task(#[case] status: TaskStatus) {
@@ -238,7 +240,7 @@ fn insert_finished_task(#[case] status: TaskStatus) {
 
 ```rust
 #[test]
-#[rstest]
+#[rstest::rstest]
 #[case::completed(TaskStatus::Completed)]
 #[case::cancelled(TaskStatus::Cancelled)]
 fn insert_finished_task(#[case] status: TaskStatus) {
@@ -254,7 +256,7 @@ fn insert_finished_task(#[case] status: TaskStatus) {
 }
 mod insert_finished_task_subtests {
     use super::*;
-    #[rstest]
+    #[rstest::rstest]
     #[case::completed(TaskStatus::Completed)]
     #[case::cancelled(TaskStatus::Cancelled)]
     fn cannot_complete_already_finished_task(#[case] status: TaskStatus) {
@@ -270,7 +272,7 @@ mod insert_finished_task_subtests {
         let err = list.complete(id).unwrap_err();
         assert!(matches!(err, TodoError::InvalidTransition { .. }));
     }
-    #[rstest]
+    #[rstest::rstest]
     #[case::completed(TaskStatus::Completed)]
     #[case::cancelled(TaskStatus::Cancelled)]
     fn cannot_cancel_already_finished_task(#[case] status: TaskStatus) {
@@ -409,7 +411,7 @@ Just follow these rules:
 
 In case you do ever forget the `#[test]` attribute, you will get the same compiler warning as if you forgot to annotate a regular test function with `#[test]`:
 
-```
+```text
 warning: function `parent` is never used
  --> subtest/tests/expand/missing_test_attr.rs:2:4
   |
@@ -449,7 +451,7 @@ fn value_can_be_sent() {
 
 will lead to the following compiler error:
 
-```
+```text
 error[E0659]: `assert` is ambiguous
   --> tests/ui/fail/readme_ambiguous_assert_import_example.rs:15:9
    |
@@ -546,7 +548,7 @@ fn value_can_be_sent() {
 
 will lead to
 
-```
+```text
 warning: unused variable: `receiver`
   --> tests/ui/fail/readme_unused_variables_example.rs:10:18
    |
@@ -576,6 +578,8 @@ The solution is to
         drop(receiver);
     }
     ```
+
+<!-- cargo-rdme end -->
 
 ## Changelog
 

@@ -17,6 +17,7 @@ env:
   RUST_BACKTRACE: 1
   MSRV: "1.85"
   CARGO_EXPAND_VERSION: "1.0.123"
+  CARGO_RDME_VERSION: "2.1.0"
 
 permissions:
   contents: read
@@ -70,6 +71,18 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Run clippy
         run: cargo clippy --locked --workspace --all-targets --all-features -- -D warnings
+
+  pinned-rdme:
+    name: "Pinned Toolchain: rdme"
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v7
+      - run: rustup toolchain install --profile minimal
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-rdme@${{ env.CARGO_RDME_VERSION }}
+      - name: Run rdme
+        run: cargo rdme --check --workspace-project subtest
 
   # === Latest stable: mandatory checks ===
   stable-check:
