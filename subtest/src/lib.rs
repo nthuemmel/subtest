@@ -6,7 +6,7 @@
 //!
 //! ... use `#[subtest]`: a Rust macro to easily use test setup code from one test function in another one.
 //!
-//! ## Example
+//! # Example
 //!
 //! **Let's say you have a TODO list app.**
 //!
@@ -38,7 +38,7 @@
 //!
 //! ([Link to full example](https://github.com/nthuemmel/subtest/blob/master/subtest/tests/expand/readme_todo_list_example.rs))
 //!
-//! ## How it works
+//! # How it works
 //!
 //! * Statements preceding a nested `#[subtest]` function are **copied** into the nested function's body
 //! * This means you can freely use and mutate any local variables from the parent function in the nested function...
@@ -73,9 +73,9 @@
 //! }
 //! ```
 //!
-//! ## What you can do
+//! # What you can do
 //!
-//! ### Arbitrarily Nest Test Functions
+//! ## Arbitrarily Nest Test Functions
 //!
 //! You can nest `#[subtest]` functions arbitrarily deeply:
 //!
@@ -139,7 +139,7 @@
 //!
 //! </details>
 //!
-//! ### Use async tests
+//! ## Use async tests
 //!
 //! Example:
 //!
@@ -192,7 +192,7 @@
 //!
 //! </details>
 //!
-//! ### Use rstest (or other Testing Frameworks)
+//! ## Use rstest (or other Testing Frameworks)
 //!
 //! Example:
 //!
@@ -292,7 +292,7 @@
 //! Make sure to specify the `#[subtest]` attribute first, before `#[rstest]`.
 //! The same way you can use `rstest`, you can use any other testing framework as well.
 //!
-//! ### Omit or Override Attributes, Parameters, Return Types
+//! ## Omit or Override Attributes, Parameters, Return Types
 //!
 //! Nested `#[subtest]`s' function attributes, parameters and return type are inherited from the parent test function by default.
 //!
@@ -374,9 +374,9 @@
 //!
 //! **Note:** Overriding is all-or-nothing. If you add an attribute, you have to repeat the remaining relevant attributes from the parent function, in this case `#[test]`.
 //!
-//! ## Things to be aware of
+//! # Things to be aware of
 //!
-//! ### Do not omit test attribute altogether
+//! ## Do not omit test attribute altogether
 //!
 //! Even when using `#[subtest]`, you still have to specify an "actual" test attribute - typically `#[test]`, or alternatively `#[tokio::test]` or `#[rstest]` (or whatever testing framework you intend to use) - at least for the top-level test function:
 //!
@@ -422,7 +422,7 @@
 //!
 //! I recommend automatically running clippy with deny-warnings turned on (`cargo clippy --locked --all-targets --all-features -- -D warnings`), which catches these issues fairly quickly.
 //!
-//! ### Ambiguous macro import
+//! ## Ambiguous macro import
 //!
 //! If you happen to use `assert2`'s `assert` macro, or any other macro that has a name similar to a macro from the stdlib's auto-imported prelude, you will get a conflict compiler error when using the macro in a nested `#[subtest]`.
 //!
@@ -543,7 +543,7 @@
 //!     # }
 //!     ```
 //!
-//! ### Unused variables in parent test function
+//! ## Unused variables in parent test function
 //!
 //! If you define a variable which is only used in nested subtests, but not in the parent test function, you will get an "unused variables" warning.
 //! Example:
@@ -612,7 +612,7 @@ use subtest_impl::expand_subtest_main_fn;
 ///
 /// For more information, refer to the [crate-level documentation](crate).
 ///
-/// ### Example
+/// # Example
 ///
 /// ```rust
 /// use subtest::subtest;
