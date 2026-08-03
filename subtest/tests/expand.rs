@@ -7,7 +7,7 @@ pub fn test_snapshots() {
 
     // without the '--tests' flag, `cargo expand` would just remove functions annotated with #[test]
     // without the '--remap-path-prefix', absolute paths to the input files would show up in the generated output snapshots
-    macrotest::expand_args(
+    macrotest::expand_without_refresh_args(
         "tests/expand/*.rs",
         [
             "--tests".to_string(),
