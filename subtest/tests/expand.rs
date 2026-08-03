@@ -21,6 +21,7 @@ pub fn test_snapshots() {
 mod expand {
     mod async_tests;
     mod doc_comments;
+    mod helper_fn;
     #[expect(
         dead_code,
         reason = "since #[test] is missing, the function should lead to a dead code warning, \

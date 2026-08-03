@@ -1,0 +1,39 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/helper_fn.rs
+---
+#[test]
+fn parent() {
+    fn double(value: u32) -> u32 {
+        value * 2
+    }
+    let local_var = double(1);
+    /// Helper functions may carry doc comments as well as lint & configuration attributes
+    #[allow(dead_code)]
+    fn noop() {}
+    fn unused_by_subtests() {}
+}
+mod parent_subtests {
+    use super::*;
+    #[test]
+    fn sees_preceding_helper() {
+        fn double(value: u32) -> u32 {
+            value * 2
+        }
+        let local_var = double(1);
+        assert_eq!(double(local_var), 4);
+    }
+    #[test]
+    fn sees_all_preceding_helpers() {
+        fn double(value: u32) -> u32 {
+            value * 2
+        }
+        let local_var = double(1);
+        /// Helper functions may carry doc comments as well as lint & configuration attributes
+        #[allow(dead_code)]
+        fn noop() {}
+        noop();
+        assert_eq!(double(local_var), 4);
+    }
+}

@@ -94,15 +94,29 @@ impl Subtest {
 
         for statement in input_fn.block.stmts {
             match statement {
-                Stmt::Item(Item::Fn(nested_fn)) => {
+                Stmt::Item(Item::Fn(nested_fn)) if has_subtest_attr(&nested_fn) => {
                     subtests.push(Subtest::new(
-                        check_and_remove_subtest_attr(nested_fn)?,
+                        remove_subtest_attrs(nested_fn)?,
                         function.block.stmts.clone(),
                         &inheritable_attrs,
                         &function.sig.inputs,
                         &function.sig.output,
                     )?);
                 }
+
+                // A function carrying attributes which would override the inherited ones - such as
+                // #[test] - is most likely a subtest whose #[subtest] attribute was forgotten
+                Stmt::Item(Item::Fn(nested_fn))
+                    if nested_fn.attrs.iter().any(is_overriding_attr) =>
+                {
+                    return Err(syn::Error::new_spanned(
+                        nested_fn,
+                        "function is missing the #[subtest] attribute",
+                    ));
+                }
+
+                // Any remaining function is a helper function, which is treated like any other
+                // statement: kept in the test fn and copied into the subtests following it
                 other => {
                     check_for_misplaced_subtests(&other)?;
                     function.block.stmts.push(other);
@@ -208,13 +222,17 @@ fn is_subtest_attr(attr: &Attribute) -> bool {
     attr.meta.path().is_ident("subtest")
 }
 
-fn check_and_remove_subtest_attr(mut from_fn: ItemFn) -> Result<ItemFn, syn::Error> {
-    let mut subtest_attr_found = false;
+/// Whether a function is marked as a subtest
+fn has_subtest_attr(item_fn: &ItemFn) -> bool {
+    item_fn.attrs.iter().any(is_subtest_attr)
+}
+
+/// Strip the `#[subtest]` attribute off a subtest fn, validating that it carries no arguments
+fn remove_subtest_attrs(mut from_fn: ItemFn) -> Result<ItemFn, syn::Error> {
     let mut validation_error = None;
 
     from_fn.attrs.retain(|attr| {
         if is_subtest_attr(attr) {
-            subtest_attr_found = true;
             if validation_error.is_none() {
                 validation_error = attr.meta.require_path_only().err().map(|_| {
                     syn::Error::new_spanned(attr, "expected #[subtest] with no arguments")
@@ -226,16 +244,8 @@ fn check_and_remove_subtest_attr(mut from_fn: ItemFn) -> Result<ItemFn, syn::Err
         }
     });
 
-    if !subtest_attr_found {
-        return Err(syn::Error::new_spanned(
-            from_fn,
-            "function is missing the #[subtest] attribute",
-        ));
+    match validation_error {
+        Some(validation_error) => Err(validation_error),
+        None => Ok(from_fn),
     }
-
-    if let Some(validation_error) = validation_error {
-        return Err(validation_error);
-    }
-
-    Ok(from_fn)
 }
