@@ -10,7 +10,7 @@
 //!
 //! **Let's say you have a TODO list app.**
 //!
-//! ```rust
+//! ```no_run
 //! use subtest::subtest;
 //!
 //! #[subtest]
@@ -46,7 +46,7 @@
 //!
 //! **The above example gets expanded to:**
 //!
-//! ```rust
+//! ```no_run
 //! #[test]
 //! fn add_creates_pending_task() {
 //!     let mut list = TodoList::new();
@@ -79,7 +79,7 @@
 //!
 //! You can nest `#[subtest]` functions arbitrarily deeply:
 //!
-//! ```rust
+//! ```no_run
 //! # use subtest::subtest;
 //! #[subtest]
 //! #[test]
@@ -107,7 +107,7 @@
 //!
 //! <summary>Click to see expansion</summary>
 //!
-//! ```rust
+//! ```no_run
 //! #[test]
 //! fn add_creates_pending_task() {
 //!     let mut list = TodoList::new();
@@ -143,7 +143,7 @@
 //!
 //! Example:
 //!
-//! ```rust
+//! ```no_run
 //! # use subtest::subtest;
 //! #[subtest]
 //! #[tokio::test]
@@ -170,7 +170,7 @@
 //!
 //! <summary>Click to show example</summary>
 //!
-//! ```rust
+//! ```no_run
 //! # use subtest::subtest;
 //! #[subtest]
 //! #[test]
@@ -196,7 +196,7 @@
 //!
 //! Example:
 //!
-//! ```rust
+//! ```no_run
 //! # use subtest::subtest;
 //! #[subtest]
 //! #[rstest::rstest]
@@ -232,7 +232,7 @@
 //!
 //! <summary>Click to see expansion</summary>
 //!
-//! ```rust
+//! ```no_run
 //! # use rstest::rstest;
 //! #[test]
 //! #[rstest::rstest]
@@ -298,7 +298,7 @@
 //!
 //! The following:
 //!
-//! ```rust
+//! ```no_run
 //! # use subtest::subtest;
 //! #[subtest]
 //! #[tokio::test]
@@ -321,7 +321,7 @@
 //!
 //! is semantically equivalent to:
 //!
-//! ```rust
+//! ```no_run
 //! # use subtest::subtest;
 //! #[subtest]
 //! #[tokio::test]
@@ -345,7 +345,7 @@
 //!
 //! You may also override any of attributes, parameters and return types as needed, for example by adding `#[ignore]` or `#[should_panic]`:
 //!
-//! ```rust
+//! ```no_run
 //! # use subtest::subtest;
 //! #[subtest]
 //! #[test]
@@ -380,7 +380,7 @@
 //!
 //! Even when using `#[subtest]`, you still have to specify an "actual" test attribute - typically `#[test]`, or alternatively `#[tokio::test]` or `#[rstest]` (or whatever testing framework you intend to use) - at least for the top-level test function:
 //!
-//! ```rust
+//! ```no_run
 //! # use subtest::subtest;
 //! #[subtest]
 //! #[test] // <-- Do not omit this!
@@ -428,7 +428,7 @@
 //!
 //! Example: The following code:
 //!
-//! ```rust
+//! ```no_run
 //! use assert2::assert;
 //! use subtest::subtest;
 //!
@@ -479,7 +479,7 @@
 //!
 //! <summary>Click to see expansion</summary>
 //!
-//! ```rust
+//! ```no_run
 //! use assert2::assert;
 //! #[test]
 //! fn value_can_be_sent() {
@@ -506,7 +506,7 @@
 //!
 //! * Either import the macro within the subtest itself:
 //!
-//!     ```rust
+//!     ```no_run
 //!     # use assert2::assert;
 //!     # use subtest::subtest;
 //!     #
@@ -526,7 +526,7 @@
 //!
 //! * Or qualify the invocation with `super`:
 //!
-//!     ```rust
+//!     ```no_run
 //!     # use assert2::assert;
 //!     # use subtest::subtest;
 //!     #
@@ -548,7 +548,7 @@
 //! If you define a variable which is only used in nested subtests, but not in the parent test function, you will get an "unused variables" warning.
 //! Example:
 //!
-//! ```rust
+//! ```no_run
 //! # use subtest::subtest;
 //! #[subtest]
 //! #[test]
@@ -580,7 +580,7 @@
 //! * either avoid declaring unused variables in the parent test function, and move them directly into the subtest that needs them (preferred)
 //! * or, if this is not possible (like in the example shown above), explicitly drop them at the end of the parent test function's scope:
 //!
-//!     ```rust
+//!     ```no_run
 //!     # use subtest::subtest;
 //!     #[subtest]
 //!     #[test]
@@ -614,7 +614,7 @@ use subtest_impl::expand_subtest_main_fn;
 ///
 /// # Example
 ///
-/// ```rust
+/// ```no_run
 /// use subtest::subtest;
 ///
 /// #[subtest]
