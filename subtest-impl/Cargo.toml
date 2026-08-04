@@ -6,6 +6,7 @@ edition = "2024"
 rust-version = "1.85"
 authors = ["Nikolaus Thümmel <commit.nthuemmel@ntcomputer.de>"]
 license = "MIT OR Apache-2.0"
+readme = "README.md"
 homepage = "https://github.com/nthuemmel/subtest"
 repository = "https://github.com/nthuemmel/subtest"
 
