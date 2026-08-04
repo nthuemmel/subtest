@@ -56,7 +56,12 @@ cargo clippy --locked --all-targets --fix --allow-dirty --allow-staged
 Use [cargo-msrv](https://github.com/foresterre/cargo-msrv) (`cargo install cargo-msrv`).
 
 * Find MSRV: `cargo msrv find --min 2024`
-* When changed, update the `rust-version` field in [`subtest/Cargo.toml`](subtest/Cargo.toml) and [`subtest-impl/Cargo.toml`](subtest-impl/Cargo.toml), and the versions in [CHANGELOG.md](CHANGELOG.md#next-release) and [`env.MSRV` in the CI workflow](.github/workflows/ci.yml)
+* When changed, update:
+  * the `rust-version` field in [`subtest/Cargo.toml`](subtest/Cargo.toml)
+  * the `rust-version` field in [`subtest-impl/Cargo.toml`](subtest-impl/Cargo.toml)
+  * the version in [CHANGELOG.md](CHANGELOG.md#next-release)
+  * the version in [`env.MSRV` in the CI workflow](.github/workflows/ci.yml)
+  * the version in the *Installation* section of the [crate-level documentation](subtest/src/lib.rs), then regenerate the README (see [README Generation](#readme-generation))
 
 ## Pinned Toolchain
 
@@ -69,13 +74,14 @@ The pinned toolchain is only relevant for tests. The macro itself should compile
 ## Release
 
 1. Update version in [`subtest/Cargo.toml`](subtest/Cargo.toml), [`subtest-impl/Cargo.toml`](subtest-impl/Cargo.toml) and [`workspace.dependencies` of `Cargo.toml`](Cargo.toml), update `Cargo.lock`
-2. Update version & release date in [`CHANGELOG.md`](CHANGELOG.md)
-3. Commit changes
-4. Tag commit with version
-5. Push
-6. Publish
+2. Update the dependency version in the *Installation* section of the [crate-level documentation](subtest/src/lib.rs), then regenerate the README (see [README Generation](#readme-generation))
+3. Update version & release date in [`CHANGELOG.md`](CHANGELOG.md)
+4. Commit changes
+5. Tag commit with version
+6. Push
+7. Publish
    1. `cargo publish -p subtest-impl --dry-run`
    2. `cargo publish -p subtest-impl`
    3. `cargo publish -p subtest --dry-run`
    4. `cargo publish -p subtest`
-7. Pull in new version in a test project, make sure everything works
+8. Pull in new version in a test project, make sure everything works

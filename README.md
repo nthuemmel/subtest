@@ -10,7 +10,7 @@
 
 *Just continue writing tests.*
 
-Ever got to a point, were you felt extending a test would be much easier than writing a new one?
+Ever got to a point where you felt extending a test would be much easier than writing a new one?
 But the thing you want to test is actually a different feature, and would warrant its own test?
 You *could* copy-paste the existing test's setup code, or you *could* refactor it to a shared test fixture, but you could also...
 
@@ -48,11 +48,28 @@ fn add_creates_pending_task() {
 
 ([Link to full example](https://github.com/nthuemmel/subtest/blob/master/subtest/tests/expand/readme_todo_list_example.rs))
 
+## Installation
+
+```sh
+cargo add --dev subtest
+```
+
+or, in your `Cargo.toml`:
+
+```toml
+[dev-dependencies]
+subtest = "0.0.1"
+```
+
+`subtest` requires Rust 1.85 or newer.
+
 ## How it works
 
-* Statements preceding a nested `#[subtest]` function are **copied** into the nested function's body
+* Statements *preceding* a nested `#[subtest]` function are **copied** into the nested function's body
 * This means you can freely use and mutate any local variables from the parent function in the nested function...
 * ... without affecting the parent function or sibling test functions
+* Statements *following* a nested `#[subtest]` function are **not** copied - they only run in the parent function
+* The parent function stays a test of its own, and every subtest becomes a new test - so the setup code is run once per test
 
 **The above example gets expanded to:**
 
@@ -82,6 +99,17 @@ mod add_creates_pending_task_subtests {
     }
 }
 ```
+
+**and therefore runs as three tests:**
+
+```text
+running 3 tests
+test add_creates_pending_task ... ok
+test add_creates_pending_task_subtests::complete_marks_task_completed ... ok
+test add_creates_pending_task_subtests::cancel_marks_task_cancelled ... ok
+```
+
+Since subtests live in a `<parent function>_subtests` module, `cargo test add_creates_pending_task` runs the parent test together with all of its subtests, while `cargo test add_creates_pending_task_subtests::complete_marks_task_completed` runs just that single subtest.
 
 ## What you can do
 
