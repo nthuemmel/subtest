@@ -1,0 +1,18 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/nested_fully_qualified_macro_name.rs
+---
+#[test]
+fn parent() {
+    let i = 1;
+}
+mod parent_subtests {
+    use super::*;
+    #[test]
+    fn child() {
+        let i = 1;
+        let i = i + 1;
+        assert_eq!(i, 2);
+    }
+}

@@ -3,8 +3,8 @@ use quote::{format_ident, quote};
 use syn::punctuated::Punctuated;
 use syn::visit::{self, Visit};
 use syn::{
-    Attribute, Block, Expr, ExprLit, FnArg, Item, ItemFn, Lit, Meta, MetaNameValue, ReturnType,
-    Signature, Stmt, Token,
+    Attribute, Block, Expr, ExprLit, FnArg, Item, ItemFn, Lit, Meta, MetaNameValue, Path,
+    ReturnType, Signature, Stmt, Token,
 };
 
 pub fn expand_subtest_main_fn(args: TokenStream, input: TokenStream) -> TokenStream {
@@ -308,9 +308,20 @@ fn check_for_misplaced_subtests(statement: &Stmt) -> Result<(), syn::Error> {
     }
 }
 
-/// Whether an attribute is the `#[subtest]` attribute
+/// Whether an attribute is the `#[subtest]` attribute (or `#[subtest::subtest]`)
 fn is_subtest_attr(attr: &Attribute) -> bool {
-    attr.meta.path().is_ident("subtest")
+    let path = attr.meta.path();
+    path.is_ident("subtest") || path_matches(path, &["subtest", "subtest"])
+}
+
+fn path_matches(path: &Path, segments: &[&str]) -> bool {
+    // ignores leading `::`
+    path.segments.len() == segments.len()
+        && path
+            .segments
+            .iter()
+            .zip(segments)
+            .all(|(s, e)| s.ident == e)
 }
 
 /// Strip the `#[subtest]` attribute off a subtest fn, parsing its arguments
