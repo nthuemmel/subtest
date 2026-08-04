@@ -153,11 +153,26 @@ impl Subtest {
 
 /// Whether an attribute of a subtest fn overrides the attributes inherited from the parent test fn.
 ///
-/// Doc comments as well as lint & configuration attributes don't override, they are additive to the
-/// inherited attributes
+/// Doc comments, lint & configuration attributes and function modifiers don't override, they
+/// are additive to the inherited attributes.
 fn is_overriding_attr(attr: &Attribute) -> bool {
     const NON_OVERRIDING_ATTRS: &[&str] = &[
-        "doc", "allow", "expect", "warn", "deny", "forbid", "cfg", "cfg_attr",
+        // doc comments
+        "doc",
+        // lint attributes
+        "allow",
+        "expect",
+        "warn",
+        "deny",
+        "forbid",
+        // configuration attributes
+        "cfg",
+        "cfg_attr",
+        // function modifiers
+        "inline",
+        "must_use",
+        "track_caller",
+        "cold",
     ];
 
     let path = attr.meta.path();

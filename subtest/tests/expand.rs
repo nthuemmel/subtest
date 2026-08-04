@@ -22,6 +22,7 @@ mod expand {
     mod async_tests;
     mod doc_comments;
     mod helper_fn;
+    mod helper_fn_attrs;
     #[expect(
         dead_code,
         reason = "since #[test] is missing, the function should lead to a dead code warning, \

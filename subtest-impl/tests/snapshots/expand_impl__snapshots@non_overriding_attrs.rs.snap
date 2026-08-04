@@ -1,0 +1,60 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/non_overriding_attrs.rs
+---
+#[test]
+fn parent() {}
+mod parent_subtests {
+    use super::*;
+    /// A doc comment
+    #[test]
+    fn doc_comment() {}
+    ///An explicit doc attribute
+    #[test]
+    fn doc_attr() {}
+    #[allow(clippy::eq_op)]
+    #[test]
+    fn allow_attr() {}
+    #[expect(clippy::eq_op)]
+    #[test]
+    fn expect_attr() {}
+    #[warn(clippy::eq_op)]
+    #[test]
+    fn warn_attr() {}
+    #[deny(clippy::eq_op)]
+    #[test]
+    fn deny_attr() {}
+    #[forbid(unsafe_code)]
+    #[test]
+    fn forbid_attr() {}
+    #[cfg(test)]
+    #[test]
+    fn cfg_attr_() {}
+    #[cfg_attr(test, inline)]
+    #[test]
+    fn cfg_attr_attr() {}
+    #[rustfmt::skip]
+    #[test]
+    fn tool_attr() {}
+    #[inline]
+    #[test]
+    fn inline_attr() {}
+    #[must_use]
+    #[test]
+    fn must_use_attr() {}
+    #[track_caller]
+    #[test]
+    fn track_caller_attr() {}
+    #[cold]
+    #[test]
+    fn cold_attr() {}
+    /// A doc comment
+    #[allow(clippy::eq_op)]
+    #[cfg(test)]
+    #[rustfmt::skip]
+    #[inline]
+    #[track_caller]
+    #[test]
+    fn all_at_once() {}
+}
