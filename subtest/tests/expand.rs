@@ -29,6 +29,12 @@ mod expand {
                   like normal test functions which you forgot to annotate with #[test]"
     )]
     mod missing_test_attr;
+    #[expect(
+        dead_code,
+        reason = "since #[test] is missing, the function should lead to a dead code warning, \
+                  like normal test functions which you forgot to annotate with #[test]"
+    )]
+    mod missing_test_attr_on_nested_subtest;
     mod no_subtests;
     mod readme_ambiguous_assert_import_solution1;
     mod readme_ambiguous_assert_import_solution2;

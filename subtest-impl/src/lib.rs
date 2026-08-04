@@ -15,17 +15,11 @@ fn expand_subtest_main_fn_fallible(
     args: TokenStream,
     input: TokenStream,
 ) -> Result<TokenStream, syn::Error> {
-    let config = MacroConfig::parse(&args)?;
+    let macro_config = MacroConfig::parse(&args)?;
     let input_fn: ItemFn = syn::parse2(input)?;
 
-    if !has_test_attr(&input_fn) && !config.allow_missing_test_attr {
-        return Err(syn::Error::new_spanned(
-            input_fn.sig.ident,
-            "function is missing a test attribute, such as #[test], #[tokio::test] or #[rstest] - add one below #[subtest]",
-        ));
-    }
-
     let main_subtest = Subtest::new(
+        &macro_config,
         &SubtestConfig::default(),
         input_fn,
         vec![],
@@ -119,14 +113,15 @@ struct Subtest {
 
 impl Subtest {
     fn new(
-        config: &SubtestConfig,
+        macro_config: &MacroConfig,
+        subtest_config: &SubtestConfig,
         input_fn: ItemFn,
         parent_fn_statements: Vec<Stmt>,
         parent_fn_attrs: &[Attribute],
         parent_fn_params: &Punctuated<FnArg, Token![,]>,
         parent_fn_return_type: &ReturnType,
     ) -> Result<Self, syn::Error> {
-        let attrs = if config.inherit_attributes {
+        let attrs = if subtest_config.inherit_attributes {
             parent_fn_attrs
                 .iter()
                 .cloned()
@@ -165,6 +160,13 @@ impl Subtest {
             }),
         };
 
+        if !has_test_attr(&function) && !macro_config.allow_missing_test_attr {
+            return Err(syn::Error::new_spanned(
+                function.sig.ident,
+                "function is missing a test attribute, such as #[test], #[tokio::test] or #[rstest] - add one below #[subtest]",
+            ));
+        }
+
         let mut subtests = Vec::new();
 
         // Doc comments describe the function they are written on, so they are not passed down
@@ -184,6 +186,7 @@ impl Subtest {
                             cleaned_function,
                         } => {
                             subtests.push(Subtest::new(
+                                macro_config,
                                 &subtest_config,
                                 cleaned_function,
                                 function.block.stmts.clone(),
