@@ -46,9 +46,11 @@ impl Subtest {
         // doc comments and lint & configuration attributes excluded),
         // inherit attributes from the parent test fn
         let attrs = if !input_fn.attrs.iter().any(is_overriding_attr) {
-            let mut attrs = input_fn.attrs;
-            attrs.extend_from_slice(parent_fn_attrs);
-            attrs
+            parent_fn_attrs
+                .iter()
+                .cloned()
+                .chain(input_fn.attrs)
+                .collect()
         } else {
             input_fn.attrs
         };

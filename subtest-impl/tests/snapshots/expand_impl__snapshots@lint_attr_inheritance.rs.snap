@@ -7,28 +7,28 @@ input_file: subtest-impl/tests/expand_impl/lint_attr_inheritance.rs
 fn parent() {}
 mod parent_subtests {
     use super::*;
+    #[test]
     #[allow(clippy::eq_op)]
-    #[test]
     fn child_with_allow_attr() {}
+    #[test]
     #[expect(clippy::eq_op)]
-    #[test]
     fn child_with_expect_attr() {}
+    #[test]
     #[warn(unused)]
-    #[test]
     fn child_with_warn_attr() {}
+    #[test]
     #[deny(unsafe_code)]
-    #[test]
     fn child_with_deny_attr() {}
+    #[test]
     #[forbid(unsafe_code)]
-    #[test]
     fn child_with_forbid_attr() {}
+    #[test]
     #[cfg(unix)]
-    #[test]
     fn child_with_cfg_attr() {}
+    #[test]
     #[cfg_attr(miri, ignore)]
-    #[test]
     fn child_with_conditional_attr() {}
-    #[rustfmt::skip]
     #[test]
+    #[rustfmt::skip]
     fn child_with_tool_attr() {}
 }

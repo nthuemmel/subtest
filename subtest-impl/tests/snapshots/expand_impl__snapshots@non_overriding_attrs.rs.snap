@@ -7,54 +7,54 @@ input_file: subtest-impl/tests/expand_impl/non_overriding_attrs.rs
 fn parent() {}
 mod parent_subtests {
     use super::*;
-    /// A doc comment
     #[test]
+    /// A doc comment
     fn doc_comment() {}
+    #[test]
     ///An explicit doc attribute
-    #[test]
     fn doc_attr() {}
+    #[test]
     #[allow(clippy::eq_op)]
-    #[test]
     fn allow_attr() {}
+    #[test]
     #[expect(clippy::eq_op)]
-    #[test]
     fn expect_attr() {}
+    #[test]
     #[warn(clippy::eq_op)]
-    #[test]
     fn warn_attr() {}
+    #[test]
     #[deny(clippy::eq_op)]
-    #[test]
     fn deny_attr() {}
+    #[test]
     #[forbid(unsafe_code)]
-    #[test]
     fn forbid_attr() {}
+    #[test]
     #[cfg(test)]
-    #[test]
     fn cfg_attr_() {}
+    #[test]
     #[cfg_attr(test, inline)]
-    #[test]
     fn cfg_attr_attr() {}
+    #[test]
     #[rustfmt::skip]
-    #[test]
     fn tool_attr() {}
+    #[test]
     #[inline]
-    #[test]
     fn inline_attr() {}
+    #[test]
     #[must_use]
-    #[test]
     fn must_use_attr() {}
+    #[test]
     #[track_caller]
-    #[test]
     fn track_caller_attr() {}
-    #[cold]
     #[test]
+    #[cold]
     fn cold_attr() {}
+    #[test]
     /// A doc comment
     #[allow(clippy::eq_op)]
     #[cfg(test)]
     #[rustfmt::skip]
     #[inline]
     #[track_caller]
-    #[test]
     fn all_at_once() {}
 }
