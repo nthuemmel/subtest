@@ -17,3 +17,4 @@ proc-macro2 = { workspace = true }
 [dev-dependencies]
 insta = { workspace = true }
 prettyplease = { workspace = true }
+syn = { workspace = true, features = ["extra-traits"] }

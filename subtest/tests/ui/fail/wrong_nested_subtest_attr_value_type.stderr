@@ -1,0 +1,5 @@
+error: expected a bool literal
+ --> tests/ui/fail/wrong_nested_subtest_attr_value_type.rs:6:36
+  |
+6 |     #[subtest(inherit_attributes = "value")]
+  |                                    ^^^^^^^

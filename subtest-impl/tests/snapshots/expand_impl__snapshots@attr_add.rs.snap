@@ -1,0 +1,21 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/attr_add.rs
+---
+#[test]
+fn parent() {}
+mod parent_subtests {
+    use super::*;
+    #[test]
+    #[should_panic(expected = "my failure")]
+    fn child_should_panic() {}
+    mod child_should_panic_subtests {
+        use super::*;
+        #[test]
+        fn grandchild_reset() {}
+        #[test]
+        #[should_panic(expected = "my failure")]
+        fn grandchild_should_panic() {}
+    }
+}

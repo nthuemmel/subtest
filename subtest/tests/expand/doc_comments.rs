@@ -20,7 +20,7 @@ fn doc_comments() {
     }
 
     /// Explicit test attributes still override.
-    #[subtest]
+    #[subtest(inherit_attributes = false)]
     #[test]
     #[should_panic(expected = "my failure")]
     fn documented_with_override() {

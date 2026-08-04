@@ -2,10 +2,10 @@
 #[test]
 #[should_panic(expected = "my failure")]
 fn parent() {
-    #[subtest]
+    #[subtest(inherit_attributes = false)]
     #[test]
     fn child() {
-        #[subtest]
+        #[subtest(inherit_attributes = false)]
         #[test]
         #[ignore]
         fn grandchild() {}

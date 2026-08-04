@@ -1,5 +1,5 @@
-error: expected #[subtest] with no arguments
- --> tests/ui/fail/wrong_nested_subtest_attr_format_2.rs:6:5
+error: expected '<key> = <value>' pair
+ --> tests/ui/fail/wrong_nested_subtest_attr_format_2.rs:6:15
   |
-6 |     #[subtest(SubTest)]
-  |     ^^^^^^^^^^^^^^^^^^^
+6 |     #[subtest(inherit_attributes)]
+  |               ^^^^^^^^^^^^^^^^^^

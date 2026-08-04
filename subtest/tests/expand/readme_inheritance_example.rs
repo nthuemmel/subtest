@@ -14,7 +14,7 @@ async fn value_can_be_sent_async() -> anyhow::Result<()> {
         Ok(())
     }
 
-    #[subtest]
+    #[subtest(inherit_attributes = false)]
     #[tokio::test]
     async fn value_can_be_received_repeat() -> anyhow::Result<()> {
         let mut receiver = receiver;
@@ -35,14 +35,12 @@ fn value_can_be_sent_and_received() {
     receiver.try_recv().unwrap();
 
     #[subtest]
-    #[test]
     #[should_panic(expected = "called `Result::unwrap()` on an `Err` value: Empty")]
     fn value_cannot_be_received_a_second_time() {
         receiver.try_recv().unwrap();
     }
 
     #[subtest]
-    #[test]
     #[ignore]
     fn value_can_be_sent_a_second_time() {
         unimplemented!()

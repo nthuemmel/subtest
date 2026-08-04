@@ -4,7 +4,7 @@
 fn parent() {
     #[subtest]
     fn child() {
-        #[subtest]
+        #[subtest(inherit_attributes = true)]
         fn grandchild() {}
     }
 }

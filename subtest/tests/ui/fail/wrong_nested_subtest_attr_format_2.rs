@@ -3,6 +3,6 @@ fn main() {}
 #[subtest::subtest]
 #[test]
 fn parent() {
-    #[subtest(SubTest)]
+    #[subtest(inherit_attributes)]
     fn child() {}
 }

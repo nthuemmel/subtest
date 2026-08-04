@@ -1,0 +1,5 @@
+error: expected `inherit_attributes`
+ --> tests/ui/fail/wrong_nested_subtest_attr_key.rs:6:15
+  |
+6 |     #[subtest(foo = false)]
+  |               ^^^

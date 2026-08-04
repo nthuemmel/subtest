@@ -2,7 +2,10 @@ use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 use syn::punctuated::Punctuated;
 use syn::visit::{self, Visit};
-use syn::{Attribute, Block, FnArg, Item, ItemFn, ReturnType, Signature, Stmt, Token};
+use syn::{
+    Attribute, Block, Expr, ExprLit, FnArg, Item, ItemFn, Lit, Meta, MetaNameValue, ReturnType,
+    Signature, Stmt, Token,
+};
 
 pub fn expand_subtest_main_fn(args: TokenStream, input: TokenStream) -> TokenStream {
     expand_subtest_main_fn_fallible(args, input).unwrap_or_else(|err| err.to_compile_error())
@@ -23,6 +26,7 @@ fn expand_subtest_main_fn_fallible(
     }
 
     let main_subtest = Subtest::new(
+        &SubtestConfig::default(),
         input_fn,
         vec![],
         &[],
@@ -63,6 +67,51 @@ impl MacroConfig {
     }
 }
 
+#[cfg_attr(test, derive(Debug, PartialEq))]
+struct SubtestConfig {
+    inherit_attributes: bool,
+}
+
+impl Default for SubtestConfig {
+    fn default() -> Self {
+        Self {
+            inherit_attributes: true,
+        }
+    }
+}
+
+impl SubtestConfig {
+    fn parse(args: &TokenStream) -> Result<Self, syn::Error> {
+        if args.is_empty() {
+            return Ok(Self::default());
+        }
+
+        let inherit_attributes_ident = "inherit_attributes";
+
+        let key_value_pair: MetaNameValue = syn::parse2(args.clone())
+            .map_err(|_| syn::Error::new_spanned(args, "expected '<key> = <value>' pair"))?;
+
+        if !key_value_pair.path.is_ident(inherit_attributes_ident) {
+            return Err(syn::Error::new_spanned(
+                key_value_pair.path,
+                format!("expected `{inherit_attributes_ident}`"),
+            ));
+        }
+
+        let inherit_attributes = match key_value_pair.value {
+            Expr::Lit(ExprLit {
+                lit: Lit::Bool(lit_bool),
+                ..
+            }) => lit_bool.value,
+            other => {
+                return Err(syn::Error::new_spanned(other, "expected a bool literal"));
+            }
+        };
+
+        Ok(Self { inherit_attributes })
+    }
+}
+
 struct Subtest {
     function: ItemFn,
     subtests: Vec<Subtest>,
@@ -70,16 +119,14 @@ struct Subtest {
 
 impl Subtest {
     fn new(
+        config: &SubtestConfig,
         input_fn: ItemFn,
         parent_fn_statements: Vec<Stmt>,
         parent_fn_attrs: &[Attribute],
         parent_fn_params: &Punctuated<FnArg, Token![,]>,
         parent_fn_return_type: &ReturnType,
     ) -> Result<Self, syn::Error> {
-        // If the subtest fn does not specify any overriding attributes (#[subtest] itself,
-        // doc comments and lint & configuration attributes excluded),
-        // inherit attributes from the parent test fn
-        let attrs = if !input_fn.attrs.iter().any(is_overriding_attr) {
+        let attrs = if config.inherit_attributes {
             parent_fn_attrs
                 .iter()
                 .cloned()
@@ -129,35 +176,48 @@ impl Subtest {
             .collect();
 
         for statement in input_fn.block.stmts {
-            match statement {
-                Stmt::Item(Item::Fn(nested_fn)) if has_subtest_attr(&nested_fn) => {
-                    subtests.push(Subtest::new(
-                        remove_subtest_attrs(nested_fn)?,
-                        function.block.stmts.clone(),
-                        &inheritable_attrs,
-                        &function.sig.inputs,
-                        &function.sig.output,
-                    )?);
+            let statement = match statement {
+                Stmt::Item(Item::Fn(nested_fn)) => {
+                    match remove_subtest_attrs(nested_fn)? {
+                        RemovedSubtestAttrs::RemovedSubtest {
+                            subtest_config,
+                            cleaned_function,
+                        } => {
+                            subtests.push(Subtest::new(
+                                &subtest_config,
+                                cleaned_function,
+                                function.block.stmts.clone(),
+                                &inheritable_attrs,
+                                &function.sig.inputs,
+                                &function.sig.output,
+                            )?);
+                            continue;
+                        }
+
+                        RemovedSubtestAttrs::NoSubtest(nested_fn) => {
+                            // A function carrying a test attribute - such as #[test] -
+                            // is most likely a subtest whose #[subtest] attribute was forgotten
+                            if has_test_attr(&nested_fn) {
+                                return Err(syn::Error::new_spanned(
+                                    nested_fn.sig.ident,
+                                    "function is missing the #[subtest] attribute",
+                                ));
+                            }
+
+                            // Any remaining function is a helper function, which is treated like
+                            // any other statement: kept in the test fn and copied into the subtests
+                            // following it
+                            Stmt::Item(Item::Fn(nested_fn))
+                        }
+                    }
                 }
 
-                // A function carrying attributes which would override the inherited ones - such as
-                // #[test] - is most likely a subtest whose #[subtest] attribute was forgotten
-                Stmt::Item(Item::Fn(nested_fn))
-                    if nested_fn.attrs.iter().any(is_overriding_attr) =>
-                {
-                    return Err(syn::Error::new_spanned(
-                        nested_fn.sig.ident,
-                        "function is missing the #[subtest] attribute",
-                    ));
-                }
+                // non-function statements
+                other => other,
+            };
 
-                // Any remaining function is a helper function, which is treated like any other
-                // statement: kept in the test fn and copied into the subtests following it
-                other => {
-                    check_for_misplaced_subtests(&other)?;
-                    function.block.stmts.push(other);
-                }
-            }
+            check_for_misplaced_subtests(&statement)?;
+            function.block.stmts.push(statement);
         }
 
         Ok(Self { function, subtests })
@@ -198,42 +258,6 @@ fn has_test_attr(item_fn: &ItemFn) -> bool {
                 .last()
                 .is_some_and(|segment| segment.ident.to_string().ends_with("test"))
     })
-}
-
-/// Whether an attribute of a subtest fn overrides the attributes inherited from the parent test fn.
-///
-/// Doc comments, lint & configuration attributes and function modifiers don't override, they
-/// are additive to the inherited attributes.
-fn is_overriding_attr(attr: &Attribute) -> bool {
-    const NON_OVERRIDING_ATTRS: &[&str] = &[
-        // doc comments
-        "doc",
-        // lint attributes
-        "allow",
-        "expect",
-        "warn",
-        "deny",
-        "forbid",
-        // configuration attributes
-        "cfg",
-        "cfg_attr",
-        // function modifiers
-        "inline",
-        "must_use",
-        "track_caller",
-        "cold",
-    ];
-
-    let path = attr.meta.path();
-
-    let is_non_overriding = NON_OVERRIDING_ATTRS.iter().any(|name| path.is_ident(name))
-        // tool attributes such as #[rustfmt::skip]
-        || path
-            .segments
-            .first()
-            .is_some_and(|segment| segment.ident == "rustfmt");
-
-    !is_non_overriding
 }
 
 /// Whether an attribute is a doc comment (or an equivalent `#[doc = "..."]` attribute)
@@ -286,30 +310,195 @@ fn is_subtest_attr(attr: &Attribute) -> bool {
     attr.meta.path().is_ident("subtest")
 }
 
-/// Whether a function is marked as a subtest
-fn has_subtest_attr(item_fn: &ItemFn) -> bool {
-    item_fn.attrs.iter().any(is_subtest_attr)
-}
-
-/// Strip the `#[subtest]` attribute off a subtest fn, validating that it carries no arguments
-fn remove_subtest_attrs(mut from_fn: ItemFn) -> Result<ItemFn, syn::Error> {
+/// Strip the `#[subtest]` attribute off a subtest fn, parsing its arguments
+fn remove_subtest_attrs(mut from_fn: ItemFn) -> Result<RemovedSubtestAttrs, syn::Error> {
+    let mut parsed_config = None;
     let mut validation_error = None;
 
     from_fn.attrs.retain(|attr| {
-        if is_subtest_attr(attr) {
-            if validation_error.is_none() {
-                validation_error = attr.meta.require_path_only().err().map(|_| {
-                    syn::Error::new_spanned(attr, "expected #[subtest] with no arguments")
-                });
-            }
-            false
-        } else {
-            true
+        if !is_subtest_attr(attr) {
+            return true;
         }
+
+        if parsed_config.is_some() {
+            validation_error = Some(syn::Error::new_spanned(
+                attr,
+                "duplicate #[subtest] attribute, remove one",
+            ));
+            return false;
+        }
+
+        parsed_config = Some(match &attr.meta {
+            Meta::Path(_) => SubtestConfig::default(),
+            Meta::List(list) => match SubtestConfig::parse(&list.tokens) {
+                Ok(config) => config,
+                Err(e) => {
+                    validation_error = Some(e);
+                    return false;
+                }
+            },
+            Meta::NameValue(_) => {
+                validation_error = Some(syn::Error::new_spanned(
+                    attr,
+                    "expected #[subtest] or #[subtest(<args>)]",
+                ));
+                return false;
+            }
+        });
+
+        false
     });
 
-    match validation_error {
-        Some(validation_error) => Err(validation_error),
-        None => Ok(from_fn),
+    if let Some(validation_error) = validation_error {
+        return Err(validation_error);
+    }
+
+    if let Some(subtest_config) = parsed_config {
+        Ok(RemovedSubtestAttrs::RemovedSubtest {
+            subtest_config,
+            cleaned_function: from_fn,
+        })
+    } else {
+        Ok(RemovedSubtestAttrs::NoSubtest(from_fn))
+    }
+}
+
+#[cfg_attr(test, derive(Debug, PartialEq))]
+enum RemovedSubtestAttrs {
+    NoSubtest(ItemFn),
+    RemovedSubtest {
+        cleaned_function: ItemFn,
+        subtest_config: SubtestConfig,
+    },
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use syn::parse_quote;
+
+    #[test]
+    fn remove_subtest_attrs_none() {
+        let input: ItemFn = parse_quote! { fn bare() {} };
+        let result = remove_subtest_attrs(input.clone());
+        assert_eq!(result.unwrap(), RemovedSubtestAttrs::NoSubtest(input));
+    }
+
+    #[test]
+    fn remove_subtest_attrs_other() {
+        let input: ItemFn = parse_quote! {
+            #[inline]
+            fn bare() {}
+        };
+        let result = remove_subtest_attrs(input.clone());
+        assert_eq!(result.unwrap(), RemovedSubtestAttrs::NoSubtest(input));
+    }
+
+    #[test]
+    fn remove_subtest_attrs_one_without_args() {
+        let input: ItemFn = parse_quote! {
+            #[subtest]
+            #[inline]
+            fn bare() {}
+        };
+
+        let result = remove_subtest_attrs(input.clone());
+
+        assert_eq!(
+            result.unwrap(),
+            RemovedSubtestAttrs::RemovedSubtest {
+                cleaned_function: parse_quote! {
+                    #[inline]
+                    fn bare() {}
+                },
+                subtest_config: SubtestConfig {
+                    inherit_attributes: true,
+                }
+            }
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "expected '<key> = <value>' pair")]
+    fn remove_subtest_attrs_one_with_wrong_arg_value() {
+        let input: ItemFn = parse_quote! {
+            #[subtest(foo)]
+            fn bare() {}
+        };
+        let result = remove_subtest_attrs(input.clone());
+        result.unwrap();
+    }
+
+    #[test]
+    #[should_panic(expected = "expected #[subtest] or #[subtest(<args>)]")]
+    fn remove_subtest_attrs_one_with_wrong_arg_type() {
+        let input: ItemFn = parse_quote! {
+            #[subtest = foo]
+            fn bare() {}
+        };
+        let result = remove_subtest_attrs(input.clone());
+        result.unwrap();
+    }
+
+    #[test]
+    #[should_panic(expected = "duplicate #[subtest] attribute, remove one")]
+    fn remove_subtest_attrs_two() {
+        let input: ItemFn = parse_quote! {
+            #[subtest]
+            #[subtest]
+            fn bare() {}
+        };
+        let result = remove_subtest_attrs(input.clone());
+        result.unwrap();
+    }
+
+    #[test]
+    fn remove_subtest_attrs_with_inherit_attributes_true() {
+        let input: ItemFn = parse_quote! {
+            #[subtest(inherit_attributes = true)]
+            #[inline]
+            #[test]
+            fn bare() {}
+        };
+
+        let result = remove_subtest_attrs(input.clone());
+
+        assert_eq!(
+            result.unwrap(),
+            RemovedSubtestAttrs::RemovedSubtest {
+                cleaned_function: parse_quote! {
+                    #[inline]
+                    #[test]
+                    fn bare() {}
+                },
+                subtest_config: SubtestConfig {
+                    inherit_attributes: true,
+                }
+            }
+        );
+    }
+
+    #[test]
+    fn remove_subtest_attrs_with_inherit_attributes_false() {
+        let input: ItemFn = parse_quote! {
+            #[subtest(inherit_attributes = false)]
+            #[inline]
+            fn bare() {}
+        };
+
+        let result = remove_subtest_attrs(input.clone());
+
+        assert_eq!(
+            result.unwrap(),
+            RemovedSubtestAttrs::RemovedSubtest {
+                cleaned_function: parse_quote! {
+                    #[inline]
+                    fn bare() {}
+                },
+                subtest_config: SubtestConfig {
+                    inherit_attributes: false,
+                }
+            }
+        );
     }
 }

@@ -178,7 +178,7 @@
 //!     let (sender, receiver) = tokio::sync::mpsc::channel(5);
 //!     sender.try_send("Hello!").unwrap();
 //!
-//!     #[subtest]
+//!     #[subtest(inherit_attributes = false)]
 //!     #[tokio::test]
 //!     async fn value_can_be_received() {
 //!         let mut receiver = receiver;
@@ -292,7 +292,7 @@
 //! Make sure to specify the `#[subtest]` attribute first, before `#[rstest]`.
 //! The same way you can use `rstest`, you can use any other testing framework as well.
 //!
-//! ## Omit or override attributes, parameters, return types
+//! ## Omit, add or override attributes, parameters, return types
 //!
 //! Nested `#[subtest]`s' function attributes, parameters and return type are inherited from the parent test function by default.
 //!
@@ -329,7 +329,7 @@
 //!     let (sender, receiver) = tokio::sync::mpsc::channel(5);
 //!     sender.send("Hello!").await?;
 //!
-//!     #[subtest]
+//!     #[subtest(inherit_attributes = false)] // <-- do not copy attributes from the parent function
 //!     #[tokio::test] // <-- same attribute as parent function
 //!     async fn value_can_be_received() -> anyhow::Result<()> {  // <-- same return type as parent function
 //!         let mut receiver = receiver;
@@ -343,7 +343,7 @@
 //! }
 //! ```
 //!
-//! You may also override any of attributes, parameters and return types as needed, for example by adding `#[ignore]` or `#[should_panic]`:
+//! You may also add attributes, for example `#[ignore]` or `#[should_panic]`:
 //!
 //! ```no_run
 //! # use subtest::subtest;
@@ -355,14 +355,12 @@
 //!     receiver.try_recv().unwrap();
 //!
 //!     #[subtest]
-//!     #[test] // <-- make sure to include test attribute when overriding attributes
 //!     #[should_panic(expected = "called `Result::unwrap()` on an `Err` value: Empty")]
 //!     fn value_cannot_be_received_a_second_time() {
 //!         receiver.try_recv().unwrap();
 //!     }
 //!
 //!     #[subtest]
-//!     #[test] // <-- make sure to include test attribute when overriding attributes
 //!     #[ignore]
 //!     fn value_can_be_sent_a_second_time() {
 //!         unimplemented!()
@@ -371,10 +369,6 @@
 //!     drop(receiver);
 //! }
 //! ```
-//!
-//! **Note:** Overriding is all-or-nothing. If you add an attribute, you have to repeat the remaining relevant attributes from the parent function, in this case `#[test]`.
-//!
-//! Doc comments and lint & configuration attributes (`#[allow]`, `#[expect]`, `#[warn]`, `#[deny]`, `#[forbid]`, `#[cfg]`, `#[cfg_attr]` and tool attributes such as `#[rustfmt::skip]`) are an exception: they do **not** count as an override, and are simply added on top of the inherited attributes.
 //!
 //! # Things to be aware of
 //!
@@ -390,14 +384,14 @@
 //!     // ...
 //!
 //!     #[subtest] // <-- here it is fine to omit #[test], since it is inherited
-//!     fn inherits_attributes() {
+//!     #[should_panic]
+//!     fn adds_attributes() {
 //!         // ...
 //!     }
-//!   
-//!     #[subtest]
-//!     #[test] // <-- make sure to include #[test] attribute when overriding attributes, like adding #[should_panic]
-//!     #[should_panic]
-//!     fn overrides_attributes() {
+//!
+//!     #[subtest(inherit_attributes = false)]
+//!     #[tokio::test] // <-- make sure to include a test attribute when disabling attribute inheritance
+//!     async fn overrides_attributes() {
 //!         // ...
 //!     }
 //! }
@@ -406,8 +400,8 @@
 //! Just follow these rules:
 //!
 //! * If it is a top-level function with a `#[subtest]` attribute: **Specify a `#[test]` attribute as well!**
-//! * If it is a nested function with **just** a `#[subtest]` attribute (and optionally a doc comment or a lint attribute like `#[allow]`): You can omit the `#[test]` attribute, it is inherited (see [Omit or Override Attributes, Parameters, Return Types](#omit-or-override-attributes-parameters-return-types))
-//! * If it is a nested function with added attributes like `#[should_panic]`: **Specify a `#[test]` attribute as well!** (see [Omit or Override Attributes, Parameters, Return Types](#omit-or-override-attributes-parameters-return-types))
+//! * If it is a nested function with a `#[subtest]` attribute (and optionally more attributes like `#[should_panic]`): You can omit the `#[test]` attribute, it is inherited (see [Omit, add or override attributes, parameters, return types](#omit-add-or-override-attributes-parameters-return-types))
+//! * If it is a nested function with a `#[subtest(inherit_attributes = false)]` attribute: **Specify a `#[test]` attribute as well!**
 //! * Always put other attributes **after** `#[subtest]`
 //!
 //! In case you do ever forget the `#[test]` attribute, you will get a compiler error:
@@ -619,6 +613,8 @@ use subtest_impl::expand_subtest_main_fn;
 ///       * `#[subtest(allow_missing_test_attribute)]` - disables the compiler check for whether a test attribute is present
 /// 2. On each individual subtest function
 ///    * here, you can omit test attributes, parameters, and return types - they are inherited from the parent test function
+///    * optional arguments:
+///       * `#[subtest(inherit_attributes = false)]` - disable attribute inheritance, now you **have to** add a test attribute of the testing framework you intend to use, similar to the top-level test function
 ///
 /// For more information, refer to the [crate-level documentation](crate).
 ///

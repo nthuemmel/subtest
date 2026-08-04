@@ -1,15 +1,15 @@
 #[subtest]
 #[test]
 fn parent() {
-    #[subtest]
+    #[subtest(inherit_attributes = false)]
     #[test]
     fn nested_sync() {}
 
-    #[subtest]
+    #[subtest(inherit_attributes = false)]
     #[tokio::test]
     async fn nested_async() -> anyhow::Result<()> {}
 
-    #[subtest]
+    #[subtest(inherit_attributes = false)]
     #[rstest]
     #[case(0, 0)]
     #[case(1, 1)]
