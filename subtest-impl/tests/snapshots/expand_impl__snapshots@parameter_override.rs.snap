@@ -3,12 +3,15 @@ source: subtest-impl/tests/expand_impl.rs
 expression: macro_output
 input_file: subtest-impl/tests/expand_impl/parameter_override.rs
 ---
+#[test]
 fn parent(arg: i32, arg2: bool) {}
 mod parent_subtests {
     use super::*;
+    #[test]
     fn child(arg: i32, arg2: bool, arg3: u64) {}
     mod child_subtests {
         use super::*;
+        #[test]
         fn grandchild(arg: i32, arg2: bool, arg3: u64) {}
     }
 }

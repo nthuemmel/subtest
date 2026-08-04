@@ -1,5 +1,5 @@
 error: expected #[subtest] with no arguments
- --> tests/ui/fail/wrong_nested_subtest_attr_format_2.rs:5:5
+ --> tests/ui/fail/wrong_nested_subtest_attr_format_2.rs:6:5
   |
-5 |     #[subtest(SubTest)]
+6 |     #[subtest(SubTest)]
   |     ^^^^^^^^^^^^^^^^^^^

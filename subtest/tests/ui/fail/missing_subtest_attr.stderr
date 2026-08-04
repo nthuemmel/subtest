@@ -1,5 +1,5 @@
 error: function is missing the #[subtest] attribute
- --> tests/ui/fail/missing_subtest_attr.rs:6:8
+ --> tests/ui/fail/missing_subtest_attr.rs:7:8
   |
-6 |     fn missing_here() {}
+7 |     fn missing_here() {}
   |        ^^^^^^^^^^^^

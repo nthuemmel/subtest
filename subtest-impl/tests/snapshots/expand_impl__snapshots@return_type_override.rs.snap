@@ -3,12 +3,15 @@ source: subtest-impl/tests/expand_impl.rs
 expression: macro_output
 input_file: subtest-impl/tests/expand_impl/return_type_override.rs
 ---
+#[test]
 fn parent() -> anyhow::Result<()> {}
 mod parent_subtests {
     use super::*;
+    #[test]
     fn child() -> () {}
     mod child_subtests {
         use super::*;
+        #[test]
         fn grandchild() -> Result<Foo, Bar> {}
     }
 }

@@ -1,6 +1,7 @@
 fn main() {}
 
 #[subtest::subtest]
+#[test]
 fn parent() {
     #[test]
     fn missing_here() {}
