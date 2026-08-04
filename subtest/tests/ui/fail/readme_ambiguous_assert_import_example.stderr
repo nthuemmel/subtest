@@ -8,8 +8,8 @@ error[E0659]: `assert` is ambiguous
 note: `assert` could refer to the macro imported here
   --> tests/ui/fail/readme_ambiguous_assert_import_example.rs:6:1
    |
- 6 | #[subtest]
-   | ^^^^^^^^^^
+ 6 | #[subtest(allow_missing_test_attribute)]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
    = help: consider adding an explicit import of `assert` to disambiguate
    = help: or use `self::assert` to refer to this macro unambiguously
 note: `assert` could also refer to the macro defined here

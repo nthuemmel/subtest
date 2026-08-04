@@ -411,19 +411,26 @@ Just follow these rules:
 * If it is a nested function with added attributes like `#[should_panic]`: **Specify a `#[test]` attribute as well!** (see [Omit or Override Attributes, Parameters, Return Types](#omit-or-override-attributes-parameters-return-types))
 * Always put other attributes **after** `#[subtest]`
 
-In case you do ever forget the `#[test]` attribute, you will get the same compiler warning as if you forgot to annotate a regular test function with `#[test]`:
+In case you do ever forget the `#[test]` attribute, you will get a compiler error:
 
 ```text
-warning: function `parent` is never used
- --> subtest/tests/expand/missing_test_attr.rs:2:4
+error: function is missing a test attribute, such as #[test], #[tokio::test] or #[rstest] - add one below #[subtest]
+ --> tests/ui/fail/missing_test_attr.rs:4:4
   |
-2 | fn parent() {
+4 | fn parent() {
   |    ^^^^^^
-  |
-  = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
 ```
 
-I recommend automatically running clippy with deny-warnings turned on (`cargo clippy --locked --all-targets --all-features -- -D warnings`), which catches these issues fairly quickly.
+`subtest` determines test attributes by checking whether they end with `test`.
+If your test attribute of choice does not, you can opt out of the check via:
+
+```rust
+#[subtest(allow_missing_test_attribute)]
+// your weirdly-named test attribute goes here!
+fn top_level() {
+    // ...
+}
+```
 
 ### Ambiguous macro import
 

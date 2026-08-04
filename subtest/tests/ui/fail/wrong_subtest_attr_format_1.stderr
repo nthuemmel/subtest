@@ -4,7 +4,7 @@ error: key-value macro attributes are not supported
 3 | #[subtest::subtest = "foo"]
   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-error: expected no arguments
+error: expected either allow_missing_test_attribute or no arguments
  --> tests/ui/fail/wrong_subtest_attr_format_1.rs:3:22
   |
 3 | #[subtest::subtest = "foo"]

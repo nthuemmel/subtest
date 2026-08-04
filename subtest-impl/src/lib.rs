@@ -1,4 +1,4 @@
-use proc_macro2::TokenStream;
+use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 use syn::punctuated::Punctuated;
 use syn::visit::{self, Visit};
@@ -12,11 +12,15 @@ fn expand_subtest_main_fn_fallible(
     args: TokenStream,
     input: TokenStream,
 ) -> Result<TokenStream, syn::Error> {
-    if !args.is_empty() {
-        return Err(syn::Error::new_spanned(args, "expected no arguments"));
-    }
-
+    let config = MacroConfig::parse(&args)?;
     let input_fn: ItemFn = syn::parse2(input)?;
+
+    if !has_test_attr(&input_fn) && !config.allow_missing_test_attr {
+        return Err(syn::Error::new_spanned(
+            input_fn.sig.ident,
+            "function is missing a test attribute, such as #[test], #[tokio::test] or #[rstest] - add one below #[subtest]",
+        ));
+    }
 
     let main_subtest = Subtest::new(
         input_fn,
@@ -27,6 +31,36 @@ fn expand_subtest_main_fn_fallible(
     )?;
 
     Ok(main_subtest.render())
+}
+
+struct MacroConfig {
+    allow_missing_test_attr: bool,
+}
+
+impl MacroConfig {
+    fn parse(args: &TokenStream) -> Result<Self, syn::Error> {
+        let allow_missing_test_attr_string = "allow_missing_test_attribute";
+
+        if syn::parse2::<Ident>(args.clone())
+            .ok()
+            .map(|ident| ident.to_string())
+            .as_deref()
+            == Some(allow_missing_test_attr_string)
+        {
+            Ok(Self {
+                allow_missing_test_attr: true,
+            })
+        } else if args.is_empty() {
+            Ok(Self {
+                allow_missing_test_attr: false,
+            })
+        } else {
+            Err(syn::Error::new_spanned(
+                args,
+                format!("expected either {allow_missing_test_attr_string} or no arguments"),
+            ))
+        }
+    }
 }
 
 struct Subtest {
@@ -151,6 +185,19 @@ impl Subtest {
             #subtest_module
         }
     }
+}
+
+/// Whether the function has a `#[test]`, `#[tokio::test]`, `#[rstest]` attribute etc.
+fn has_test_attr(item_fn: &ItemFn) -> bool {
+    item_fn.attrs.iter().any(|attr| {
+        !is_subtest_attr(attr)
+            && attr
+                .meta
+                .path()
+                .segments
+                .last()
+                .is_some_and(|segment| segment.ident.to_string().ends_with("test"))
+    })
 }
 
 /// Whether an attribute of a subtest fn overrides the attributes inherited from the parent test fn.

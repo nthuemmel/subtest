@@ -2,7 +2,7 @@ use subtest::subtest;
 
 fn main() {}
 
-#[subtest]
+#[subtest(allow_missing_test_attribute)]
 // #[tokio::test] // if marked as test, the function is removed before the diagnostic shows, because trybuild doesn't compile with `--test`
 async fn value_can_be_sent_async() {
     let (sender, receiver) = tokio::sync::mpsc::channel(5);

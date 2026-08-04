@@ -1,6 +1,6 @@
 fn main() {}
 
-#[subtest::subtest]
+#[subtest::subtest(allow_missing_test_attribute)]
 fn parent() {
     missing_fn();
 

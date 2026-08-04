@@ -4,7 +4,7 @@ fn main() {}
 
 use subtest::subtest;
 
-#[subtest]
+#[subtest(allow_missing_test_attribute)]
 // #[test] // if marked as test, the function is removed before the diagnostic shows, because trybuild doesn't compile with `--test`
 fn value_can_be_sent() {
     let (sender, receiver) = std::sync::mpsc::channel();

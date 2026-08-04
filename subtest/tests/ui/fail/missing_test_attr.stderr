@@ -1,0 +1,5 @@
+error: function is missing a test attribute, such as #[test], #[tokio::test] or #[rstest] - add one below #[subtest]
+ --> tests/ui/fail/missing_test_attr.rs:4:4
+  |
+4 | fn parent() {
+  |    ^^^^^^
