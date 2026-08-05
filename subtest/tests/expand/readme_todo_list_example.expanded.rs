@@ -245,7 +245,9 @@ mod tests {
             ),
         };
         fn complete_marks_task_completed() {
+            #[allow(unused_variables)]
             let mut list = TodoList::new();
+            #[allow(unused_variables)]
             let id = list.add("Buy milk");
             list.complete(id).unwrap();
             match (&list.get(id).unwrap().status, &TaskStatus::Completed) {
@@ -288,7 +290,9 @@ mod tests {
             ),
         };
         fn cancel_marks_task_cancelled() {
+            #[allow(unused_variables)]
             let mut list = TodoList::new();
+            #[allow(unused_variables)]
             let id = list.add("Buy milk");
             list.cancel(id).unwrap();
             match (&list.get(id).unwrap().status, &TaskStatus::Cancelled) {
@@ -333,7 +337,9 @@ mod tests {
                 ),
             };
             fn cannot_complete_already_cancelled_task() {
+                #[allow(unused_variables)]
                 let mut list = TodoList::new();
+                #[allow(unused_variables)]
                 let id = list.add("Buy milk");
                 list.cancel(id).unwrap();
                 match (&list.get(id).unwrap().status, &TaskStatus::Cancelled) {
@@ -450,9 +456,14 @@ mod tests {
     }
     mod insert_finished_task_subtests {
         use super::*;
-        fn cannot_complete_already_finished_task(status: TaskStatus) {
+        fn cannot_complete_already_finished_task(
+            #[allow(unused_variables)]
+            status: TaskStatus,
+        ) {
             {
+                #[allow(unused_variables)]
                 let mut list = TodoList::new();
+                #[allow(unused_variables)]
                 let id = 1;
                 list.tasks
                     .push(Task {
@@ -546,9 +557,14 @@ mod tests {
                 cannot_complete_already_finished_task(status)
             }
         }
-        fn cannot_cancel_already_finished_task(status: TaskStatus) {
+        fn cannot_cancel_already_finished_task(
+            #[allow(unused_variables)]
+            status: TaskStatus,
+        ) {
             {
+                #[allow(unused_variables)]
                 let mut list = TodoList::new();
+                #[allow(unused_variables)]
                 let id = 1;
                 list.tasks
                     .push(Task {

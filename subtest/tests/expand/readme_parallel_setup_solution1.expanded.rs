@@ -67,7 +67,9 @@ mod server_starts_subtests {
         ),
     };
     fn server_accepts_a_connection() {
+        #[allow(unused_variables)]
         let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+        #[allow(unused_variables)]
         let port = listener.local_addr().unwrap().port();
         match (&port, &0) {
             (left_val, right_val) => {

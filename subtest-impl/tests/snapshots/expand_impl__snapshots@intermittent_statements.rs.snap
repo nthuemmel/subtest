@@ -13,12 +13,15 @@ mod parent_subtests {
     use super::*;
     #[test]
     fn first() {
+        #[allow(unused_variables)]
         let local_var = 1;
         assert_eq!(local_var, 1);
     }
     #[test]
     fn second() {
+        #[allow(unused_variables)]
         let local_var = 1;
+        #[allow(unused_variables)]
         let local_var = local_var + 1;
         assert_eq!(local_var, 2);
     }

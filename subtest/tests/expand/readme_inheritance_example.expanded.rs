@@ -79,6 +79,7 @@ mod value_can_be_sent_async_subtests {
     };
     fn value_can_be_received_inherit() -> anyhow::Result<()> {
         let body = async {
+            #[allow(unused_variables)]
             let (sender, receiver) = tokio::sync::mpsc::channel(5);
             sender.send("Hello!").await?;
             let mut receiver = receiver;
@@ -148,6 +149,7 @@ mod value_can_be_sent_async_subtests {
     };
     fn value_can_be_received_repeat() -> anyhow::Result<()> {
         let body = async {
+            #[allow(unused_variables)]
             let (sender, receiver) = tokio::sync::mpsc::channel(5);
             sender.send("Hello!").await?;
             let mut receiver = receiver;
@@ -251,6 +253,7 @@ mod value_can_be_sent_and_received_subtests {
     };
     #[should_panic(expected = "called `Result::unwrap()` on an `Err` value: Empty")]
     fn value_cannot_be_received_a_second_time() {
+        #[allow(unused_variables)]
         let (sender, mut receiver) = tokio::sync::mpsc::channel(5);
         sender.try_send("Hello!").unwrap();
         receiver.try_recv().unwrap();
@@ -283,6 +286,7 @@ mod value_can_be_sent_and_received_subtests {
     };
     #[ignore]
     fn value_can_be_sent_a_second_time() {
+        #[allow(unused_variables)]
         let (sender, mut receiver) = tokio::sync::mpsc::channel(5);
         sender.try_send("Hello!").unwrap();
         receiver.try_recv().unwrap();

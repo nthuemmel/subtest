@@ -45,8 +45,25 @@ mod expand {
     mod readme_parallel_setup_solution1;
     mod readme_parallel_setup_solution2;
     mod readme_todo_list_example;
-    mod readme_unused_variables_in_subtest_solution;
     mod readme_unused_variables_solution;
     mod rstest_tests;
     mod two_subtests;
+    #[deny(
+        unused_variables,
+        reason = "variables inherited from the parent test function must not be reported as \
+                  unused in a subtest which does not use them"
+    )]
+    #[deny(
+        clippy::allow_attributes_without_reason,
+        reason = "the generated #[allow(unused_variables)] states no reason, which must stay \
+                  acceptable in a project requiring one - clippy does not apply the lint to \
+                  attributes coming out of a macro"
+    )]
+    #[deny(
+        clippy::allow_attributes,
+        reason = "the generated #[allow(unused_variables)] must stay acceptable in a project \
+                  requiring #[expect] instead - clippy does not apply the lint to attributes \
+                  coming out of a macro"
+    )]
+    mod unused_variables_in_subtest;
 }

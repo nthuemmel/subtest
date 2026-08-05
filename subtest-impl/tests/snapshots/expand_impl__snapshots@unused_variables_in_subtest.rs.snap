@@ -1,22 +1,22 @@
 ---
 source: subtest-impl/tests/expand_impl.rs
 expression: macro_output
-input_file: subtest-impl/tests/expand_impl/readme_ambiguous_assert_import_example.rs
+input_file: subtest-impl/tests/expand_impl/unused_variables_in_subtest.rs
 ---
 #[test]
 fn value_can_be_sent() {
     let (sender, receiver) = std::sync::mpsc::channel();
     sender.send("Hello!").unwrap();
-    drop(receiver);
+    let value = receiver.recv().unwrap();
+    assert_eq!(value, "Hello!");
 }
 mod value_can_be_sent_subtests {
     use super::*;
     #[test]
-    fn value_can_be_received() {
+    fn another_value_can_be_sent() {
         #[allow(unused_variables)]
         let (sender, receiver) = std::sync::mpsc::channel();
         sender.send("Hello!").unwrap();
-        let value = receiver.recv().unwrap();
-        assert!(value == "Hello!");
+        sender.send("Hello again!").unwrap();
     }
 }

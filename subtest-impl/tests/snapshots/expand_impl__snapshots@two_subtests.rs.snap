@@ -11,12 +11,14 @@ mod two_subtests_subtests {
     use super::*;
     #[test]
     fn add() {
+        #[allow(unused_variables)]
         let i = 1;
         let i = i + 1;
         assert_eq!(i, 2);
     }
     #[test]
     fn subtract() {
+        #[allow(unused_variables)]
         let i = 1;
         let i = i - 1;
         assert_eq!(i, 0);

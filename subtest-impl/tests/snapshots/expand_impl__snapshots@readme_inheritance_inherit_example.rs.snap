@@ -14,6 +14,7 @@ mod value_can_be_sent_async_subtests {
     use super::*;
     #[tokio::test]
     async fn value_can_be_received() -> anyhow::Result<()> {
+        #[allow(unused_variables)]
         let (sender, receiver) = tokio::sync::mpsc::channel(5);
         sender.send("Hello!").await?;
         let mut receiver = receiver;

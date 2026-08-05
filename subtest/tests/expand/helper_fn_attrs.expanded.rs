@@ -145,6 +145,7 @@ mod helper_fn_attrs_subtests {
                 ::core::panicking::panic("assertion failed: value > 0")
             }
         }
+        #[allow(unused_variables)]
         let sum = warns() + denies() + forbids() + always_compiled()
             + conditionally_inlined() + not_formatted() + inlined() + must_be_used()
             + cold();

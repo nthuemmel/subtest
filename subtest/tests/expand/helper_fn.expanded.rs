@@ -72,6 +72,7 @@ mod helper_fn_subtests {
         fn double(value: u32) -> u32 {
             value * 2
         }
+        #[allow(unused_variables)]
         let local_var = double(1);
         match (&double(local_var), &4) {
             (left_val, right_val) => {
@@ -114,6 +115,7 @@ mod helper_fn_subtests {
         fn double(value: u32) -> u32 {
             value * 2
         }
+        #[allow(unused_variables)]
         let local_var = double(1);
         /// Helper functions may carry doc comments as well as lint & configuration attributes
         #[allow(dead_code)]

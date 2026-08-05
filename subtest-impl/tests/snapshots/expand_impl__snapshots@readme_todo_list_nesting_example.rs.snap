@@ -12,7 +12,9 @@ mod add_creates_pending_task_subtests {
     use super::*;
     #[test]
     fn cancel_marks_task_cancelled() {
+        #[allow(unused_variables)]
         let mut list = TodoList::new();
+        #[allow(unused_variables)]
         let id = list.add("Buy milk");
         list.cancel(id).unwrap();
         assert_eq!(list.get(id).unwrap().status, TaskStatus::Cancelled);
@@ -21,7 +23,9 @@ mod add_creates_pending_task_subtests {
         use super::*;
         #[test]
         fn cannot_complete_already_cancelled_task() {
+            #[allow(unused_variables)]
             let mut list = TodoList::new();
+            #[allow(unused_variables)]
             let id = list.add("Buy milk");
             list.cancel(id).unwrap();
             assert_eq!(list.get(id).unwrap().status, TaskStatus::Cancelled);

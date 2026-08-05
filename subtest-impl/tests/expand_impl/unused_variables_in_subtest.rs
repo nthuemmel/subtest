@@ -1,5 +1,3 @@
-use subtest::subtest;
-
 #[subtest]
 #[test]
 fn value_can_be_sent() {
@@ -9,7 +7,6 @@ fn value_can_be_sent() {
     #[subtest]
     fn another_value_can_be_sent() {
         sender.send("Hello again!").unwrap();
-        drop(receiver);
     }
 
     let value = receiver.recv().unwrap();

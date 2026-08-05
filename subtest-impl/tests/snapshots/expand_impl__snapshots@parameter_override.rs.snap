@@ -12,6 +12,13 @@ mod parent_subtests {
     mod child_subtests {
         use super::*;
         #[test]
-        fn grandchild(arg: i32, arg2: bool, arg3: u64) {}
+        fn grandchild(
+            #[allow(unused_variables)]
+            arg: i32,
+            #[allow(unused_variables)]
+            arg2: bool,
+            #[allow(unused_variables)]
+            arg3: u64,
+        ) {}
     }
 }

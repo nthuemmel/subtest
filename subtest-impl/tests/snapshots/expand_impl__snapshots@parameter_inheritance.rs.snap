@@ -8,10 +8,20 @@ fn parent(arg: i32, arg2: bool) {}
 mod parent_subtests {
     use super::*;
     #[test]
-    fn child(arg: i32, arg2: bool) {}
+    fn child(
+        #[allow(unused_variables)]
+        arg: i32,
+        #[allow(unused_variables)]
+        arg2: bool,
+    ) {}
     mod child_subtests {
         use super::*;
         #[test]
-        fn grandchild(arg: i32, arg2: bool) {}
+        fn grandchild(
+            #[allow(unused_variables)]
+            arg: i32,
+            #[allow(unused_variables)]
+            arg2: bool,
+        ) {}
     }
 }

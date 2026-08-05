@@ -7,7 +7,7 @@ pub const value_can_be_sent: test::TestDescAndFn = test::TestDescAndFn {
         name: test::StaticTestName("value_can_be_sent"),
         ignore: false,
         ignore_message: ::core::option::Option::None,
-        source_file: "./tests/expand/readme_unused_variables_in_subtest_solution.rs",
+        source_file: "./tests/expand/unused_variables_in_subtest.rs",
         start_line: 5usize,
         start_col: 4usize,
         end_line: 5usize,
@@ -52,7 +52,7 @@ mod value_can_be_sent_subtests {
             ),
             ignore: false,
             ignore_message: ::core::option::Option::None,
-            source_file: "./tests/expand/readme_unused_variables_in_subtest_solution.rs",
+            source_file: "./tests/expand/unused_variables_in_subtest.rs",
             start_line: 10usize,
             start_col: 8usize,
             end_line: 10usize,
@@ -68,10 +68,10 @@ mod value_can_be_sent_subtests {
         ),
     };
     fn another_value_can_be_sent() {
+        #[allow(unused_variables)]
         let (sender, receiver) = std::sync::mpsc::channel();
         sender.send("Hello!").unwrap();
         sender.send("Hello again!").unwrap();
-        drop(receiver);
     }
 }
 #[rustc_main]

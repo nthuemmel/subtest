@@ -60,6 +60,7 @@ mod two_subtests_subtests {
         testfn: test::StaticTestFn(#[coverage(off)] || test::assert_test_result(add())),
     };
     fn add() {
+        #[allow(unused_variables)]
         let i = 1;
         match (&i, &1) {
             (left_val, right_val) => {
@@ -113,6 +114,7 @@ mod two_subtests_subtests {
         ),
     };
     fn subtract() {
+        #[allow(unused_variables)]
         let i = 1;
         match (&i, &1) {
             (left_val, right_val) => {

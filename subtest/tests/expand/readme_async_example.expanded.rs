@@ -76,6 +76,7 @@ mod value_can_be_sent_async_subtests {
     };
     fn value_can_be_received() {
         let body = async {
+            #[allow(unused_variables)]
             let (sender, receiver) = tokio::sync::mpsc::channel(5);
             sender.send("Hello!").await.unwrap();
             let mut receiver = receiver;
@@ -173,6 +174,7 @@ mod value_can_be_sent_sync_subtests {
     };
     fn value_can_be_received() {
         let body = async {
+            #[allow(unused_variables)]
             let (sender, receiver) = tokio::sync::mpsc::channel(5);
             sender.try_send("Hello!").unwrap();
             let mut receiver = receiver;

@@ -13,6 +13,7 @@ mod value_can_be_sent_sync_subtests {
     use super::*;
     #[tokio::test]
     async fn value_can_be_received() {
+        #[allow(unused_variables)]
         let (sender, receiver) = tokio::sync::mpsc::channel(5);
         sender.try_send("Hello!").unwrap();
         let mut receiver = receiver;

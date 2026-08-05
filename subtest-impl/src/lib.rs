@@ -1,9 +1,11 @@
 mod attribute_parser;
 mod config;
+mod unused_variables;
 
 use crate::attribute_parser::{
     check_for_misplaced_subtests, has_test_attr, is_doc_attr, remove_subtest_attrs,
 };
+use crate::unused_variables::{mask_unused_parameters, mask_unused_variables};
 use attribute_parser::RemovedSubtestAttrs;
 use config::{MacroConfig, SubtestConfig};
 use proc_macro2::TokenStream;
@@ -50,6 +52,10 @@ impl Subtest {
         parent_fn_params: &Punctuated<FnArg, Token![,]>,
         parent_fn_return_type: &ReturnType,
     ) -> Result<Self, syn::Error> {
+        let mut inheritable_statements =
+            Vec::with_capacity(parent_fn_statements.len() + input_fn.block.stmts.len());
+        inheritable_statements.extend(parent_fn_statements.iter().cloned());
+
         let attrs = if subtest_config.inherit_attributes {
             parent_fn_attrs
                 .iter()
@@ -60,11 +66,16 @@ impl Subtest {
             input_fn.attrs
         };
 
-        // Inherit function parameters if the subtest fn does not specify any
-        let fn_params = if input_fn.sig.inputs.is_empty() {
-            parent_fn_params.clone()
+        // Inherit function parameters if the subtest fn does not specify any.
+        let (fn_params, inheritable_params) = if input_fn.sig.inputs.is_empty() {
+            // mask unused params - as long as the params are used in the parent, they should not show up as unused just because one of the subtests doesn't make use of them!
+            // Nested subtests inherit the unmasked params, so that the mask is not applied twice.
+            (
+                mask_unused_parameters(parent_fn_params),
+                parent_fn_params.clone(),
+            )
         } else {
-            input_fn.sig.inputs
+            (input_fn.sig.inputs.clone(), input_fn.sig.inputs)
         };
 
         // Inherit function return type if the subtest fn does not specify any
@@ -84,8 +95,9 @@ impl Subtest {
             },
             block: Box::new(Block {
                 brace_token: input_fn.block.brace_token,
-                // inherit all preceding statements from the parent
-                stmts: parent_fn_statements,
+                // inherit all preceding statements from the parent, masking unused variables
+                // - as long as the variables are used in the parent, they should not show up as unused just because one of the subtests doesn't make use of them!
+                stmts: mask_unused_variables(parent_fn_statements),
             }),
         };
 
@@ -120,9 +132,9 @@ impl Subtest {
                                 macro_config,
                                 &subtest_config,
                                 cleaned_function,
-                                function.block.stmts.clone(),
+                                inheritable_statements.clone(),
                                 &inheritable_attrs,
-                                &function.sig.inputs,
+                                &inheritable_params,
                                 &function.sig.output,
                             )?);
                             continue;
@@ -151,6 +163,7 @@ impl Subtest {
             };
 
             check_for_misplaced_subtests(&statement)?;
+            inheritable_statements.push(statement.clone());
             function.block.stmts.push(statement);
         }
 

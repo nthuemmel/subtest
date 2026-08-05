@@ -22,8 +22,14 @@ mod insert_finished_task_subtests {
     #[rstest]
     #[case::completed(TaskStatus::Completed)]
     #[case::cancelled(TaskStatus::Cancelled)]
-    fn cannot_complete_already_finished_task(#[case] status: TaskStatus) {
+    fn cannot_complete_already_finished_task(
+        #[case]
+        #[allow(unused_variables)]
+        status: TaskStatus,
+    ) {
+        #[allow(unused_variables)]
         let mut list = TodoList::new();
+        #[allow(unused_variables)]
         let id = 1;
         list.tasks
             .push(Task {
@@ -38,8 +44,14 @@ mod insert_finished_task_subtests {
     #[rstest]
     #[case::completed(TaskStatus::Completed)]
     #[case::cancelled(TaskStatus::Cancelled)]
-    fn cannot_cancel_already_finished_task(#[case] status: TaskStatus) {
+    fn cannot_cancel_already_finished_task(
+        #[case]
+        #[allow(unused_variables)]
+        status: TaskStatus,
+    ) {
+        #[allow(unused_variables)]
         let mut list = TodoList::new();
+        #[allow(unused_variables)]
         let id = 1;
         list.tasks
             .push(Task {

@@ -11,6 +11,7 @@ mod parent_subtests {
     use super::*;
     #[test]
     fn child() {
+        #[allow(unused_variables)]
         let i = 1;
         let i = i + 1;
         assert_eq!(i, 2);

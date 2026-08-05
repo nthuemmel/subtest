@@ -287,7 +287,10 @@ mod insert_finished_task_subtests {
     #[rstest::rstest]
     #[case::completed(TaskStatus::Completed)]
     #[case::cancelled(TaskStatus::Cancelled)]
-    fn cannot_complete_already_finished_task(#[case] status: TaskStatus) {
+    fn cannot_complete_already_finished_task(
+        #[case]
+        status: TaskStatus,
+    ) {
         let mut list = TodoList::new();
         let id = 1;
         list.tasks
@@ -303,7 +306,10 @@ mod insert_finished_task_subtests {
     #[rstest::rstest]
     #[case::completed(TaskStatus::Completed)]
     #[case::cancelled(TaskStatus::Cancelled)]
-    fn cannot_cancel_already_finished_task(#[case] status: TaskStatus) {
+    fn cannot_cancel_already_finished_task(
+        #[case]
+        status: TaskStatus,
+    ) {
         let mut list = TodoList::new();
         let id = 1;
         list.tasks
@@ -737,58 +743,6 @@ The solution is to
         drop(receiver); // <-- drop here to silence unused variable warning
     }
     ```
-
-The reverse can happen as well:
-If you define a variable which is only used in the parent test function, but not in nested subtests, you will also get an "unused variables" warning.
-Example:
-
-```rust
-#[subtest]
-#[test]
-fn value_can_be_sent() {
-    let (sender, receiver) = std::sync::mpsc::channel();
-    sender.send("Hello!").unwrap();
-
-    #[subtest]
-    fn another_value_can_be_sent() {
-        sender.send("Hello again!").unwrap();
-    }
-
-    let value = receiver.recv().unwrap(); // <-- receiver is used here, but not in the subtest above
-    assert_eq!(value, "Hello!");
-}
-```
-
-will lead to
-
-```text
-warning: unused variable: `receiver`
-  --> tests/ui/fail/readme_unused_variables_in_subtest_example.rs:10:18
-   |
-10 |     let (sender, receiver) = std::sync::mpsc::channel();
-   |                  ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_receiver`
-   |
-```
-
-The solution is to drop the variable at the end of the subtest:
-
-```rust
-#[subtest]
-#[test]
-fn value_can_be_sent() {
-    let (sender, receiver) = std::sync::mpsc::channel();
-    sender.send("Hello!").unwrap();
-
-    #[subtest]
-    fn another_value_can_be_sent() {
-        sender.send("Hello again!").unwrap();
-        drop(receiver); // <-- drop here to silence unused variable warning
-    }
-
-    let value = receiver.recv().unwrap();
-    assert_eq!(value, "Hello!");
-}
-```
 
 <!-- cargo-rdme end -->
 

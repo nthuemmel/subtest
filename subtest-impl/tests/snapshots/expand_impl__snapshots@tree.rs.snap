@@ -11,6 +11,7 @@ mod level_0_subtests {
     use super::*;
     #[test]
     fn level_1a() {
+        #[allow(unused_variables)]
         let i = 1;
         let level1 = "a";
     }
@@ -18,13 +19,17 @@ mod level_0_subtests {
         use super::*;
         #[test]
         fn level_1a_2a() {
+            #[allow(unused_variables)]
             let i = 1;
+            #[allow(unused_variables)]
             let level1 = "a";
             let level2 = "a";
         }
         #[test]
         fn level_1a_2b() {
+            #[allow(unused_variables)]
             let i = 1;
+            #[allow(unused_variables)]
             let level1 = "a";
             let level2 = "b";
         }
@@ -32,8 +37,11 @@ mod level_0_subtests {
             use super::*;
             #[test]
             fn level_1a_2b_3() {
+                #[allow(unused_variables)]
                 let i = 1;
+                #[allow(unused_variables)]
                 let level1 = "a";
+                #[allow(unused_variables)]
                 let level2 = "b";
                 let level3 = "X";
             }
@@ -41,6 +49,7 @@ mod level_0_subtests {
     }
     #[test]
     fn level_1b() {
+        #[allow(unused_variables)]
         let i = 1;
         let level1 = "b";
     }
@@ -48,13 +57,17 @@ mod level_0_subtests {
         use super::*;
         #[test]
         fn level_1b_2a() {
+            #[allow(unused_variables)]
             let i = 1;
+            #[allow(unused_variables)]
             let level1 = "b";
             let level2 = "1ba";
         }
         #[test]
         fn level_1b_2b() {
+            #[allow(unused_variables)]
             let i = 1;
+            #[allow(unused_variables)]
             let level1 = "b";
             let level2 = "1bb";
         }

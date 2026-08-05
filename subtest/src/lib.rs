@@ -75,14 +75,18 @@
 //!     use super::*;
 //!     #[test]
 //!     fn complete_marks_task_completed() {
+//! #        #[allow(unused_variables)]
 //!         let mut list = TodoList::new();
+//! #        #[allow(unused_variables)]
 //!         let id = list.add("Buy milk");
 //!         list.complete(id).unwrap();
 //!         assert_eq!(list.get(id).unwrap().status, TaskStatus::Completed);
 //!     }
 //!     #[test]
 //!     fn cancel_marks_task_cancelled() {
+//! #        #[allow(unused_variables)]
 //!         let mut list = TodoList::new();
+//! #        #[allow(unused_variables)]
 //!         let id = list.add("Buy milk");
 //!         list.cancel(id).unwrap();
 //!         assert_eq!(list.get(id).unwrap().status, TaskStatus::Cancelled);
@@ -145,7 +149,9 @@
 //!     use super::*;
 //!     #[test]
 //!     fn cancel_marks_task_cancelled() {
+//! #        #[allow(unused_variables)]
 //!         let mut list = TodoList::new();
+//! #        #[allow(unused_variables)]
 //!         let id = list.add("Buy milk");
 //!         list.cancel(id).unwrap();
 //!         assert_eq!(list.get(id).unwrap().status, TaskStatus::Cancelled);
@@ -154,7 +160,9 @@
 //!         use super::*;
 //!         #[test]
 //!         fn cannot_complete_already_cancelled_task() {
+//! #            #[allow(unused_variables)]
 //!             let mut list = TodoList::new();
+//! #            #[allow(unused_variables)]
 //!             let id = list.add("Buy milk");
 //!             list.cancel(id).unwrap();
 //!             assert_eq!(list.get(id).unwrap().status, TaskStatus::Cancelled);
@@ -282,8 +290,14 @@
 //!     #[rstest::rstest]
 //!     #[case::completed(TaskStatus::Completed)]
 //!     #[case::cancelled(TaskStatus::Cancelled)]
-//!     fn cannot_complete_already_finished_task(#[case] status: TaskStatus) {
+//!     fn cannot_complete_already_finished_task(
+//!         #[case]
+//! #        #[allow(unused_variables)]
+//!         status: TaskStatus,
+//!     ) {
+//! #        #[allow(unused_variables)]
 //!         let mut list = TodoList::new();
+//! #        #[allow(unused_variables)]
 //!         let id = 1;
 //!         list.tasks
 //!             .push(Task {
@@ -298,8 +312,14 @@
 //!     #[rstest::rstest]
 //!     #[case::completed(TaskStatus::Completed)]
 //!     #[case::cancelled(TaskStatus::Cancelled)]
-//!     fn cannot_cancel_already_finished_task(#[case] status: TaskStatus) {
+//!     fn cannot_cancel_already_finished_task(
+//!         #[case]
+//! #        #[allow(unused_variables)]
+//!         status: TaskStatus,
+//!     ) {
+//! #        #[allow(unused_variables)]
 //!         let mut list = TodoList::new();
+//! #        #[allow(unused_variables)]
 //!         let id = 1;
 //!         list.tasks
 //!             .push(Task {
@@ -657,6 +677,7 @@
 //!     use super::*; // <-- this causes the conflict
 //!     #[test]
 //!     fn value_can_be_received() {
+//! #        #[allow(unused_variables)]
 //!         let (sender, receiver) = std::sync::mpsc::channel();
 //!         sender.send("Hello!").unwrap();
 //!         let value = receiver.recv().unwrap();
@@ -763,60 +784,6 @@
 //!         drop(receiver); // <-- drop here to silence unused variable warning
 //!     }
 //!     ```
-//!
-//! The reverse can happen as well:
-//! If you define a variable which is only used in the parent test function, but not in nested subtests, you will also get an "unused variables" warning.
-//! Example:
-//!
-//! ```no_run
-//! # use subtest::subtest;
-//! #[subtest]
-//! #[test]
-//! fn value_can_be_sent() {
-//!     let (sender, receiver) = std::sync::mpsc::channel();
-//!     sender.send("Hello!").unwrap();
-//!
-//!     #[subtest]
-//!     fn another_value_can_be_sent() {
-//!         sender.send("Hello again!").unwrap();
-//!     }
-//!
-//!     let value = receiver.recv().unwrap(); // <-- receiver is used here, but not in the subtest above
-//!     assert_eq!(value, "Hello!");
-//! }
-//! ```
-//!
-//! will lead to
-//!
-//! ```text
-//! warning: unused variable: `receiver`
-//!   --> tests/ui/fail/readme_unused_variables_in_subtest_example.rs:10:18
-//!    |
-//! 10 |     let (sender, receiver) = std::sync::mpsc::channel();
-//!    |                  ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_receiver`
-//!    |
-//! ```
-//!
-//! The solution is to drop the variable at the end of the subtest:
-//!
-//! ```no_run
-//! # use subtest::subtest;
-//! #[subtest]
-//! #[test]
-//! fn value_can_be_sent() {
-//!     let (sender, receiver) = std::sync::mpsc::channel();
-//!     sender.send("Hello!").unwrap();
-//!
-//!     #[subtest]
-//!     fn another_value_can_be_sent() {
-//!         sender.send("Hello again!").unwrap();
-//!         drop(receiver); // <-- drop here to silence unused variable warning
-//!     }
-//!
-//!     let value = receiver.recv().unwrap();
-//!     assert_eq!(value, "Hello!");
-//! }
-//! ```
 
 use proc_macro::TokenStream;
 use subtest_impl::expand_subtest_main_fn;
