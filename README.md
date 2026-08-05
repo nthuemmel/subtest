@@ -670,7 +670,7 @@ mod value_can_be_sent_subtests {
 
 There are two possible solutions for this:
 
-* Either import the macro within the subtest itself:
+* Either import the macro within the subtest itself (or in the parent, if the parent also uses the macro or you have many subtests using it):
 
     ```rust
         #[subtest]
