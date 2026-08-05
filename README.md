@@ -436,7 +436,9 @@ Just follow these rules:
 In case you do ever forget the `#[test]` attribute, you will get a compiler error:
 
 ```text
-error: function is missing a test attribute, such as #[test], #[tokio::test] or #[rstest] - add one below #[subtest]
+error: function is missing a test attribute, such as #[test], #[tokio::test] or #[rstest]
+       add one below #[subtest] - attributes written above it are not visible to this macro
+       if this function is meant to be a nested subtest, add #[subtest] to the enclosing test function instead
  --> tests/ui/fail/missing_test_attr.rs:4:4
   |
 4 | fn parent() {

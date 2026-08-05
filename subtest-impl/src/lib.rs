@@ -163,7 +163,9 @@ impl Subtest {
         if !has_test_attr(&function) && !macro_config.allow_missing_test_attr {
             return Err(syn::Error::new_spanned(
                 function.sig.ident,
-                "function is missing a test attribute, such as #[test], #[tokio::test] or #[rstest] - add one below #[subtest]",
+                "function is missing a test attribute, such as #[test], #[tokio::test] or #[rstest]\n\
+                 add one below #[subtest] - attributes written above it are not visible to this macro\n\
+                 if this function is meant to be a nested subtest, add #[subtest] to the enclosing test function instead",
             ));
         }
 
