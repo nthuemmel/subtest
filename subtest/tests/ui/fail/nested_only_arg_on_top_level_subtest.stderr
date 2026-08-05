@@ -1,0 +1,6 @@
+error: `inherit_attributes` is only available on nested #[subtest] functions
+       a top-level test function has no parent to inherit attributes from
+ --> tests/ui/fail/nested_only_arg_on_top_level_subtest.rs:3:20
+  |
+3 | #[subtest::subtest(inherit_attributes = false)]
+  |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^

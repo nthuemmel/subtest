@@ -1,4 +1,4 @@
-use proc_macro2::{Ident, TokenStream};
+use proc_macro2::{Ident, TokenStream, TokenTree};
 use quote::{format_ident, quote};
 use syn::punctuated::Punctuated;
 use syn::visit::{self, Visit};
@@ -31,33 +31,56 @@ fn expand_subtest_main_fn_fallible(
     Ok(main_subtest.render())
 }
 
+/// Argument accepted by the `#[subtest]` attribute of a top-level test function
+const ALLOW_MISSING_TEST_ATTR_ARG: &str = "allow_missing_test_attribute";
+
+/// Argument accepted by the `#[subtest]` attribute of a nested subtest function
+const INHERIT_ATTRIBUTES_ARG: &str = "inherit_attributes";
+
+/// Whether the argument list starts with the given argument name, no matter whether it is written
+/// as a bare name or as a `<key> = <value>` pair
+fn args_start_with(args: &TokenStream, arg_name: &str) -> bool {
+    matches!(args.clone().into_iter().next(), Some(TokenTree::Ident(ident)) if ident == arg_name)
+}
+
+#[cfg_attr(test, derive(Debug))]
 struct MacroConfig {
     allow_missing_test_attr: bool,
 }
 
 impl MacroConfig {
     fn parse(args: &TokenStream) -> Result<Self, syn::Error> {
-        let allow_missing_test_attr_string = "allow_missing_test_attribute";
+        if args.is_empty() {
+            return Ok(Self {
+                allow_missing_test_attr: false,
+            });
+        }
+
+        if args_start_with(args, INHERIT_ATTRIBUTES_ARG) {
+            return Err(syn::Error::new_spanned(
+                args,
+                format!(
+                    "`{INHERIT_ATTRIBUTES_ARG}` is only available on nested #[subtest] functions\n\
+                     a top-level test function has no parent to inherit attributes from"
+                ),
+            ));
+        }
 
         if syn::parse2::<Ident>(args.clone())
             .ok()
             .map(|ident| ident.to_string())
             .as_deref()
-            == Some(allow_missing_test_attr_string)
+            == Some(ALLOW_MISSING_TEST_ATTR_ARG)
         {
-            Ok(Self {
+            return Ok(Self {
                 allow_missing_test_attr: true,
-            })
-        } else if args.is_empty() {
-            Ok(Self {
-                allow_missing_test_attr: false,
-            })
-        } else {
-            Err(syn::Error::new_spanned(
-                args,
-                format!("expected either {allow_missing_test_attr_string} or no arguments"),
-            ))
+            });
         }
+
+        Err(syn::Error::new_spanned(
+            args,
+            format!("expected either {ALLOW_MISSING_TEST_ATTR_ARG} or no arguments"),
+        ))
     }
 }
 
@@ -80,15 +103,23 @@ impl SubtestConfig {
             return Ok(Self::default());
         }
 
-        let inherit_attributes_ident = "inherit_attributes";
+        if args_start_with(args, ALLOW_MISSING_TEST_ATTR_ARG) {
+            return Err(syn::Error::new_spanned(
+                args,
+                format!(
+                    "`{ALLOW_MISSING_TEST_ATTR_ARG}` is only available on the top-level #[subtest] function\n\
+                     it applies to the whole subtest tree, so specify it on the enclosing test function instead"
+                ),
+            ));
+        }
 
         let key_value_pair: MetaNameValue = syn::parse2(args.clone())
             .map_err(|_| syn::Error::new_spanned(args, "expected '<key> = <value>' pair"))?;
 
-        if !key_value_pair.path.is_ident(inherit_attributes_ident) {
+        if !key_value_pair.path.is_ident(INHERIT_ATTRIBUTES_ARG) {
             return Err(syn::Error::new_spanned(
                 key_value_pair.path,
-                format!("expected `{inherit_attributes_ident}`"),
+                format!("expected `{INHERIT_ATTRIBUTES_ARG}`"),
             ));
         }
 
@@ -394,6 +425,15 @@ mod tests {
     use syn::parse_quote;
 
     #[test]
+    #[should_panic(
+        expected = "`inherit_attributes` is only available on nested #[subtest] functions"
+    )]
+    fn macro_config_with_nested_only_arg() {
+        let result = MacroConfig::parse(&quote! { inherit_attributes = false });
+        result.unwrap();
+    }
+
+    #[test]
     fn remove_subtest_attrs_none() {
         let input: ItemFn = parse_quote! { fn bare() {} };
         let result = remove_subtest_attrs(input.clone());
@@ -450,6 +490,19 @@ mod tests {
     fn remove_subtest_attrs_one_with_wrong_arg_type() {
         let input: ItemFn = parse_quote! {
             #[subtest = foo]
+            fn bare() {}
+        };
+        let result = remove_subtest_attrs(input.clone());
+        result.unwrap();
+    }
+
+    #[test]
+    #[should_panic(
+        expected = "`allow_missing_test_attribute` is only available on the top-level #[subtest] function"
+    )]
+    fn remove_subtest_attrs_one_with_top_level_only_arg() {
+        let input: ItemFn = parse_quote! {
+            #[subtest(allow_missing_test_attribute)]
             fn bare() {}
         };
         let result = remove_subtest_attrs(input.clone());

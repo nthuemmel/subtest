@@ -1,0 +1,6 @@
+error: `allow_missing_test_attribute` is only available on the top-level #[subtest] function
+       it applies to the whole subtest tree, so specify it on the enclosing test function instead
+ --> tests/ui/fail/top_level_only_arg_on_nested_subtest.rs:6:15
+  |
+6 |     #[subtest(allow_missing_test_attribute)]
+  |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
