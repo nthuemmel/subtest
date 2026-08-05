@@ -42,6 +42,8 @@ mod expand {
     mod readme_inheritance_example;
     mod readme_inherited_ignore_example;
     mod readme_inherited_ignore_solution;
+    mod readme_parallel_setup_solution1;
+    mod readme_parallel_setup_solution2;
     mod readme_todo_list_example;
     mod readme_unused_variables_solution;
     mod rstest_tests;

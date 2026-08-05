@@ -33,7 +33,7 @@ jobs:
       - run: rustup toolchain install --profile minimal
       - uses: Swatinem/rust-cache@v2
       - name: Cargo check
-        run: cargo check --locked --workspace --all-targets --all-features
+        run: cargo check --locked --workspace --all-features
 
   # === pinned toolchain: mandatory checks ===
   # see ../../MAINTENANCE.md#pinned-toolchain

@@ -69,7 +69,7 @@ subtest = "0.0.1"
 * This means you can freely use and mutate any local variables from the parent function in the nested function...
 * ... without affecting the parent function or sibling test functions
 * Statements *following* a nested `#[subtest]` function are **not** copied - they only run in the parent function
-* The parent function stays a test of its own, and every subtest becomes a new test - so the setup code is run once per test
+* The parent function stays a test of its own, and every subtest becomes a new test - so the setup code is run once per test (see [Setup code runs once per test, in parallel](#setup-code-runs-once-per-test-in-parallel))
 
 **The above example gets expanded to:**
 
@@ -401,6 +401,82 @@ fn value_can_be_sent_and_received() {
 ```
 
 ## Things to be aware of
+
+### Setup code runs once per test, in parallel
+
+Every subtest inherits the setup code preceding it.
+This means that the setup code runs once for the parent test, and once *again* for *every* subtest.
+Rust's test harness runs tests in parallel by default.
+
+This breaks setup code which acquires a shared resource like a fixed TCP port or a file at a fixed path.
+Example:
+
+```rust
+#[subtest]
+#[test]
+fn server_starts() {
+    let listener = std::net::TcpListener::bind("127.0.0.1:39118").unwrap(); // <-- fixed port
+    let port = listener.local_addr().unwrap().port();
+    assert_eq!(port, 39118);
+
+    #[subtest]
+    fn server_accepts_a_connection() {
+        std::net::TcpStream::connect(("127.0.0.1", port)).unwrap();
+    }
+}
+```
+
+Both tests bind the same port, if they run at the same time one fails:
+
+```text
+running 2 tests
+test server_starts ... ok
+test server_starts_subtests::server_accepts_a_connection ... FAILED
+
+failures:
+
+---- server_starts_subtests::server_accepts_a_connection stdout ----
+called `Result::unwrap()` on an `Err` value: Os { code: 98, kind: AddrInUse, message: "Address already in use" }
+```
+
+The solution is to make the setup code safe to run concurrently with itself:
+
+* prefer resources which are unique per test: port `0` (letting the OS pick a free port) instead of a fixed port or a temporary directory instead of a fixed path. Example:
+
+    ```rust
+    #[subtest]
+    #[test]
+    fn server_starts() {
+        let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap(); // <-- OS-assigned port
+        let port = listener.local_addr().unwrap().port();
+        assert_ne!(port, 0);
+
+        #[subtest]
+        fn server_accepts_a_connection() {
+            std::net::TcpStream::connect(("127.0.0.1", port)).unwrap();
+        }
+    }
+    ```
+
+* or, if the resource cannot be made unique, serialize the affected tests with a crate such as [`serial_test`](https://crates.io/crates/serial_test):
+
+    ```rust
+    #[subtest]
+    #[test]
+    #[serial] // <-- inherited by the subtest, so the two never run at the same time
+    fn server_starts() {
+        let listener = std::net::TcpListener::bind("127.0.0.1:39118").unwrap(); // <-- still a fixed port
+        let port = listener.local_addr().unwrap().port();
+        assert_eq!(port, 39118);
+
+        #[subtest]
+        fn server_accepts_a_connection() {
+            std::net::TcpStream::connect(("127.0.0.1", port)).unwrap();
+        }
+    }
+    ```
+
+* or, as a last resort, run the whole test binary single-threaded via `cargo test -- --test-threads=1`
 
 ### Do not omit test attribute altogether
 

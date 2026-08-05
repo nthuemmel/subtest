@@ -23,5 +23,6 @@ macrotest = { workspace = true }
 trybuild = { workspace = true }
 tokio = { workspace = true }
 rstest = { workspace = true }
+serial_test = { workspace = true }
 anyhow = { workspace = true }
 assert2 = { workspace = true }
