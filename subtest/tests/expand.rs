@@ -40,6 +40,8 @@ mod expand {
     mod readme_ambiguous_assert_import_solution2;
     mod readme_async_example;
     mod readme_inheritance_example;
+    mod readme_inherited_ignore_example;
+    mod readme_inherited_ignore_solution;
     mod readme_todo_list_example;
     mod readme_unused_variables_solution;
     mod rstest_tests;

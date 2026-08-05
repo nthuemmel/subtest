@@ -456,6 +456,58 @@
 //! }
 //! ```
 //!
+//! ## Attributes apply to the whole subtest tree
+//!
+//! Attribute inheritance (see [Omit, add or override attributes, parameters, return types](#omit-add-or-override-attributes-parameters-return-types)) is transitive: every attribute of a test function is passed on to its subtests, to *their* subtests, and so on.
+//! This includes `#[ignore]` and `#[should_panic]`!
+//!
+//! So marking a test `#[ignore]` ignores all nested subtests as well:
+//!
+//! ```no_run
+//! # use subtest::subtest;
+//! #[subtest]
+//! #[test]
+//! #[ignore]
+//! fn parent() {
+//!     let value = 1;
+//!     assert_eq!(value, 1);
+//!
+//!     #[subtest]
+//!     fn child() { // <-- inherits #[ignore], so it does not run either
+//!         assert_eq!(value + 1, 2);
+//!     }
+//! }
+//! ```
+//!
+//! ```text
+//! running 2 tests
+//! test parent ... ignored
+//! test parent_subtests::child ... ignored
+//! ```
+//!
+//! The same applies to `#[should_panic]`: a subtest inheriting it fails unless it panics as well.
+//!
+//! To apply an attribute to the parent only, disable attribute inheritance for the nested subtest and re-specify the attributes you do want:
+//!
+//! ```no_run
+//! # use subtest::subtest;
+//! #[subtest]
+//! #[test]
+//! #[ignore]
+//! fn parent() {
+//!     let value = 1;
+//!     assert_eq!(value, 1);
+//!
+//!     #[subtest(inherit_attributes = false)]
+//!     #[test] // <-- no longer inherited, so specify it explicitly
+//!     fn child() { // <-- runs, even though the parent is ignored
+//!         assert_eq!(value + 1, 2);
+//!     }
+//! }
+//! ```
+//!
+//! Note that this only turns off *attribute* inheritance - setup code is still inherited as usual!
+//!
 //! ## Ambiguous macro import
 //!
 //! If you happen to use `assert2`'s `assert` macro, or any other macro that has a name similar to a macro from the stdlib's auto-imported prelude, you will get a conflict compiler error when using the macro in a nested `#[subtest]`.
