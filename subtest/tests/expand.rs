@@ -45,6 +45,7 @@ mod expand {
     mod readme_parallel_setup_solution1;
     mod readme_parallel_setup_solution2;
     mod readme_todo_list_example;
+    mod readme_unused_variables_in_subtest_solution;
     mod readme_unused_variables_solution;
     mod rstest_tests;
     mod two_subtests;

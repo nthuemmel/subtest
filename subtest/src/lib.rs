@@ -709,7 +709,7 @@
 //!     # }
 //!     ```
 //!
-//! ## Unused variables in parent test function
+//! ## Unused variables
 //!
 //! If you define a variable which is only used in nested subtests, but not in the parent test function, you will get an "unused variables" warning.
 //! Example:
@@ -724,7 +724,7 @@
 //!
 //!     #[subtest]
 //!     fn value_can_be_received() {
-//!         let value = receiver.recv().unwrap();
+//!         let value = receiver.recv().unwrap(); // <-- receiver is used here, but not in the parent
 //!         assert_eq!(value, "Hello!");
 //!     }
 //! }
@@ -760,9 +760,63 @@
 //!             assert_eq!(value, "Hello!");
 //!         }
 //!   
-//!         drop(receiver);
+//!         drop(receiver); // <-- drop here to silence unused variable warning
 //!     }
 //!     ```
+//!
+//! The reverse can happen as well:
+//! If you define a variable which is only used in the parent test function, but not in nested subtests, you will also get an "unused variables" warning.
+//! Example:
+//!
+//! ```no_run
+//! # use subtest::subtest;
+//! #[subtest]
+//! #[test]
+//! fn value_can_be_sent() {
+//!     let (sender, receiver) = std::sync::mpsc::channel();
+//!     sender.send("Hello!").unwrap();
+//!
+//!     #[subtest]
+//!     fn another_value_can_be_sent() {
+//!         sender.send("Hello again!").unwrap();
+//!     }
+//!
+//!     let value = receiver.recv().unwrap(); // <-- receiver is used here, but not in the subtest above
+//!     assert_eq!(value, "Hello!");
+//! }
+//! ```
+//!
+//! will lead to
+//!
+//! ```text
+//! warning: unused variable: `receiver`
+//!   --> tests/ui/fail/readme_unused_variables_in_subtest_example.rs:10:18
+//!    |
+//! 10 |     let (sender, receiver) = std::sync::mpsc::channel();
+//!    |                  ^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_receiver`
+//!    |
+//! ```
+//!
+//! The solution is to drop the variable at the end of the subtest:
+//!
+//! ```no_run
+//! # use subtest::subtest;
+//! #[subtest]
+//! #[test]
+//! fn value_can_be_sent() {
+//!     let (sender, receiver) = std::sync::mpsc::channel();
+//!     sender.send("Hello!").unwrap();
+//!
+//!     #[subtest]
+//!     fn another_value_can_be_sent() {
+//!         sender.send("Hello again!").unwrap();
+//!         drop(receiver); // <-- drop here to silence unused variable warning
+//!     }
+//!
+//!     let value = receiver.recv().unwrap();
+//!     assert_eq!(value, "Hello!");
+//! }
+//! ```
 
 use proc_macro::TokenStream;
 use subtest_impl::expand_subtest_main_fn;
