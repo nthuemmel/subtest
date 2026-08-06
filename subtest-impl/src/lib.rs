@@ -3,8 +3,7 @@ mod config;
 mod unused_variables;
 
 use crate::attribute_parser::{
-    check_for_misplaced_subtests, has_test_attr, is_doc_attr, remove_line_count_expectation,
-    remove_subtest_attrs,
+    check_for_misplaced_subtests, has_test_attr, inheritable_attributes, remove_subtest_attrs,
 };
 use crate::unused_variables::{mask_unused_parameters, mask_unused_variables};
 use attribute_parser::RemovedSubtestAttrs;
@@ -114,12 +113,7 @@ impl Subtest {
         let mut subtests = Vec::new();
 
         // Doc comments describe the function they are written on, so they are not passed down
-        let inheritable_attrs: Vec<Attribute> = function
-            .attrs
-            .iter()
-            .filter(|attr| !is_doc_attr(attr))
-            .filter_map(remove_line_count_expectation)
-            .collect();
+        let inheritable_attrs = inheritable_attributes(function.attrs.clone());
 
         for statement in input_fn.block.stmts {
             let statement = match statement {

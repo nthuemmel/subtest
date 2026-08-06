@@ -17,17 +17,27 @@ pub fn has_test_attr(item_fn: &ItemFn) -> bool {
     })
 }
 
+/// Return only the attributes from the given list of `attributes` that a nested subtest can
+/// inherit
+pub fn inheritable_attributes(attributes: Vec<Attribute>) -> Vec<Attribute> {
+    attributes
+        .into_iter()
+        // Doc comments describe the function they are written on, so they are not passed down
+        .filter(|attr| !is_doc_attr(attr))
+        // Drop `#[expect(clippy::too_many_lines)]` from the attributes a nested subtest inherits.
+        // This lint misfires when the subtest is shorter than the parent. Inherited lines don't
+        // count against the lint
+        .filter_map(remove_line_count_expectation)
+        .collect()
+}
+
 /// Whether an attribute is a doc comment (or an equivalent `#[doc = "..."]` attribute)
-pub fn is_doc_attr(attr: &Attribute) -> bool {
+fn is_doc_attr(attr: &Attribute) -> bool {
     attr.meta.path().is_ident("doc")
 }
 
-/// Drop `#[expect(clippy::too_many_lines)]` from the attributes a nested subtest inherits.
-/// This lint misfires when the subtest is shorter than the parent. Inherited lines don't count
-/// against the lint.
-pub fn remove_line_count_expectation(attr: &Attribute) -> Option<Attribute> {
-    let mut attr = attr.clone();
-
+/// Drop `#[expect(clippy::too_many_lines)]` from the attribute
+fn remove_line_count_expectation(mut attr: Attribute) -> Option<Attribute> {
     if !attr.meta.path().is_ident("expect") {
         return Some(attr);
     }
@@ -189,25 +199,25 @@ mod tests {
     #[test]
     fn keep_expectation_of_other_lints() {
         let attr: Attribute = parse_quote!(#[expect(unused_variables)]);
-        assert_eq!(remove_line_count_expectation(&attr), Some(attr));
+        assert_eq!(remove_line_count_expectation(attr.clone()), Some(attr));
     }
 
     #[test]
     fn keep_allowance_of_the_line_count_lint() {
         let attr: Attribute = parse_quote!(#[allow(clippy::too_many_lines)]);
-        assert_eq!(remove_line_count_expectation(&attr), Some(attr));
+        assert_eq!(remove_line_count_expectation(attr.clone()), Some(attr));
     }
 
     #[test]
     fn remove_expectation_of_the_line_count_lint() {
         let attr: Attribute = parse_quote!(#[expect(clippy::too_many_lines)]);
-        assert_eq!(remove_line_count_expectation(&attr), None);
+        assert_eq!(remove_line_count_expectation(attr), None);
     }
 
     #[test]
     fn remove_expectation_of_the_line_count_lint_with_a_reason() {
         let attr: Attribute = parse_quote!(#[expect(clippy::too_many_lines, reason = "long")]);
-        assert_eq!(remove_line_count_expectation(&attr), None);
+        assert_eq!(remove_line_count_expectation(attr), None);
     }
 
     #[test]
@@ -216,7 +226,7 @@ mod tests {
             parse_quote!(#[expect(unused_variables, clippy::too_many_lines, reason = "long")]);
 
         assert_eq!(
-            remove_line_count_expectation(&attr),
+            remove_line_count_expectation(attr),
             Some(parse_quote!(#[expect(unused_variables, reason = "long")]))
         );
     }
