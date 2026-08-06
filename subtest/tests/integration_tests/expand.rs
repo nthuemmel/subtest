@@ -20,6 +20,7 @@ pub fn test_snapshots() {
 // Also actually run the tests for which we do snapshot testing above
 mod async_tests;
 mod doc_comments;
+mod failing_subtest;
 mod helper_fn;
 mod helper_fn_attrs;
 #[deny(
