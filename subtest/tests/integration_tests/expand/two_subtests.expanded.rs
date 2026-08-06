@@ -1,35 +1,29 @@
 extern crate test;
-#[rustc_test_marker = "helper_fn"]
+#[rustc_test_marker = "two_subtests"]
 #[doc(hidden)]
-pub const helper_fn: test::TestDescAndFn = test::TestDescAndFn {
+pub const two_subtests: test::TestDescAndFn = test::TestDescAndFn {
     desc: test::TestDesc {
-        name: test::StaticTestName("helper_fn"),
+        name: test::StaticTestName("two_subtests"),
         ignore: false,
         ignore_message: ::core::option::Option::None,
-        source_file: "./tests/expand/helper_fn.rs",
+        source_file: "./tests/integration_tests/expand/two_subtests.rs",
         start_line: 3usize,
         start_col: 4usize,
         end_line: 3usize,
-        end_col: 13usize,
+        end_col: 16usize,
         compile_fail: false,
         no_run: false,
         should_panic: test::ShouldPanic::No,
         test_type: test::TestType::Unknown,
     },
-    testfn: test::StaticTestFn(#[coverage(off)] || test::assert_test_result(helper_fn())),
+    testfn: test::StaticTestFn(
+        #[coverage(off)]
+        || test::assert_test_result(two_subtests()),
+    ),
 };
-fn helper_fn() {
-    fn double(value: u32) -> u32 {
-        value * 2
-    }
-    let local_var = double(1);
-    /// Helper functions may carry doc comments as well as lint & configuration attributes
-    #[allow(dead_code)]
-    fn noop() {}
-    fn triple(value: u32) -> u32 {
-        value * 3
-    }
-    match (&triple(local_var), &6) {
+fn two_subtests() {
+    let i = 1;
+    match (&i, &1) {
         (left_val, right_val) => {
             if !(*left_val == *right_val) {
                 let kind = ::core::panicking::AssertKind::Eq;
@@ -43,38 +37,46 @@ fn helper_fn() {
         }
     };
 }
-mod helper_fn_subtests {
+mod two_subtests_subtests {
     use super::*;
     extern crate test;
-    #[rustc_test_marker = "helper_fn_subtests::sees_preceding_helper"]
+    #[rustc_test_marker = "two_subtests_subtests::add"]
     #[doc(hidden)]
-    pub const sees_preceding_helper: test::TestDescAndFn = test::TestDescAndFn {
+    pub const add: test::TestDescAndFn = test::TestDescAndFn {
         desc: test::TestDesc {
-            name: test::StaticTestName("helper_fn_subtests::sees_preceding_helper"),
+            name: test::StaticTestName("two_subtests_subtests::add"),
             ignore: false,
             ignore_message: ::core::option::Option::None,
-            source_file: "./tests/expand/helper_fn.rs",
-            start_line: 11usize,
+            source_file: "./tests/integration_tests/expand/two_subtests.rs",
+            start_line: 8usize,
             start_col: 8usize,
-            end_line: 11usize,
-            end_col: 29usize,
+            end_line: 8usize,
+            end_col: 11usize,
             compile_fail: false,
             no_run: false,
             should_panic: test::ShouldPanic::No,
             test_type: test::TestType::Unknown,
         },
-        testfn: test::StaticTestFn(
-            #[coverage(off)]
-            || test::assert_test_result(sees_preceding_helper()),
-        ),
+        testfn: test::StaticTestFn(#[coverage(off)] || test::assert_test_result(add())),
     };
-    fn sees_preceding_helper() {
-        fn double(value: u32) -> u32 {
-            value * 2
-        }
+    fn add() {
         #[allow(unused_variables)]
-        let local_var = double(1);
-        match (&double(local_var), &4) {
+        let i = 1;
+        match (&i, &1) {
+            (left_val, right_val) => {
+                if !(*left_val == *right_val) {
+                    let kind = ::core::panicking::AssertKind::Eq;
+                    ::core::panicking::assert_failed(
+                        kind,
+                        &*left_val,
+                        &*right_val,
+                        ::core::option::Option::None,
+                    );
+                }
+            }
+        };
+        let i = i + 1;
+        match (&i, &2) {
             (left_val, right_val) => {
                 if !(*left_val == *right_val) {
                     let kind = ::core::panicking::AssertKind::Eq;
@@ -89,18 +91,18 @@ mod helper_fn_subtests {
         };
     }
     extern crate test;
-    #[rustc_test_marker = "helper_fn_subtests::sees_all_preceding_helpers"]
+    #[rustc_test_marker = "two_subtests_subtests::subtract"]
     #[doc(hidden)]
-    pub const sees_all_preceding_helpers: test::TestDescAndFn = test::TestDescAndFn {
+    pub const subtract: test::TestDescAndFn = test::TestDescAndFn {
         desc: test::TestDesc {
-            name: test::StaticTestName("helper_fn_subtests::sees_all_preceding_helpers"),
+            name: test::StaticTestName("two_subtests_subtests::subtract"),
             ignore: false,
             ignore_message: ::core::option::Option::None,
-            source_file: "./tests/expand/helper_fn.rs",
-            start_line: 20usize,
+            source_file: "./tests/integration_tests/expand/two_subtests.rs",
+            start_line: 14usize,
             start_col: 8usize,
-            end_line: 20usize,
-            end_col: 34usize,
+            end_line: 14usize,
+            end_col: 16usize,
             compile_fail: false,
             no_run: false,
             should_panic: test::ShouldPanic::No,
@@ -108,20 +110,27 @@ mod helper_fn_subtests {
         },
         testfn: test::StaticTestFn(
             #[coverage(off)]
-            || test::assert_test_result(sees_all_preceding_helpers()),
+            || test::assert_test_result(subtract()),
         ),
     };
-    fn sees_all_preceding_helpers() {
-        fn double(value: u32) -> u32 {
-            value * 2
-        }
+    fn subtract() {
         #[allow(unused_variables)]
-        let local_var = double(1);
-        /// Helper functions may carry doc comments as well as lint & configuration attributes
-        #[allow(dead_code)]
-        fn noop() {}
-        noop();
-        match (&double(local_var), &4) {
+        let i = 1;
+        match (&i, &1) {
+            (left_val, right_val) => {
+                if !(*left_val == *right_val) {
+                    let kind = ::core::panicking::AssertKind::Eq;
+                    ::core::panicking::assert_failed(
+                        kind,
+                        &*left_val,
+                        &*right_val,
+                        ::core::option::Option::None,
+                    );
+                }
+            }
+        };
+        let i = i - 1;
+        match (&i, &0) {
             (left_val, right_val) => {
                 if !(*left_val == *right_val) {
                     let kind = ::core::panicking::AssertKind::Eq;
@@ -141,7 +150,5 @@ mod helper_fn_subtests {
 #[doc(hidden)]
 pub fn main() -> () {
     extern crate test;
-    test::test_main_static(
-        &[&helper_fn, &sees_all_preceding_helpers, &sees_preceding_helper],
-    )
+    test::test_main_static(&[&two_subtests, &add, &subtract])
 }

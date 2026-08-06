@@ -46,7 +46,7 @@ fn add_creates_pending_task() {
 }
 ```
 
-([Link to full example](https://github.com/nthuemmel/subtest/blob/master/subtest/tests/expand/readme_todo_list_example.rs))
+([Link to full example](https://github.com/nthuemmel/subtest/blob/master/subtest/tests/integration_tests/expand/readme_todo_list_example.rs))
 
 ## Installation
 

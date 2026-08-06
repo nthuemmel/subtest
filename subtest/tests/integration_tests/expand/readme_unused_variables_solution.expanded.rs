@@ -7,7 +7,7 @@ pub const value_can_be_sent: test::TestDescAndFn = test::TestDescAndFn {
         name: test::StaticTestName("value_can_be_sent"),
         ignore: false,
         ignore_message: ::core::option::Option::None,
-        source_file: "./tests/expand/readme_ambiguous_assert_import_solution1.rs",
+        source_file: "./tests/integration_tests/expand/readme_unused_variables_solution.rs",
         start_line: 5usize,
         start_col: 4usize,
         end_line: 5usize,
@@ -39,7 +39,7 @@ mod value_can_be_sent_subtests {
             ),
             ignore: false,
             ignore_message: ::core::option::Option::None,
-            source_file: "./tests/expand/readme_ambiguous_assert_import_solution1.rs",
+            source_file: "./tests/integration_tests/expand/readme_unused_variables_solution.rs",
             start_line: 10usize,
             start_col: 8usize,
             end_line: 10usize,
@@ -58,50 +58,18 @@ mod value_can_be_sent_subtests {
         #[allow(unused_variables)]
         let (sender, receiver) = std::sync::mpsc::channel();
         sender.send("Hello!").unwrap();
-        use assert2::assert;
         let value = receiver.recv().unwrap();
-        match match (&(value), &("Hello!")) {
-            (left, right) if !(left == right) => {
-                use ::assert2::__assert2_impl::maybe_debug::{IsDebug, IsMaybeNotDebug};
-                let left = (&&::assert2::__assert2_impl::maybe_debug::Wrap(left))
-                    .__assert2_maybe_debug()
-                    .wrap(left);
-                let right = (&&::assert2::__assert2_impl::maybe_debug::Wrap(right))
-                    .__assert2_maybe_debug()
-                    .wrap(right);
-                ::assert2::__assert2_impl::print::FailedCheck {
-                    macro_name: "assert",
-                    file: "./tests/expand/readme_ambiguous_assert_import_solution1.rs",
-                    line: 13u32,
-                    column: 9u32,
-                    predicates: &[
-                        (
-                            "",
-                            ::assert2::__assert2_impl::print::Predicate::Binary {
-                                left: "value",
-                                operator: "==",
-                                right: "\"Hello!\"",
-                            },
-                        ),
-                    ],
-                    multiline: false,
-                    failed: 0usize,
-                    expansion: ::assert2::__assert2_impl::print::Expansion::Binary {
-                        left: (&left as &dyn ::core::fmt::Debug),
-                        right: (&right as &dyn ::core::fmt::Debug),
-                        operator: "==",
-                    },
-                    fragments: &[],
-                    custom_msg: ::core::option::Option::None,
+        match (&value, &"Hello!") {
+            (left_val, right_val) => {
+                if !(*left_val == *right_val) {
+                    let kind = ::core::panicking::AssertKind::Eq;
+                    ::core::panicking::assert_failed(
+                        kind,
+                        &*left_val,
+                        &*right_val,
+                        ::core::option::Option::None,
+                    );
                 }
-                    .print();
-                ::core::result::Result::Err(())
-            }
-            _ => ::core::result::Result::Ok::<(), ()>(()),
-        } {
-            ::core::result::Result::Ok(()) => {}
-            ::core::result::Result::Err(()) => {
-                ::core::panicking::panic_fmt(format_args!("assertion failed"));
             }
         };
     }

@@ -8,7 +8,7 @@ pub const value_can_be_sent: test::TestDescAndFn = test::TestDescAndFn {
         name: test::StaticTestName("value_can_be_sent"),
         ignore: false,
         ignore_message: ::core::option::Option::None,
-        source_file: "./tests/expand/readme_ambiguous_assert_import_solution2.rs",
+        source_file: "./tests/integration_tests/expand/readme_ambiguous_assert_import_solution2.rs",
         start_line: 6usize,
         start_col: 4usize,
         end_line: 6usize,
@@ -40,7 +40,7 @@ mod value_can_be_sent_subtests {
             ),
             ignore: false,
             ignore_message: ::core::option::Option::None,
-            source_file: "./tests/expand/readme_ambiguous_assert_import_solution2.rs",
+            source_file: "./tests/integration_tests/expand/readme_ambiguous_assert_import_solution2.rs",
             start_line: 11usize,
             start_col: 8usize,
             end_line: 11usize,
@@ -71,7 +71,7 @@ mod value_can_be_sent_subtests {
                     .wrap(right);
                 ::assert2::__assert2_impl::print::FailedCheck {
                     macro_name: "assert",
-                    file: "./tests/expand/readme_ambiguous_assert_import_solution2.rs",
+                    file: "./tests/integration_tests/expand/readme_ambiguous_assert_import_solution2.rs",
                     line: 13u32,
                     column: 9u32,
                     predicates: &[

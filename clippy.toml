@@ -1,5 +1,5 @@
 # `clippy::too_many_lines` is a pedantic lint, and is only enabled for the test fixture which makes
 # sure that an `#[expect(clippy::too_many_lines)]` is not inherited by nested subtests
-# (see `mod too_many_lines_expectation` in subtest/tests/expand.rs).
+# (see `mod too_many_lines_expectation` in subtest/tests/integration_tests/expand.rs).
 # A low threshold keeps that fixture short enough to read.
 too-many-lines-threshold = 10

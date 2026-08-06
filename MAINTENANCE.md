@@ -22,10 +22,10 @@ This repository contains 4 testing strategies:
    * Cannot properly test attributes passed to the outermost `#[subtest]` macro, as those attributes are passed by the compiler itself during macro expansion
 2. Snapshot-based testing on macro error messages (so-called UI tests), using [trybuild](https://github.com/dtolnay/trybuild). Fixtures live in [subtest/tests/ui/fail/](subtest/tests/ui/fail), inputs are the `*.rs` files, expected outputs the `*.stderr` files.
    * Makes sure that you get sensible error messages when using the macro in a wrong way
-3. Snapshot-based testing on the output of macro expansion, using [macrotest](https://github.com/eupn/macrotest). Fixtures live in [subtest/tests/expand/](subtest/tests/expand), inputs are the `*.rs` files, expected outputs the `*.expanded.rs` files.
+3. Snapshot-based testing on the output of macro expansion, using [macrotest](https://github.com/eupn/macrotest). Fixtures live in [subtest/tests/integration_tests/expand/](subtest/tests/integration_tests/expand), inputs are the `*.rs` files, expected outputs the `*.expanded.rs` files.
    * Makes sure that the macro expansion is correct when driven by the compiler, and attributes passed to the outermost `#[subtest]` macro are handled correctly (which (1.) cannot do)
    * Outputs are not very readable, brittle, and compiler-version-dependent 
-4. Running inputs of the macro expansion tests as integration tests. Those inputs live in [subtest/tests/expand/](subtest/tests/expand), and are pulled in as submodules in [subtest/tests/expand.rs](subtest/tests/expand.rs).
+4. Running inputs of the macro expansion tests as integration tests. Those inputs live in [subtest/tests/integration_tests/expand/](subtest/tests/integration_tests/expand), and are pulled in as submodules of the `expand` module in [subtest/tests/integration_tests/expand.rs](subtest/tests/integration_tests/expand.rs).
    * Makes sure the expanded macro results can actually run
    * Also useful for manual sanity checks (view the list of generated test cases in your IDE)
 
