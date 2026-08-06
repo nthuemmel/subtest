@@ -445,6 +445,101 @@
 //!
 //! # Things to be aware of
 //!
+//! ## Attribute inheritance exceptions
+//!
+//! Attribute inheritance is transitive: every attribute of a test function is passed on to its subtests, to *their* subtests, and so on.
+//!
+//! There are three exceptions:
+//!
+//! * `#[ignore]` and `#[should_panic]` are **not** passed down
+//! * Doc comments are not passed down
+//! * An `#[expect(<lint>)]` is passed down as an `#[allow(<lint>)]`, so that it is not reported as unfulfilled in a subtest which does not happen to trigger the lint
+//!
+//! So marking a test `#[ignore]` does not ignore its subtests:
+//!
+//! ```no_run
+//! # use subtest::subtest;
+//! #[subtest]
+//! #[test]
+//! #[ignore]
+//! fn parent() {
+//!     let value = 1;
+//!     assert_eq!(value, 1);
+//!
+//!     #[subtest]
+//!     fn child() { // <-- runs, even though the parent is ignored
+//!         assert_eq!(value + 1, 2);
+//!     }
+//! }
+//! ```
+//!
+//! ```text
+//! running 2 tests
+//! test parent ... ignored
+//! test parent_subtests::child ... ok
+//! ```
+//!
+//! To ignore the subtests as well, mark each of them `#[ignore]` too.
+//!
+//! For any *other* attribute, to apply it to the parent only, disable attribute inheritance on the nested subtest with `#[subtest(inherit_attributes = false)]` and re-specify the attributes you do want - including the test attribute.
+//! Note that this only turns off *attribute* inheritance - setup code is still inherited as usual!
+//!
+//! ## Do not omit test attribute altogether
+//!
+//! Even when using `#[subtest]`, you still have to specify an "actual" test attribute - typically `#[test]`, or alternatively `#[tokio::test]` or `#[rstest]` (or whatever testing framework you intend to use) - at least for the top-level test function:
+//!
+//! ```no_run
+//! # use subtest::subtest;
+//! #[subtest]
+//! #[test] // <-- Do not omit this!
+//! fn top_level() {
+//!     // ...
+//!
+//!     #[subtest] // <-- here it is fine to omit #[test], since it is inherited
+//!     #[should_panic]
+//!     fn adds_attributes() {
+//!         // ...
+//!     }
+//!
+//!     #[subtest(inherit_attributes = false)]
+//!     #[tokio::test] // <-- make sure to include a test attribute when disabling attribute inheritance
+//!     async fn overrides_attributes() {
+//!         // ...
+//!     }
+//! }
+//! ```
+//!
+//! Just follow these rules:
+//!
+//! * If it is a top-level function with a `#[subtest]` attribute: **Specify a `#[test]` attribute as well!**
+//! * If it is a nested function with a `#[subtest]` attribute (and optionally more attributes like `#[should_panic]`): You can omit the `#[test]` attribute, it is inherited (see [Omit, add or override attributes, parameters, return types](#omit-add-or-override-attributes-parameters-return-types))
+//! * If it is a nested function with a `#[subtest(inherit_attributes = false)]` attribute: **Specify a `#[test]` attribute as well!**
+//! * Always put other attributes **after** `#[subtest]`
+//!
+//! In case you do ever forget the `#[test]` attribute, you will get a compiler error:
+//!
+//! ```text
+//! error: function is missing a test attribute, such as #[test], #[tokio::test] or #[rstest]
+//!        add one below #[subtest] - attributes written above it are not visible to this macro
+//!        if this function is meant to be a nested subtest, add #[subtest] to the enclosing test function instead
+//!  --> tests/ui/fail/missing_test_attr.rs:4:4
+//!   |
+//! 4 | fn parent() {
+//!   |    ^^^^^^
+//! ```
+//!
+//! `subtest` determines test attributes by checking whether they end with `test`.
+//! If your test attribute of choice does not, you can opt out of the check via:
+//!
+//! ```
+//! # use subtest::subtest;
+//! #[subtest(allow_missing_test_attribute)]
+//! // your weirdly-named test attribute goes here!
+//! fn top_level() {
+//!     // ...
+//! }
+//! ```
+//!
 //! ## Setup code runs once per test, in parallel
 //!
 //! Every subtest inherits the setup code preceding it.
@@ -524,101 +619,6 @@
 //!     ```
 //!
 //! * or, as a last resort, run the whole test binary single-threaded via `cargo test -- --test-threads=1`
-//!
-//! ## Do not omit test attribute altogether
-//!
-//! Even when using `#[subtest]`, you still have to specify an "actual" test attribute - typically `#[test]`, or alternatively `#[tokio::test]` or `#[rstest]` (or whatever testing framework you intend to use) - at least for the top-level test function:
-//!
-//! ```no_run
-//! # use subtest::subtest;
-//! #[subtest]
-//! #[test] // <-- Do not omit this!
-//! fn top_level() {
-//!     // ...
-//!
-//!     #[subtest] // <-- here it is fine to omit #[test], since it is inherited
-//!     #[should_panic]
-//!     fn adds_attributes() {
-//!         // ...
-//!     }
-//!
-//!     #[subtest(inherit_attributes = false)]
-//!     #[tokio::test] // <-- make sure to include a test attribute when disabling attribute inheritance
-//!     async fn overrides_attributes() {
-//!         // ...
-//!     }
-//! }
-//! ```
-//!
-//! Just follow these rules:
-//!
-//! * If it is a top-level function with a `#[subtest]` attribute: **Specify a `#[test]` attribute as well!**
-//! * If it is a nested function with a `#[subtest]` attribute (and optionally more attributes like `#[should_panic]`): You can omit the `#[test]` attribute, it is inherited (see [Omit, add or override attributes, parameters, return types](#omit-add-or-override-attributes-parameters-return-types))
-//! * If it is a nested function with a `#[subtest(inherit_attributes = false)]` attribute: **Specify a `#[test]` attribute as well!**
-//! * Always put other attributes **after** `#[subtest]`
-//!
-//! In case you do ever forget the `#[test]` attribute, you will get a compiler error:
-//!
-//! ```text
-//! error: function is missing a test attribute, such as #[test], #[tokio::test] or #[rstest]
-//!        add one below #[subtest] - attributes written above it are not visible to this macro
-//!        if this function is meant to be a nested subtest, add #[subtest] to the enclosing test function instead
-//!  --> tests/ui/fail/missing_test_attr.rs:4:4
-//!   |
-//! 4 | fn parent() {
-//!   |    ^^^^^^
-//! ```
-//!
-//! `subtest` determines test attributes by checking whether they end with `test`.
-//! If your test attribute of choice does not, you can opt out of the check via:
-//!
-//! ```
-//! # use subtest::subtest;
-//! #[subtest(allow_missing_test_attribute)]
-//! // your weirdly-named test attribute goes here!
-//! fn top_level() {
-//!     // ...
-//! }
-//! ```
-//!
-//! ## Attribute inheritance exceptions
-//!
-//! Attribute inheritance (see [Omit, add or override attributes, parameters, return types](#omit-add-or-override-attributes-parameters-return-types)) is transitive: every attribute of a test function is passed on to its subtests, to *their* subtests, and so on.
-//!
-//! There are three exceptions:
-//!
-//! * `#[ignore]` and `#[should_panic]` are **not** passed down
-//! * Doc comments are not passed down
-//! * An `#[expect(<lint>)]` is passed down as an `#[allow(<lint>)]`, so that it is not reported as unfulfilled in a subtest which does not happen to trigger the lint
-//!
-//! So marking a test `#[ignore]` does not ignore its subtests:
-//!
-//! ```no_run
-//! # use subtest::subtest;
-//! #[subtest]
-//! #[test]
-//! #[ignore]
-//! fn parent() {
-//!     let value = 1;
-//!     assert_eq!(value, 1);
-//!
-//!     #[subtest]
-//!     fn child() { // <-- runs, even though the parent is ignored
-//!         assert_eq!(value + 1, 2);
-//!     }
-//! }
-//! ```
-//!
-//! ```text
-//! running 2 tests
-//! test parent ... ignored
-//! test parent_subtests::child ... ok
-//! ```
-//!
-//! To ignore the subtests as well, mark each of them `#[ignore]` too.
-//!
-//! For any *other* attribute, to apply it to the parent only, disable attribute inheritance on the nested subtest with `#[subtest(inherit_attributes = false)]` and re-specify the attributes you do want - including the test attribute.
-//! Note that this only turns off *attribute* inheritance - setup code is still inherited as usual!
 //!
 //! ## Ambiguous macro import
 //!
