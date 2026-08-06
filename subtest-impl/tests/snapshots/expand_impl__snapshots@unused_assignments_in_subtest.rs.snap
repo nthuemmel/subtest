@@ -1,0 +1,60 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/unused_assignments_in_subtest.rs
+---
+#[test]
+fn values_are_assigned() {
+    let deferred;
+    deferred = "a";
+    let nested;
+    {
+        nested = "b";
+    }
+    let branched;
+    if deferred == "a" {
+        branched = "c";
+    } else {
+        branched = "d";
+    }
+    let mut counter = 0;
+    counter += 1;
+    assert_eq!((deferred, nested, branched, counter), ("a", "b", "c", 1));
+}
+mod values_are_assigned_subtests {
+    use super::*;
+    #[test]
+    fn subtest_reads_none_of_them() {
+        #[allow(unused_variables)]
+        let deferred;
+        #[allow(unused_assignments)]
+        {
+            deferred = "a";
+        }
+        #[allow(unused_variables)]
+        let nested;
+        #[allow(unused_assignments)]
+        {
+            {
+                nested = "b";
+            };
+        }
+        #[allow(unused_variables)]
+        let branched;
+        #[allow(unused_assignments)]
+        {
+            if deferred == "a" {
+                branched = "c";
+            } else {
+                branched = "d";
+            };
+        }
+        #[allow(unused_variables)]
+        let mut counter = 0;
+        #[allow(unused_assignments)]
+        {
+            counter += 1;
+        }
+        assert_eq!(1 + 1, 2);
+    }
+}

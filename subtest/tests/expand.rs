@@ -49,6 +49,17 @@ mod expand {
     mod rstest_tests;
     mod two_subtests;
     #[deny(
+        unused_assignments,
+        reason = "values assigned in the parent test function must not be reported as never read \
+                  in a subtest which does not read them"
+    )]
+    #[allow(
+        clippy::needless_late_init,
+        reason = "the fixture declares variables without a value on purpose - that is what makes \
+                  the inherited statements assignments in the first place"
+    )]
+    mod unused_assignments_in_subtest;
+    #[deny(
         unused_variables,
         reason = "variables inherited from the parent test function must not be reported as \
                   unused in a subtest which does not use them"
