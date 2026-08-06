@@ -46,11 +46,10 @@ mod readme_ambiguous_assert_import_solution1;
 mod readme_ambiguous_assert_import_solution2;
 mod readme_async_example;
 mod readme_inheritance_example;
-mod readme_inherited_ignore_example;
-mod readme_inherited_ignore_solution;
 mod readme_parallel_setup_solution1;
 mod readme_parallel_setup_solution2;
 mod readme_todo_list_example;
+mod readme_uninherited_ignore_example;
 mod readme_unused_variables_solution;
 mod rstest_tests;
 #[deny(
@@ -65,6 +64,7 @@ mod rstest_tests;
 )]
 mod too_many_lines_expectation;
 mod two_subtests;
+mod uninherited_test_attrs;
 #[deny(
     unused_assignments,
     reason = "values assigned in the parent test function must not be reported as never read \

@@ -23,6 +23,8 @@ pub fn inheritable_attributes(attributes: Vec<Attribute>) -> Vec<Attribute> {
         .into_iter()
         // Doc comments describe the function they are written on, so they are not passed down
         .filter(|attr| !is_doc_attr(attr))
+        // Neither is an attribute describing that function's own outcome
+        .filter(|attr| !is_test_outcome_attr(attr))
         // Pass an `#[expect(...)]` down to nested subtests as an `#[allow(...)]`.
         // `#[expect]` may misfire on nested subtests if the expected thing only happens in the
         // parent and is not inherited
@@ -33,6 +35,13 @@ pub fn inheritable_attributes(attributes: Vec<Attribute>) -> Vec<Attribute> {
 /// Whether an attribute is a doc comment (or an equivalent `#[doc = "..."]` attribute)
 fn is_doc_attr(attr: &Attribute) -> bool {
     attr.meta.path().is_ident("doc")
+}
+
+/// Whether an attribute states the outcome expected of the test function it is written on, such as
+/// `#[ignore]` and `#[should_panic]`
+fn is_test_outcome_attr(attr: &Attribute) -> bool {
+    let path = attr.meta.path();
+    path.is_ident("ignore") || path.is_ident("should_panic")
 }
 
 fn downgrade_expect_to_allow(mut attr: Attribute) -> Attribute {
@@ -182,12 +191,27 @@ mod tests {
     }
 
     #[test]
-    fn inheritable_attributes_keep_other_attributes() {
+    fn inheritable_attributes_drop_test_outcome_attributes() {
         let attributes: Vec<Attribute> = vec![
             parse_quote!(#[test]),
             parse_quote!(#[ignore]),
-            parse_quote!(#[allow(clippy::too_many_lines)]),
+            parse_quote!(#[ignore = "a reason"]),
+            parse_quote!(#[should_panic]),
             parse_quote!(#[should_panic(expected = "boom")]),
+        ];
+
+        let expected: Vec<Attribute> = vec![parse_quote!(#[test])];
+
+        assert_eq!(inheritable_attributes(attributes), expected);
+    }
+
+    #[test]
+    fn inheritable_attributes_keep_other_attributes() {
+        let attributes: Vec<Attribute> = vec![
+            parse_quote!(#[test]),
+            parse_quote!(#[allow(clippy::too_many_lines)]),
+            parse_quote!(#[track_caller]),
+            parse_quote!(#[cfg(unix)]),
         ];
 
         assert_eq!(inheritable_attributes(attributes.clone()), attributes);

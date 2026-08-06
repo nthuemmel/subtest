@@ -35,7 +35,6 @@ fn a_test_function_with_a_subtest_returning_an_error() -> Result<(), String> {
     Ok(())
 }
 
-// The whole test function is ignored, which its subtest inherits.
 #[subtest]
 #[test]
 #[ignore = "fails on purpose, run in a child process by tests/integration_tests/run.rs"]

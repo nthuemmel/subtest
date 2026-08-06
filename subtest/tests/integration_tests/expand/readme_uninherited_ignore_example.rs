@@ -9,7 +9,7 @@ fn parent() {
 
     #[subtest]
     fn child() {
-        // <-- inherits #[ignore], so it does not run either
+        // <-- runs, even though the parent is ignored
         assert_eq!(value + 1, 2);
     }
 }

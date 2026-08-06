@@ -4,13 +4,13 @@ expression: macro_output
 input_file: subtest-impl/tests/expand_impl/doc_comment_inheritance.rs
 ---
 #[test]
-#[should_panic(expected = "my failure")]
+#[allow(clippy::eq_op)]
 /// Documents the parent test fn.
 fn parent() {}
 mod parent_subtests {
     use super::*;
     #[test]
-    #[should_panic(expected = "my failure")]
+    #[allow(clippy::eq_op)]
     /// Documents the child subtest fn.
     ///
     /// Doc comments must not count as an attribute override, and must not be inherited themselves.
@@ -18,7 +18,7 @@ mod parent_subtests {
     mod child_subtests {
         use super::*;
         #[test]
-        #[should_panic(expected = "my failure")]
+        #[allow(clippy::eq_op)]
         fn grandchild() {}
     }
 }

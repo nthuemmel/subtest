@@ -1,10 +1,11 @@
 #[subtest]
 #[test]
-#[allow(clippy::eq_op)]
+#[ignore = "my reason"]
+#[should_panic(expected = "my failure")]
 fn parent() {
     #[subtest]
     fn child() {
-        #[subtest(inherit_attributes = true)]
+        #[subtest]
         fn grandchild() {}
     }
 }

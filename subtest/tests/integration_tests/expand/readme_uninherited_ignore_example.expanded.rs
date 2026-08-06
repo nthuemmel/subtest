@@ -7,7 +7,7 @@ pub const parent: test::TestDescAndFn = test::TestDescAndFn {
         name: test::StaticTestName("parent"),
         ignore: true,
         ignore_message: ::core::option::Option::None,
-        source_file: "./tests/integration_tests/expand/readme_inherited_ignore_example.rs",
+        source_file: "./tests/integration_tests/expand/readme_uninherited_ignore_example.rs",
         start_line: 6usize,
         start_col: 4usize,
         end_line: 6usize,
@@ -44,9 +44,9 @@ mod parent_subtests {
     pub const child: test::TestDescAndFn = test::TestDescAndFn {
         desc: test::TestDesc {
             name: test::StaticTestName("parent_subtests::child"),
-            ignore: true,
+            ignore: false,
             ignore_message: ::core::option::Option::None,
-            source_file: "./tests/integration_tests/expand/readme_inherited_ignore_example.rs",
+            source_file: "./tests/integration_tests/expand/readme_uninherited_ignore_example.rs",
             start_line: 11usize,
             start_col: 8usize,
             end_line: 11usize,
@@ -58,7 +58,6 @@ mod parent_subtests {
         },
         testfn: test::StaticTestFn(#[coverage(off)] || test::assert_test_result(child())),
     };
-    #[ignore]
     fn child() {
         #[allow(unused_variables)]
         let value = 1;

@@ -4,7 +4,7 @@ expression: macro_output
 input_file: subtest-impl/tests/expand_impl/doc_comment_override.rs
 ---
 #[test]
-#[should_panic(expected = "my failure")]
+#[allow(clippy::eq_op)]
 fn parent() {}
 mod parent_subtests {
     use super::*;

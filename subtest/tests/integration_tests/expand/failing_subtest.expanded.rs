@@ -177,9 +177,9 @@ pub const a_panicking_test_function: test::TestDescAndFn = test::TestDescAndFn {
             "fails on purpose, run in a child process by tests/integration_tests/run.rs",
         ),
         source_file: "./tests/integration_tests/expand/failing_subtest.rs",
-        start_line: 42usize,
+        start_line: 41usize,
         start_col: 4usize,
-        end_line: 42usize,
+        end_line: 41usize,
         end_col: 29usize,
         compile_fail: false,
         no_run: false,
@@ -207,14 +207,12 @@ mod a_panicking_test_function_subtests {
             name: test::StaticTestName(
                 "a_panicking_test_function_subtests::a_subtest_of_a_panicking_test_function",
             ),
-            ignore: true,
-            ignore_message: ::core::option::Option::Some(
-                "fails on purpose, run in a child process by tests/integration_tests/run.rs",
-            ),
+            ignore: false,
+            ignore_message: ::core::option::Option::None,
             source_file: "./tests/integration_tests/expand/failing_subtest.rs",
-            start_line: 46usize,
+            start_line: 45usize,
             start_col: 8usize,
-            end_line: 46usize,
+            end_line: 45usize,
             end_col: 46usize,
             compile_fail: false,
             no_run: false,
@@ -226,7 +224,6 @@ mod a_panicking_test_function_subtests {
             || test::assert_test_result(a_subtest_of_a_panicking_test_function()),
         ),
     };
-    #[ignore = "fails on purpose, run in a child process by tests/integration_tests/run.rs"]
     fn a_subtest_of_a_panicking_test_function() {
         match (&(1 + 1), &2) {
             (left_val, right_val) => {

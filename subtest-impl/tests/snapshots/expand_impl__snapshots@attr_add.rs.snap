@@ -8,14 +8,15 @@ fn parent() {}
 mod parent_subtests {
     use super::*;
     #[test]
+    #[allow(clippy::eq_op)]
     #[should_panic(expected = "my failure")]
-    fn child_should_panic() {}
-    mod child_should_panic_subtests {
+    fn child_with_added_attrs() {}
+    mod child_with_added_attrs_subtests {
         use super::*;
         #[test]
         fn grandchild_reset() {}
         #[test]
-        #[should_panic(expected = "my failure")]
-        fn grandchild_should_panic() {}
+        #[allow(clippy::eq_op)]
+        fn grandchild_inheriting_only_the_allowance() {}
     }
 }

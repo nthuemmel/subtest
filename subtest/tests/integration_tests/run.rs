@@ -93,3 +93,12 @@ fn a_passing_test_function_is_reported_as_a_success() {
 fn a_passing_subtest_is_reported_as_a_success() {
     assert_test_is_reported_as_a_success("expand::two_subtests::two_subtests_subtests::add");
 }
+
+/// `#[ignore]` is not inherited, so the subtest of an ignored test function has to run.
+#[test]
+fn a_subtest_of_an_ignored_test_function_is_not_ignored() {
+    assert_test_is_reported_as_a_success(
+        "expand::uninherited_test_attrs::an_ignored_test_function_subtests::\
+         a_subtest_of_an_ignored_test_function",
+    );
+}

@@ -1,6 +1,6 @@
 #[subtest]
 #[test]
-#[should_panic(expected = "my failure")]
+#[allow(clippy::eq_op)]
 /// Documents the parent test fn.
 fn parent() {
     /// Documents the child subtest fn.
