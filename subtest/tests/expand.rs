@@ -23,6 +23,12 @@ mod expand {
     mod doc_comments;
     mod helper_fn;
     mod helper_fn_attrs;
+    #[deny(
+        unfulfilled_lint_expectations,
+        reason = "an #[expect] is passed down to nested subtests as an #[allow], make sure that\
+                  works by denying unfulfilled #[expect]s"
+    )]
+    mod inherited_lint_expectation;
     #[expect(
         dead_code,
         reason = "since #[test] is missing, the function should lead to a dead code warning, \

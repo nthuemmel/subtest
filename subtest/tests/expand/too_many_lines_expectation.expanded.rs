@@ -74,6 +74,7 @@ mod a_long_test_function_subtests {
             || test::assert_test_result(a_short_subtest()),
         ),
     };
+    #[allow(clippy::too_many_lines, reason = "this test function is long on purpose")]
     fn a_short_subtest() {
         match (&(1 + 1), &2) {
             (left_val, right_val) => {
@@ -100,9 +101,9 @@ mod a_long_test_function_subtests {
             ignore: false,
             ignore_message: ::core::option::Option::None,
             source_file: "./tests/expand/too_many_lines_expectation.rs",
-            start_line: 31usize,
+            start_line: 35usize,
             start_col: 8usize,
-            end_line: 31usize,
+            end_line: 35usize,
             end_col: 58usize,
             compile_fail: false,
             no_run: false,
@@ -196,9 +197,9 @@ pub const a_test_function_with_a_long_subtest: test::TestDescAndFn = test::TestD
         ignore: false,
         ignore_message: ::core::option::Option::None,
         source_file: "./tests/expand/too_many_lines_expectation.rs",
-        start_line: 44usize,
+        start_line: 46usize,
         start_col: 4usize,
-        end_line: 44usize,
+        end_line: 46usize,
         end_col: 39usize,
         compile_fail: false,
         no_run: false,
@@ -228,9 +229,9 @@ mod a_test_function_with_a_long_subtest_subtests {
             ignore: false,
             ignore_message: ::core::option::Option::None,
             source_file: "./tests/expand/too_many_lines_expectation.rs",
-            start_line: 47usize,
+            start_line: 49usize,
             start_col: 8usize,
-            end_line: 47usize,
+            end_line: 49usize,
             end_col: 22usize,
             compile_fail: false,
             no_run: false,
@@ -242,6 +243,10 @@ mod a_test_function_with_a_long_subtest_subtests {
             || test::assert_test_result(a_long_subtest()),
         ),
     };
+    #[allow(
+        clippy::too_many_lines,
+        reason = "this test function is long because of the subtest written in its body"
+    )]
     #[expect(clippy::too_many_lines, reason = "this subtest is long on purpose")]
     fn a_long_subtest() {
         let mut total = 0;

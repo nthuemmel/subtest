@@ -1,0 +1,21 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/inherited_lint_expectation.rs
+---
+#[test]
+#[expect(unused_variables, reason = "kept for a later commit")]
+fn a_test_function_with_an_unused_variable() {
+    let unused = 1;
+    assert_eq!(1 + 1, 2);
+}
+mod a_test_function_with_an_unused_variable_subtests {
+    use super::*;
+    #[test]
+    #[allow(unused_variables, reason = "kept for a later commit")]
+    fn a_subtest_which_does_not_trigger_the_lint() {
+        #[allow(unused_variables)]
+        let unused = 1;
+        assert_eq!(1 + 1, 2);
+    }
+}

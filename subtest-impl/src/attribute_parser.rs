@@ -1,8 +1,7 @@
 use crate::config::SubtestConfig;
-use quote::ToTokens;
-use syn::punctuated::Punctuated;
+use proc_macro2::Ident;
 use syn::visit::Visit;
-use syn::{Attribute, ItemFn, Meta, Path, Stmt, Token, visit};
+use syn::{Attribute, ItemFn, Meta, Path, Stmt, visit};
 
 /// Whether the function has a `#[test]`, `#[tokio::test]`, `#[rstest]` attribute etc.
 pub fn has_test_attr(item_fn: &ItemFn) -> bool {
@@ -24,10 +23,10 @@ pub fn inheritable_attributes(attributes: Vec<Attribute>) -> Vec<Attribute> {
         .into_iter()
         // Doc comments describe the function they are written on, so they are not passed down
         .filter(|attr| !is_doc_attr(attr))
-        // Drop `#[expect(clippy::too_many_lines)]` from the attributes a nested subtest inherits.
-        // This lint misfires when the subtest is shorter than the parent. Inherited lines don't
-        // count against the lint
-        .filter_map(remove_line_count_expectation)
+        // Pass an `#[expect(...)]` down to nested subtests as an `#[allow(...)]`.
+        // `#[expect]` may misfire on nested subtests if the expected thing only happens in the
+        // parent and is not inherited
+        .map(downgrade_expect_to_allow)
         .collect()
 }
 
@@ -36,41 +35,15 @@ fn is_doc_attr(attr: &Attribute) -> bool {
     attr.meta.path().is_ident("doc")
 }
 
-/// Drop `#[expect(clippy::too_many_lines)]` from the attribute
-fn remove_line_count_expectation(mut attr: Attribute) -> Option<Attribute> {
-    if !attr.meta.path().is_ident("expect") {
-        return Some(attr);
+fn downgrade_expect_to_allow(mut attr: Attribute) -> Attribute {
+    if let Meta::List(lints) = &mut attr.meta {
+        if lints.path.is_ident("expect") {
+            let name = &mut lints.path.segments[0].ident;
+            *name = Ident::new("allow", name.span());
+        }
     }
 
-    let Meta::List(list) = &mut attr.meta else {
-        return Some(attr);
-    };
-
-    let Ok(lints) = list.parse_args_with(Punctuated::<Meta, Token![,]>::parse_terminated) else {
-        return Some(attr);
-    };
-
-    if !lints.iter().any(is_line_count_lint) {
-        return Some(attr);
-    }
-
-    let remaining: Punctuated<Meta, Token![,]> = lints
-        .into_iter()
-        .filter(|lint| !is_line_count_lint(lint))
-        .collect();
-
-    // an expectation needs at least one lint - a lone `reason` does not compile
-    if !remaining.iter().any(|lint| matches!(lint, Meta::Path(_))) {
-        return None;
-    }
-
-    list.tokens = remaining.to_token_stream();
-
-    Some(attr)
-}
-
-fn is_line_count_lint(lint: &Meta) -> bool {
-    matches!(lint, Meta::Path(path) if path_matches(path, &["clippy", "too_many_lines"]))
+    attr
 }
 
 /// Reject `#[subtest]` functions which are not declared directly in the body of their parent test
@@ -197,38 +170,42 @@ mod tests {
     use syn::parse_quote;
 
     #[test]
-    fn keep_expectation_of_other_lints() {
-        let attr: Attribute = parse_quote!(#[expect(unused_variables)]);
-        assert_eq!(remove_line_count_expectation(attr.clone()), Some(attr));
+    fn inheritable_attributes_drop_doc_comments() {
+        let attributes: Vec<Attribute> = vec![
+            parse_quote!(#[doc = "a doc comment"]),
+            parse_quote!(#[test]),
+        ];
+
+        let expected: Vec<Attribute> = vec![parse_quote!(#[test])];
+
+        assert_eq!(inheritable_attributes(attributes), expected);
     }
 
     #[test]
-    fn keep_allowance_of_the_line_count_lint() {
-        let attr: Attribute = parse_quote!(#[allow(clippy::too_many_lines)]);
-        assert_eq!(remove_line_count_expectation(attr.clone()), Some(attr));
+    fn inheritable_attributes_keep_other_attributes() {
+        let attributes: Vec<Attribute> = vec![
+            parse_quote!(#[test]),
+            parse_quote!(#[ignore]),
+            parse_quote!(#[allow(clippy::too_many_lines)]),
+            parse_quote!(#[should_panic(expected = "boom")]),
+        ];
+
+        assert_eq!(inheritable_attributes(attributes.clone()), attributes);
     }
 
     #[test]
-    fn remove_expectation_of_the_line_count_lint() {
-        let attr: Attribute = parse_quote!(#[expect(clippy::too_many_lines)]);
-        assert_eq!(remove_line_count_expectation(attr), None);
-    }
+    fn inheritable_attributes_downgrade_expects_to_allows() {
+        let attributes: Vec<Attribute> = vec![
+            parse_quote!(#[expect(clippy::too_many_lines)]),
+            parse_quote!(#[expect(unused_variables, unused_assignments, reason = "inherited")]),
+        ];
 
-    #[test]
-    fn remove_expectation_of_the_line_count_lint_with_a_reason() {
-        let attr: Attribute = parse_quote!(#[expect(clippy::too_many_lines, reason = "long")]);
-        assert_eq!(remove_line_count_expectation(attr), None);
-    }
+        let expected: Vec<Attribute> = vec![
+            parse_quote!(#[allow(clippy::too_many_lines)]),
+            parse_quote!(#[allow(unused_variables, unused_assignments, reason = "inherited")]),
+        ];
 
-    #[test]
-    fn remove_the_line_count_lint_but_keep_the_rest() {
-        let attr: Attribute =
-            parse_quote!(#[expect(unused_variables, clippy::too_many_lines, reason = "long")]);
-
-        assert_eq!(
-            remove_line_count_expectation(attr),
-            Some(parse_quote!(#[expect(unused_variables, reason = "long")]))
-        );
+        assert_eq!(inheritable_attributes(attributes), expected);
     }
 
     #[test]

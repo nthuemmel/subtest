@@ -9,8 +9,7 @@ fn a_test_function_with_a_long_subtest() {
     #[expect(clippy::too_many_lines, reason = "this subtest is long on purpose")]
     fn a_long_subtest() {
         // A subtest which is long in its own right *is* reported, which is what fulfills the
-        // expectation above - were it not reported, that expectation would be unfulfilled.
-        // Expectations written on the subtest itself are kept, only inherited ones are removed.
+        // expectation above
         let mut total = 0;
         total += 1;
         total += 2;

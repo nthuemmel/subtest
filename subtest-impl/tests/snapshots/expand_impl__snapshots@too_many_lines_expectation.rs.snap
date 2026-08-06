@@ -22,6 +22,7 @@ fn a_long_test_function() {
 mod a_long_test_function_subtests {
     use super::*;
     #[test]
+    #[allow(clippy::too_many_lines, reason = "this test function is long on purpose")]
     fn a_short_subtest() {
         assert_eq!(1 + 1, 2);
     }

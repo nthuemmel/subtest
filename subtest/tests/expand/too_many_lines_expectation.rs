@@ -27,10 +27,12 @@ fn a_long_test_function() {
     total += 10;
     assert_eq!(total, 55);
 
-    #[subtest]
+    // This subtest inherits every statement above, but clippy doesn't count inherited lines,
+    // so `too_many_lines` does not fire. We have to turn inheritance off, otherwise the parent's
+    // `expect` would be turned into an `allow` on the nested subtest
+    #[subtest(inherit_attributes = false)]
+    #[test]
     fn a_subtest_inheriting_more_lines_than_the_threshold() {
-        // this subtest inherits every statement above, but the lint counts the lines a subtest is
-        // written on - so it is not reported either, and needs no expectation of its own
         assert_eq!(total, 55);
     }
 }

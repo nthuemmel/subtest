@@ -12,6 +12,10 @@ fn a_test_function_with_a_long_subtest() {}
 mod a_test_function_with_a_long_subtest_subtests {
     use super::*;
     #[test]
+    #[allow(
+        clippy::too_many_lines,
+        reason = "this test function is long because of the subtest written in its body"
+    )]
     #[expect(clippy::too_many_lines, reason = "this subtest is long on purpose")]
     fn a_long_subtest() {
         let mut total = 0;
