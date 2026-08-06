@@ -675,7 +675,6 @@ mod value_can_be_sent_subtests {
         assert!(value == "Hello!");
     }
 }
-
 ```
 
 </details>
@@ -745,13 +744,13 @@ The solution is to
     fn value_can_be_sent() {
         let (sender, receiver) = std::sync::mpsc::channel();
         sender.send("Hello!").unwrap();
-  
+
         #[subtest]
         fn value_can_be_received() {
             let value = receiver.recv().unwrap();
             assert_eq!(value, "Hello!");
         }
-  
+
         drop(receiver); // <-- drop here to silence unused variable warning
     }
     ```
