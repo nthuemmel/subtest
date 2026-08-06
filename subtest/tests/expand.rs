@@ -47,6 +47,17 @@ mod expand {
     mod readme_todo_list_example;
     mod readme_unused_variables_solution;
     mod rstest_tests;
+    #[deny(
+        clippy::too_many_lines,
+        reason = "the pedantic lint has to be enabled for the fixture's #[expect] attributes to \
+                  be fulfilled - and a subtest must not be reported for lines it merely inherits"
+    )]
+    #[deny(
+        unfulfilled_lint_expectations,
+        reason = "an #[expect(clippy::too_many_lines)] on a long test function must not be \
+                  inherited by a shorter subtest, where it could never be fulfilled"
+    )]
+    mod too_many_lines_expectation;
     mod two_subtests;
     #[deny(
         unused_assignments,

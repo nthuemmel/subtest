@@ -3,7 +3,8 @@ mod config;
 mod unused_variables;
 
 use crate::attribute_parser::{
-    check_for_misplaced_subtests, has_test_attr, is_doc_attr, remove_subtest_attrs,
+    check_for_misplaced_subtests, has_test_attr, is_doc_attr, remove_line_count_expectation,
+    remove_subtest_attrs,
 };
 use crate::unused_variables::{mask_unused_parameters, mask_unused_variables};
 use attribute_parser::RemovedSubtestAttrs;
@@ -117,7 +118,7 @@ impl Subtest {
             .attrs
             .iter()
             .filter(|attr| !is_doc_attr(attr))
-            .cloned()
+            .filter_map(remove_line_count_expectation)
             .collect();
 
         for statement in input_fn.block.stmts {

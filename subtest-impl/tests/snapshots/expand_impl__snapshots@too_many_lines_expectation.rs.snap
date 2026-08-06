@@ -1,0 +1,75 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/too_many_lines_expectation.rs
+---
+#[test]
+#[expect(clippy::too_many_lines, reason = "this test function is long on purpose")]
+fn a_long_test_function() {
+    let mut total = 0;
+    total += 1;
+    total += 2;
+    total += 3;
+    total += 4;
+    total += 5;
+    total += 6;
+    total += 7;
+    total += 8;
+    total += 9;
+    total += 10;
+    assert_eq!(total, 55);
+}
+mod a_long_test_function_subtests {
+    use super::*;
+    #[test]
+    fn a_short_subtest() {
+        assert_eq!(1 + 1, 2);
+    }
+    #[test]
+    fn a_subtest_inheriting_more_lines_than_the_threshold() {
+        #[allow(unused_variables)]
+        let mut total = 0;
+        #[allow(unused_assignments)]
+        {
+            total += 1;
+        }
+        #[allow(unused_assignments)]
+        {
+            total += 2;
+        }
+        #[allow(unused_assignments)]
+        {
+            total += 3;
+        }
+        #[allow(unused_assignments)]
+        {
+            total += 4;
+        }
+        #[allow(unused_assignments)]
+        {
+            total += 5;
+        }
+        #[allow(unused_assignments)]
+        {
+            total += 6;
+        }
+        #[allow(unused_assignments)]
+        {
+            total += 7;
+        }
+        #[allow(unused_assignments)]
+        {
+            total += 8;
+        }
+        #[allow(unused_assignments)]
+        {
+            total += 9;
+        }
+        #[allow(unused_assignments)]
+        {
+            total += 10;
+        }
+        assert_eq!(total, 55);
+        assert_eq!(total, 55);
+    }
+}

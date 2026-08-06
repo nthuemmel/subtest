@@ -1,6 +1,8 @@
 use crate::config::SubtestConfig;
+use quote::ToTokens;
+use syn::punctuated::Punctuated;
 use syn::visit::Visit;
-use syn::{Attribute, ItemFn, Meta, Path, Stmt, visit};
+use syn::{Attribute, ItemFn, Meta, Path, Stmt, Token, visit};
 
 /// Whether the function has a `#[test]`, `#[tokio::test]`, `#[rstest]` attribute etc.
 pub fn has_test_attr(item_fn: &ItemFn) -> bool {
@@ -18,6 +20,47 @@ pub fn has_test_attr(item_fn: &ItemFn) -> bool {
 /// Whether an attribute is a doc comment (or an equivalent `#[doc = "..."]` attribute)
 pub fn is_doc_attr(attr: &Attribute) -> bool {
     attr.meta.path().is_ident("doc")
+}
+
+/// Drop `#[expect(clippy::too_many_lines)]` from the attributes a nested subtest inherits.
+/// This lint misfires when the subtest is shorter than the parent. Inherited lines don't count
+/// against the lint.
+pub fn remove_line_count_expectation(attr: &Attribute) -> Option<Attribute> {
+    let mut attr = attr.clone();
+
+    if !attr.meta.path().is_ident("expect") {
+        return Some(attr);
+    }
+
+    let Meta::List(list) = &mut attr.meta else {
+        return Some(attr);
+    };
+
+    let Ok(lints) = list.parse_args_with(Punctuated::<Meta, Token![,]>::parse_terminated) else {
+        return Some(attr);
+    };
+
+    if !lints.iter().any(is_line_count_lint) {
+        return Some(attr);
+    }
+
+    let remaining: Punctuated<Meta, Token![,]> = lints
+        .into_iter()
+        .filter(|lint| !is_line_count_lint(lint))
+        .collect();
+
+    // an expectation needs at least one lint - a lone `reason` does not compile
+    if !remaining.iter().any(|lint| matches!(lint, Meta::Path(_))) {
+        return None;
+    }
+
+    list.tokens = remaining.to_token_stream();
+
+    Some(attr)
+}
+
+fn is_line_count_lint(lint: &Meta) -> bool {
+    matches!(lint, Meta::Path(path) if path_matches(path, &["clippy", "too_many_lines"]))
 }
 
 /// Reject `#[subtest]` functions which are not declared directly in the body of their parent test
@@ -142,6 +185,41 @@ fn path_matches(path: &Path, segments: &[&str]) -> bool {
 mod tests {
     use super::*;
     use syn::parse_quote;
+
+    #[test]
+    fn keep_expectation_of_other_lints() {
+        let attr: Attribute = parse_quote!(#[expect(unused_variables)]);
+        assert_eq!(remove_line_count_expectation(&attr), Some(attr));
+    }
+
+    #[test]
+    fn keep_allowance_of_the_line_count_lint() {
+        let attr: Attribute = parse_quote!(#[allow(clippy::too_many_lines)]);
+        assert_eq!(remove_line_count_expectation(&attr), Some(attr));
+    }
+
+    #[test]
+    fn remove_expectation_of_the_line_count_lint() {
+        let attr: Attribute = parse_quote!(#[expect(clippy::too_many_lines)]);
+        assert_eq!(remove_line_count_expectation(&attr), None);
+    }
+
+    #[test]
+    fn remove_expectation_of_the_line_count_lint_with_a_reason() {
+        let attr: Attribute = parse_quote!(#[expect(clippy::too_many_lines, reason = "long")]);
+        assert_eq!(remove_line_count_expectation(&attr), None);
+    }
+
+    #[test]
+    fn remove_the_line_count_lint_but_keep_the_rest() {
+        let attr: Attribute =
+            parse_quote!(#[expect(unused_variables, clippy::too_many_lines, reason = "long")]);
+
+        assert_eq!(
+            remove_line_count_expectation(&attr),
+            Some(parse_quote!(#[expect(unused_variables, reason = "long")]))
+        );
+    }
 
     #[test]
     fn remove_subtest_attrs_none() {

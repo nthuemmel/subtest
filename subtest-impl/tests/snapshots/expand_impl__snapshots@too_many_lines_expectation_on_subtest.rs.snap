@@ -1,0 +1,30 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/too_many_lines_expectation_on_subtest.rs
+---
+#[test]
+#[expect(
+    clippy::too_many_lines,
+    reason = "this test function is long because of the subtest written in its body"
+)]
+fn a_test_function_with_a_long_subtest() {}
+mod a_test_function_with_a_long_subtest_subtests {
+    use super::*;
+    #[test]
+    #[expect(clippy::too_many_lines, reason = "this subtest is long on purpose")]
+    fn a_long_subtest() {
+        let mut total = 0;
+        total += 1;
+        total += 2;
+        total += 3;
+        total += 4;
+        total += 5;
+        total += 6;
+        total += 7;
+        total += 8;
+        total += 9;
+        total += 10;
+        assert_eq!(total, 55);
+    }
+}
