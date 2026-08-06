@@ -6,7 +6,7 @@ members = [
 ]
 
 [workspace.dependencies]
-subtest-impl = { version = "0.0.1", path = "subtest-impl" }
+subtest-impl = { version = "1.0.0", path = "subtest-impl" }
 
 proc-macro2 = "1"
 quote = "1"

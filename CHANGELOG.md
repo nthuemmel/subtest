@@ -2,6 +2,8 @@
 
 ## Next Release
 
+## v1.0.0 (2026-08-06)
+
 First stable release!
 
 ### Added
