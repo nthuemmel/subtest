@@ -406,6 +406,30 @@ fn value_can_be_sent_and_received() {
 }
 ```
 
+You may also override attributes, for example `#[test]` with `#[tokio::test]`:
+
+```rust
+#[subtest]
+#[test]
+fn value_can_be_sent_sync() {
+    let (sender, receiver) = tokio::sync::mpsc::channel(5);
+    sender.try_send("Hello!").unwrap();
+
+    #[subtest(inherit_attributes = false)] // <-- do not copy attributes from the parent function
+    #[tokio::test] // <-- override #[test] with #[tokio::test]
+    async fn value_can_be_received() {
+        let mut receiver = receiver;
+        let value = receiver.recv().await.unwrap();
+        assert_eq!(value, "Hello!");
+    }
+
+    drop(receiver);
+}
+```
+
+Note: If you set `inherit_attributes = false`, you also have to repeat attributes like `#[allow(clippy::<lint>)]` on the nested subtest, if they were set on the parent.
+Set them on the enclosing module instead to apply them unconditionally.
+
 ## Things to be aware of
 
 ### Setup code runs once per test, in parallel
