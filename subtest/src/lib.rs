@@ -59,9 +59,9 @@
 //! * This means you can freely use and mutate any local variables from the parent function in the nested function...
 //! * ... without affecting the parent function or sibling test functions
 //! * Statements *following* a nested `#[subtest]` function are **not** copied - they only run in the parent function
-//! * The parent function stays a test of its own, and every subtest becomes a new test - so the setup code is run once per test (see [Setup code runs once per test, in parallel](#setup-code-runs-once-per-test-in-parallel))
+//! * The parent function stays a test of its own, and every subtest becomes a new test
 //!
-//! **The above example gets expanded to:**
+//! The above example gets expanded to:
 //!
 //! ```no_run
 //! #[test]
@@ -94,7 +94,7 @@
 //! }
 //! ```
 //!
-//! **and therefore runs as three tests:**
+//! and therefore runs as three tests:
 //!
 //! ```text
 //! running 3 tests
@@ -451,7 +451,7 @@
 //! This means that the setup code runs once for the parent test, and once *again* for *every* subtest.
 //! Rust's test harness runs tests in parallel by default.
 //!
-//! This breaks setup code which acquires a shared resource like a fixed TCP port or a file at a fixed path.
+//! This breaks setup code which uses a shared resource like a fixed TCP port or a file at a fixed path.
 //! Example:
 //!
 //! ```no_run
@@ -587,9 +587,9 @@
 //!
 //! There are three exceptions:
 //!
-//! * `#[ignore]` and `#[should_panic]` are **not** passed down. They state the outcome expected of the test function they are written on.
-//! * Doc comments are not passed down either, as they describe the function they are written on.
-//! * An `#[expect(<lint>)]` is passed down as an `#[allow(<lint>)]`, so that it is not reported as unfulfilled in a subtest which does not happen to trigger the lint.
+//! * `#[ignore]` and `#[should_panic]` are **not** passed down
+//! * Doc comments are not passed down
+//! * An `#[expect(<lint>)]` is passed down as an `#[allow(<lint>)]`, so that it is not reported as unfulfilled in a subtest which does not happen to trigger the lint
 //!
 //! So marking a test `#[ignore]` does not ignore its subtests:
 //!
