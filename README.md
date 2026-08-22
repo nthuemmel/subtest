@@ -834,11 +834,11 @@ The solution is to
 
 ## Changelog
 
-Refer to [CHANGELOG.md](CHANGELOG.md)
+Refer to [CHANGELOG.md](https://github.com/nthuemmel/subtest/blob/master/CHANGELOG.md)
 
 ## Maintenance
 
-If you are a contributor, refer to [MAINTENANCE.md](MAINTENANCE.md) for maintenance notes regarding this repository
+If you are a contributor, refer to [MAINTENANCE.md](https://github.com/nthuemmel/subtest/blob/master/MAINTENANCE.md) for maintenance notes regarding this repository
 
 ## License
 
@@ -865,8 +865,8 @@ be dual licensed as above, without any additional terms or conditions.
 
 [license-apache-image]: https://img.shields.io/badge/license-Apache2.0-blue.svg
 
-[license-apache-link]: LICENSE-APACHE
+[license-apache-link]: https://github.com/nthuemmel/subtest/blob/master/LICENSE-APACHE
 
 [license-mit-image]: https://img.shields.io/badge/license-MIT-blue.svg
 
-[license-mit-link]: LICENSE-MIT
+[license-mit-link]: https://github.com/nthuemmel/subtest/blob/master/LICENSE-MIT
