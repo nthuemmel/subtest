@@ -50,6 +50,8 @@ mod readme_parallel_setup_solution1;
 mod readme_parallel_setup_solution2;
 mod readme_todo_list_example;
 mod readme_uninherited_ignore_example;
+mod readme_unused_mut_solution1;
+mod readme_unused_mut_solution2;
 mod readme_unused_variables_solution;
 mod rstest_tests;
 #[deny(

@@ -755,6 +755,81 @@ The solution is to
     }
     ```
 
+### Unused `mut`
+
+If you define a variable as `mut` which is only modified in nested subtests, but not in the parent test function, you will get an "unused mut" warning.
+Example:
+
+```rust
+#[subtest]
+#[test]
+fn value_can_be_incremented() {
+    let mut value = 1;
+
+    #[subtest]
+    fn value_can_be_incremented_twice() {
+        value += 1; // <-- value is modified here, but not in the parent
+        assert_eq!(value, 2);
+    }
+
+    assert_eq!(value, 1);
+}
+```
+
+will lead to
+
+```text
+warning: variable does not need to be mutable
+  --> tests/ui/fail/readme_unused_mut_example.rs:10:9
+   |
+10 |     let mut value = 1;
+   |         ----^^^^^
+   |         |
+   |         help: remove this `mut`
+   |
+```
+
+The solution is to
+
+* either declare the variable without `mut` in the parent test function, and re-declare it as `mut` in the subtest which modifies it (preferred):
+
+    ```rust
+    #[subtest]
+    #[test]
+    fn value_can_be_incremented() {
+        let value = 1; // <-- no `mut` here
+
+        #[subtest]
+        fn value_can_be_incremented_twice() {
+            let mut value = value; // <-- re-declare as `mut` where it is actually modified
+            value += 1;
+            assert_eq!(value, 2);
+        }
+
+        assert_eq!(value, 1);
+    }
+    ```
+
+* or, if that is inconvenient (because several subtests modify the variable, for example), take a mutable borrow at the end of the parent test function's scope:
+
+    ```rust
+    #[subtest]
+    #[test]
+    fn value_can_be_incremented() {
+        let mut value = 1;
+
+        #[subtest]
+        fn value_can_be_incremented_twice() {
+            value += 1;
+            assert_eq!(value, 2);
+        }
+
+        assert_eq!(value, 1);
+
+        let _ = &mut value; // <-- borrow here to silence unused mut warning
+    }
+    ```
+
 <!-- cargo-rdme end -->
 
 ## Changelog
