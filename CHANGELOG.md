@@ -4,7 +4,7 @@
 
 ### Fixed
 
-* `mut` on variable declarations is no longer reported as unused if variables are not modified in a nested subtest, but modified in the parent test function. Limitation: Does not work in a crate which sets `#![forbid(unused_mut)]`, as `forbid` rejects the generated `#[allow]` attributes
+* `mut` on variable and parameter declarations is no longer reported as unused if the variable or parameter is not modified in a nested subtest, but modified in the parent test function. Limitation: Does not work in a crate which sets `#![forbid(unused_mut)]`, as `forbid` rejects the generated `#[allow]` attributes
 
 ## v1.0.0 (2026-08-06)
 

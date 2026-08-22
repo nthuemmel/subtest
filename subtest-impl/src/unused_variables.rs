@@ -133,6 +133,10 @@ pub fn mask_unused_parameters(
             // a test function has no `self` parameter, so there is nothing to mask on a receiver
             if let FnArg::Typed(param) = &mut param {
                 param.attrs.push(allow_unused_variables());
+
+                if pattern_declares_mut_variable(&param.pat) {
+                    param.attrs.push(allow_unused_mut());
+                }
             }
 
             param
@@ -596,6 +600,61 @@ mod tests {
             #[case]
             #[allow(unused_variables)]
             status: TaskStatus
+        };
+
+        assert_eq!(mask_unused_parameters(&params), expected);
+    }
+
+    #[test]
+    fn mask_mut_of_parameters() {
+        let params: Punctuated<FnArg, Token![,]> = parse_quote!(mut value: u32, flag: bool);
+
+        let expected: Punctuated<FnArg, Token![,]> = parse_quote! {
+            #[allow(unused_variables)]
+            #[allow(unused_mut)]
+            mut value: u32,
+            #[allow(unused_variables)] flag: bool
+        };
+
+        assert_eq!(mask_unused_parameters(&params), expected);
+    }
+
+    #[test]
+    fn mask_mut_of_parameter_keeps_existing_attributes() {
+        let params: Punctuated<FnArg, Token![,]> = parse_quote!(#[case] mut status: TaskStatus);
+
+        let expected: Punctuated<FnArg, Token![,]> = parse_quote! {
+            #[case]
+            #[allow(unused_variables)]
+            #[allow(unused_mut)]
+            mut status: TaskStatus
+        };
+
+        assert_eq!(mask_unused_parameters(&params), expected);
+    }
+
+    #[test]
+    fn mask_mut_of_destructured_parameter() {
+        let params: Punctuated<FnArg, Token![,]> =
+            parse_quote!((sender, mut receiver): (Sender, Receiver));
+
+        let expected: Punctuated<FnArg, Token![,]> = parse_quote! {
+            #[allow(unused_variables)]
+            #[allow(unused_mut)]
+            (sender, mut receiver): (Sender, Receiver)
+        };
+
+        assert_eq!(mask_unused_parameters(&params), expected);
+    }
+
+    #[test]
+    fn mask_mut_leaves_immutable_parameters_alone() {
+        let params: Punctuated<FnArg, Token![,]> =
+            parse_quote!(value: u32, &mut reference: &mut u32);
+
+        let expected: Punctuated<FnArg, Token![,]> = parse_quote! {
+            #[allow(unused_variables)] value: u32,
+            #[allow(unused_variables)] &mut reference: &mut u32
         };
 
         assert_eq!(mask_unused_parameters(&params), expected);
