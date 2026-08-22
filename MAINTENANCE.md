@@ -54,6 +54,18 @@ cargo fmt --all
 cargo clippy --locked --all-targets --fix --allow-dirty --allow-staged
 ```
 
+### Regenerate Snapshots
+
+**For the cargo-insta snapshots in [subtest-impl/tests/snapshots/](subtest-impl/tests/snapshots)**:
+
+`cd subtest-impl; cargo insta review`
+
+**For the macrotest snapshots in [subtest/tests/integration_tests/expand/](subtest/tests/integration_tests/expand)**:
+
+1. Temporarily replace `macrotest::expand_without_refresh_args` with `macrotest::expand_args` in [`subtest/tests/integration_tests/expand.rs:test_snapshots()`](subtest/tests/integration_tests/expand.rs)
+2. Run `MACROTEST=overwrite cargo test -p subtest --test integration_tests expand::test_snapshots`
+3. Restore `macrotest::expand_without_refresh_args`
+
 ## MSRV
 
 Use [cargo-msrv](https://github.com/foresterre/cargo-msrv) (`cargo install cargo-msrv`).
