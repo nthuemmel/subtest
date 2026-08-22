@@ -246,6 +246,7 @@ mod tests {
         };
         fn complete_marks_task_completed() {
             #[allow(unused_variables)]
+            #[allow(unused_mut)]
             let mut list = TodoList::new();
             #[allow(unused_variables)]
             let id = list.add("Buy milk");
@@ -291,6 +292,7 @@ mod tests {
         };
         fn cancel_marks_task_cancelled() {
             #[allow(unused_variables)]
+            #[allow(unused_mut)]
             let mut list = TodoList::new();
             #[allow(unused_variables)]
             let id = list.add("Buy milk");
@@ -338,6 +340,7 @@ mod tests {
             };
             fn cannot_complete_already_cancelled_task() {
                 #[allow(unused_variables)]
+                #[allow(unused_mut)]
                 let mut list = TodoList::new();
                 #[allow(unused_variables)]
                 let id = list.add("Buy milk");
@@ -462,6 +465,7 @@ mod tests {
         ) {
             {
                 #[allow(unused_variables)]
+                #[allow(unused_mut)]
                 let mut list = TodoList::new();
                 #[allow(unused_variables)]
                 let id = 1;
@@ -563,6 +567,7 @@ mod tests {
         ) {
             {
                 #[allow(unused_variables)]
+                #[allow(unused_mut)]
                 let mut list = TodoList::new();
                 #[allow(unused_variables)]
                 let id = 1;

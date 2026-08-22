@@ -1,0 +1,21 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/unused_mut_in_subtest.rs
+---
+#[test]
+fn value_can_be_sent() {
+    let mut value = 1;
+    value += 1;
+    assert_eq!(value, 2);
+}
+mod value_can_be_sent_subtests {
+    use super::*;
+    #[test]
+    fn another_value_can_be_sent() {
+        #[allow(unused_variables)]
+        #[allow(unused_mut)]
+        let mut value = 1;
+        assert_eq!(value, 1);
+    }
+}

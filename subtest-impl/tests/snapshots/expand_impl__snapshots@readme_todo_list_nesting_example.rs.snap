@@ -13,6 +13,7 @@ mod add_creates_pending_task_subtests {
     #[test]
     fn cancel_marks_task_cancelled() {
         #[allow(unused_variables)]
+        #[allow(unused_mut)]
         let mut list = TodoList::new();
         #[allow(unused_variables)]
         let id = list.add("Buy milk");
@@ -24,6 +25,7 @@ mod add_creates_pending_task_subtests {
         #[test]
         fn cannot_complete_already_cancelled_task() {
             #[allow(unused_variables)]
+            #[allow(unused_mut)]
             let mut list = TodoList::new();
             #[allow(unused_variables)]
             let id = list.add("Buy milk");

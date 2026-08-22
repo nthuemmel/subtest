@@ -28,6 +28,7 @@ mod insert_finished_task_subtests {
         status: TaskStatus,
     ) {
         #[allow(unused_variables)]
+        #[allow(unused_mut)]
         let mut list = TodoList::new();
         #[allow(unused_variables)]
         let id = 1;
@@ -50,6 +51,7 @@ mod insert_finished_task_subtests {
         status: TaskStatus,
     ) {
         #[allow(unused_variables)]
+        #[allow(unused_mut)]
         let mut list = TodoList::new();
         #[allow(unused_variables)]
         let id = 1;

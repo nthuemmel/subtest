@@ -104,6 +104,7 @@ mod values_are_assigned_subtests {
             };
         }
         #[allow(unused_variables)]
+        #[allow(unused_mut)]
         let mut counter = 0;
         #[allow(unused_assignments)]
         {

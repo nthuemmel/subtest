@@ -119,6 +119,7 @@ mod a_long_test_function_subtests {
     };
     fn a_subtest_inheriting_more_lines_than_the_threshold() {
         #[allow(unused_variables)]
+        #[allow(unused_mut)]
         let mut total = 0;
         #[allow(unused_assignments)]
         {

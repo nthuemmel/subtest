@@ -77,6 +77,24 @@ mod uninherited_test_attrs;
 )]
 mod unused_assignments_in_subtest;
 #[deny(
+    unused_mut,
+    reason = "mut variables inherited from the parent test function must not be reported as \
+                  unused_mut in a subtest which does not modify them"
+)]
+#[deny(
+    clippy::allow_attributes_without_reason,
+    reason = "the generated #[allow(unused_mut)] states no reason, which must stay \
+                  acceptable in a project requiring one - clippy does not apply the lint to \
+                  attributes coming out of a macro"
+)]
+#[deny(
+    clippy::allow_attributes,
+    reason = "the generated #[allow(unused_mut)] must stay acceptable in a project \
+                  requiring #[expect] instead - clippy does not apply the lint to attributes \
+                  coming out of a macro"
+)]
+mod unused_mut_in_subtest;
+#[deny(
     unused_variables,
     reason = "variables inherited from the parent test function must not be reported as \
                   unused in a subtest which does not use them"
