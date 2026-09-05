@@ -9,12 +9,8 @@ use syn::punctuated::Punctuated;
 use syn::visit::{self, Visit};
 use syn::{Attribute, BinOp, Expr, FieldPat, FnArg, Item, Pat, Stmt, Token, parse_quote};
 
-/// Go through the given statements, and mark all (top-level) declared variables in them as used, so they don't show up in unused-variable-warnings
-pub fn mask_unused_variables(statements: Vec<Stmt>) -> Vec<Stmt> {
-    statements.into_iter().map(mask_statement).collect()
-}
-
-fn mask_statement(mut statement: Stmt) -> Stmt {
+/// Go through the given statement, and mark all (top-level) declared variables in them as used, so they don't show up in unused-variable-warnings
+pub fn mask_unused_variables(mut statement: Stmt) -> Stmt {
     if let Stmt::Local(declaration) = &mut statement {
         declaration.attrs.push(allow_unused_variables());
 
@@ -172,89 +168,70 @@ mod tests {
 
     #[test]
     fn mask_variables_leaves_other_statements_alone() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             do_something();
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             do_something();
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_variables_of_declaration() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             let (sender, receiver) = channel();
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_variables)]
             let (sender, receiver) = channel();
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_variables_of_declaration_without_value() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             let value;
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_variables)]
             let value;
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
-    }
-
-    #[test]
-    fn mask_variables_of_multiple_statements() {
-        let statements: Vec<Stmt> = parse_quote! {
-            let value = 5;
-            do_something(value);
-            let other = 6;
-        };
-
-        let expected: Vec<Stmt> = parse_quote! {
-            #[allow(unused_variables)]
-            let value = 5;
-            do_something(value);
-            #[allow(unused_variables)]
-            let other = 6;
-        };
-
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_assignment() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             value = 5;
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_assignments)]
             {
                 value = 5;
             }
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_assignment_nested_in_a_block() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             {
                 value = 5;
             }
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_assignments)]
             {
                 {
@@ -263,18 +240,18 @@ mod tests {
             }
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_assignment_nested_in_a_branch() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             if condition {
                 value = 5;
             }
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_assignments)]
             {
                 if condition {
@@ -283,35 +260,35 @@ mod tests {
             }
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_compound_assignment() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             value += 1;
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_assignments)]
             {
                 value += 1;
             }
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_assignment_inside_a_declaration() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             let other = {
                 value = 5;
                 6
             };
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_variables)]
             #[allow(unused_assignments)]
             let other = {
@@ -320,264 +297,264 @@ mod tests {
             };
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_leaves_assignments_in_a_nested_item_alone() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             fn helper() {
                 let mut value = 1;
                 value = 2;
             }
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             fn helper() {
                 let mut value = 1;
                 value = 2;
             }
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_mut_of_single_declaration() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             let mut value = receive();
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_variables)]
             #[allow(unused_mut)]
             let mut value = receive();
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_mut_of_single_typed_declaration() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             let mut value: i32 = receive();
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_variables)]
             #[allow(unused_mut)]
             let mut value: i32 = receive();
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_mut_of_tuple_declaration() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             let (sender, mut receiver) = channel();
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_variables)]
             #[allow(unused_mut)]
             let (sender, mut receiver) = channel();
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_mut_of_declaration_without_value() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             let mut value;
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_variables)]
             #[allow(unused_mut)]
             let mut value;
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_mut_of_typed_tuple_declaration() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             let (sender, mut receiver): (Sender, Receiver) = channel();
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_variables)]
             #[allow(unused_mut)]
             let (sender, mut receiver): (Sender, Receiver) = channel();
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_mut_of_tuple_struct_declaration() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             let Wrapper(mut value) = wrap();
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_variables)]
             #[allow(unused_mut)]
             let Wrapper(mut value) = wrap();
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_mut_of_struct_declaration() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             let Point { x, y: mut down } = origin();
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_variables)]
             #[allow(unused_mut)]
             let Point { x, y: mut down } = origin();
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_mut_of_struct_declaration_with_shorthand_field() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             let Point { x, mut y } = origin();
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_variables)]
             #[allow(unused_mut)]
             let Point { x, mut y } = origin();
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_mut_of_slice_declaration() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             let [first, mut second, ..] = collect();
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_variables)]
             #[allow(unused_mut)]
             let [first, mut second, ..] = collect();
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_mut_of_parenthesized_declaration() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             let (mut value) = receive();
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_variables)]
             #[allow(unused_mut)]
             let (mut value) = receive();
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_mut_of_alternative_declarations() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             let (Ok(value) | Err(mut value)) = fallible();
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_variables)]
             #[allow(unused_mut)]
             let (Ok(value) | Err(mut value)) = fallible();
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_mut_behind_a_reference() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             let &(mut value) = reference();
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_variables)]
             #[allow(unused_mut)]
             let &(mut value) = reference();
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_mut_of_subpattern_of_a_binding() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             let all @ [mut first, ..] = collect();
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_variables)]
             #[allow(unused_mut)]
             let all @ [mut first, ..] = collect();
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_mut_of_deeply_nested_declaration() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             let (sender, Wrapper { receiver: Some([_, mut last]) }) = channel();
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_variables)]
             #[allow(unused_mut)]
             let (sender, Wrapper { receiver: Some([_, mut last]) }) = channel();
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_mut_leaves_immutable_declarations_alone() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             let Wrapper { values: [first, ..], rest: Some((second, _)) } = wrap();
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_variables)]
             let Wrapper { values: [first, ..], rest: Some((second, _)) } = wrap();
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]
     fn mask_mut_leaves_a_mutable_reference_alone() {
-        let statements: Vec<Stmt> = parse_quote! {
+        let statement: Stmt = parse_quote! {
             let &mut value = reference();
         };
 
-        let expected: Vec<Stmt> = parse_quote! {
+        let expected: Stmt = parse_quote! {
             #[allow(unused_variables)]
             let &mut value = reference();
         };
 
-        assert_eq!(mask_unused_variables(statements), expected);
+        assert_eq!(mask_unused_variables(statement), expected);
     }
 
     #[test]

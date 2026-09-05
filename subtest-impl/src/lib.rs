@@ -1,17 +1,15 @@
 mod attribute_parser;
 mod config;
+mod inheritance;
 mod unused_variables;
 
-use crate::attribute_parser::{
-    check_for_misplaced_subtests, has_test_attr, inheritable_attributes, remove_subtest_attrs,
-};
-use crate::unused_variables::{mask_unused_parameters, mask_unused_variables};
+use crate::attribute_parser::{check_for_misplaced_subtests, has_test_attr, remove_subtest_attrs};
+use crate::inheritance::InheritableFunctionAspects;
 use attribute_parser::RemovedSubtestAttrs;
 use config::{MacroConfig, SubtestConfig};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
-use syn::punctuated::Punctuated;
-use syn::{Attribute, Block, FnArg, Item, ItemFn, ReturnType, Signature, Stmt, Token};
+use syn::{Item, ItemFn, Stmt};
 
 pub fn expand_subtest_main_fn(args: TokenStream, input: TokenStream) -> TokenStream {
     expand_subtest_main_fn_fallible(args, input).unwrap_or_else(|err| err.to_compile_error())
@@ -28,10 +26,7 @@ fn expand_subtest_main_fn_fallible(
         &macro_config,
         &SubtestConfig::default(),
         input_fn,
-        vec![],
-        &[],
-        &Punctuated::new(),
-        &ReturnType::Default,
+        &InheritableFunctionAspects::none(),
     )?;
 
     Ok(main_subtest.render())
@@ -46,60 +41,13 @@ impl Subtest {
     fn new(
         macro_config: &MacroConfig,
         subtest_config: &SubtestConfig,
-        input_fn: ItemFn,
-        parent_fn_statements: Vec<Stmt>,
-        parent_fn_attrs: &[Attribute],
-        parent_fn_params: &Punctuated<FnArg, Token![,]>,
-        parent_fn_return_type: &ReturnType,
+        mut function: ItemFn,
+        inheritable_from_parent: &InheritableFunctionAspects,
     ) -> Result<Self, syn::Error> {
-        let mut inheritable_statements =
-            Vec::with_capacity(parent_fn_statements.len() + input_fn.block.stmts.len());
-        inheritable_statements.extend(parent_fn_statements.iter().cloned());
+        let function_statements = std::mem::take(&mut function.block.stmts);
 
-        let attrs = if subtest_config.inherit_attributes {
-            parent_fn_attrs
-                .iter()
-                .cloned()
-                .chain(input_fn.attrs)
-                .collect()
-        } else {
-            input_fn.attrs
-        };
-
-        // Inherit function parameters if the subtest fn does not specify any.
-        let (fn_params, inheritable_params) = if input_fn.sig.inputs.is_empty() {
-            // mask unused params - as long as the params are used in the parent, they should not show up as unused just because one of the subtests doesn't make use of them!
-            // Nested subtests inherit the unmasked params, so that the mask is not applied twice.
-            (
-                mask_unused_parameters(parent_fn_params),
-                parent_fn_params.clone(),
-            )
-        } else {
-            (input_fn.sig.inputs.clone(), input_fn.sig.inputs)
-        };
-
-        // Inherit function return type if the subtest fn does not specify any
-        let fn_return_type = if matches!(input_fn.sig.output, ReturnType::Default) {
-            parent_fn_return_type.clone()
-        } else {
-            input_fn.sig.output
-        };
-
-        let mut function = ItemFn {
-            attrs,
-            vis: input_fn.vis,
-            sig: Signature {
-                inputs: fn_params,
-                output: fn_return_type,
-                ..input_fn.sig
-            },
-            block: Box::new(Block {
-                brace_token: input_fn.block.brace_token,
-                // inherit all preceding statements from the parent, masking unused variables
-                // - as long as the variables are used in the parent, they should not show up as unused just because one of the subtests doesn't make use of them!
-                stmts: mask_unused_variables(parent_fn_statements),
-            }),
-        };
+        let mut inheritable_from_function =
+            inheritable_from_parent.apply(&mut function, subtest_config);
 
         if !has_test_attr(&function) && !macro_config.allow_missing_test_attr {
             return Err(syn::Error::new_spanned(
@@ -112,10 +60,7 @@ impl Subtest {
 
         let mut subtests = Vec::new();
 
-        // Doc comments describe the function they are written on, so they are not passed down
-        let inheritable_attrs = inheritable_attributes(function.attrs.clone());
-
-        for statement in input_fn.block.stmts {
+        for statement in function_statements {
             let statement = match statement {
                 Stmt::Item(Item::Fn(nested_fn)) => {
                     match remove_subtest_attrs(nested_fn)? {
@@ -127,10 +72,7 @@ impl Subtest {
                                 macro_config,
                                 &subtest_config,
                                 cleaned_function,
-                                inheritable_statements.clone(),
-                                &inheritable_attrs,
-                                &inheritable_params,
-                                &function.sig.output,
+                                &inheritable_from_function,
                             )?);
                             continue;
                         }
@@ -158,7 +100,7 @@ impl Subtest {
             };
 
             check_for_misplaced_subtests(&statement)?;
-            inheritable_statements.push(statement.clone());
+            inheritable_from_function.add_statement(statement.clone());
             function.block.stmts.push(statement);
         }
 

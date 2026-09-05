@@ -1,5 +1,4 @@
 use crate::config::SubtestConfig;
-use proc_macro2::Ident;
 use syn::visit::Visit;
 use syn::{Attribute, ItemFn, Meta, Path, Stmt, visit};
 
@@ -14,45 +13,6 @@ pub fn has_test_attr(item_fn: &ItemFn) -> bool {
                 .last()
                 .is_some_and(|segment| segment.ident.to_string().ends_with("test"))
     })
-}
-
-/// Return only the attributes from the given list of `attributes` that a nested subtest can
-/// inherit
-pub fn inheritable_attributes(attributes: Vec<Attribute>) -> Vec<Attribute> {
-    attributes
-        .into_iter()
-        // Doc comments describe the function they are written on, so they are not passed down
-        .filter(|attr| !is_doc_attr(attr))
-        // Neither is an attribute describing that function's own outcome
-        .filter(|attr| !is_test_outcome_attr(attr))
-        // Pass an `#[expect(...)]` down to nested subtests as an `#[allow(...)]`.
-        // `#[expect]` may misfire on nested subtests if the expected thing only happens in the
-        // parent and is not inherited
-        .map(downgrade_expect_to_allow)
-        .collect()
-}
-
-/// Whether an attribute is a doc comment (or an equivalent `#[doc = "..."]` attribute)
-fn is_doc_attr(attr: &Attribute) -> bool {
-    attr.meta.path().is_ident("doc")
-}
-
-/// Whether an attribute states the outcome expected of the test function it is written on, such as
-/// `#[ignore]` and `#[should_panic]`
-fn is_test_outcome_attr(attr: &Attribute) -> bool {
-    let path = attr.meta.path();
-    path.is_ident("ignore") || path.is_ident("should_panic")
-}
-
-fn downgrade_expect_to_allow(mut attr: Attribute) -> Attribute {
-    if let Meta::List(lints) = &mut attr.meta {
-        if lints.path.is_ident("expect") {
-            let name = &mut lints.path.segments[0].ident;
-            *name = Ident::new("allow", name.span());
-        }
-    }
-
-    attr
 }
 
 /// Reject `#[subtest]` functions which are not declared directly in the body of their parent test
@@ -177,60 +137,6 @@ fn path_matches(path: &Path, segments: &[&str]) -> bool {
 mod tests {
     use super::*;
     use syn::parse_quote;
-
-    #[test]
-    fn inheritable_attributes_drop_doc_comments() {
-        let attributes: Vec<Attribute> = vec![
-            parse_quote!(#[doc = "a doc comment"]),
-            parse_quote!(#[test]),
-        ];
-
-        let expected: Vec<Attribute> = vec![parse_quote!(#[test])];
-
-        assert_eq!(inheritable_attributes(attributes), expected);
-    }
-
-    #[test]
-    fn inheritable_attributes_drop_test_outcome_attributes() {
-        let attributes: Vec<Attribute> = vec![
-            parse_quote!(#[test]),
-            parse_quote!(#[ignore]),
-            parse_quote!(#[ignore = "a reason"]),
-            parse_quote!(#[should_panic]),
-            parse_quote!(#[should_panic(expected = "boom")]),
-        ];
-
-        let expected: Vec<Attribute> = vec![parse_quote!(#[test])];
-
-        assert_eq!(inheritable_attributes(attributes), expected);
-    }
-
-    #[test]
-    fn inheritable_attributes_keep_other_attributes() {
-        let attributes: Vec<Attribute> = vec![
-            parse_quote!(#[test]),
-            parse_quote!(#[allow(clippy::too_many_lines)]),
-            parse_quote!(#[track_caller]),
-            parse_quote!(#[cfg(unix)]),
-        ];
-
-        assert_eq!(inheritable_attributes(attributes.clone()), attributes);
-    }
-
-    #[test]
-    fn inheritable_attributes_downgrade_expects_to_allows() {
-        let attributes: Vec<Attribute> = vec![
-            parse_quote!(#[expect(clippy::too_many_lines)]),
-            parse_quote!(#[expect(unused_variables, unused_assignments, reason = "inherited")]),
-        ];
-
-        let expected: Vec<Attribute> = vec![
-            parse_quote!(#[allow(clippy::too_many_lines)]),
-            parse_quote!(#[allow(unused_variables, unused_assignments, reason = "inherited")]),
-        ];
-
-        assert_eq!(inheritable_attributes(attributes), expected);
-    }
 
     #[test]
     fn remove_subtest_attrs_none() {
