@@ -85,26 +85,9 @@ jobs:
         run: cargo rdme --check --workspace-project subtest
 
   # === Latest stable: mandatory checks ===
-  stable-check:
-    name: "stable: Check"
-    runs-on: ubuntu-latest
-    env:
-      RUSTUP_TOOLCHAIN: stable
-    steps:
-      - uses: actions/checkout@v7
-      - run: rustup toolchain install --profile minimal
-      - uses: Swatinem/rust-cache@v2
-      - name: Cargo check
-        run: cargo check --locked --workspace --all-targets --all-features
-
-  # === Latest stable: advisory checks ===
-  # New Rust releases can break unchanged code (macrotest, fmt and clippy can be
-  # somewhat brittle). continue-on-error ensures this still passes CI, but is at
-  # least somewhat noticeable.
   stable-test:
-    name: "stable: Test (advisory)"
-    runs-on: ubuntu-26.04
-    continue-on-error: true
+    name: "stable: Test"
+    runs-on: ubuntu-latest
     env:
       RUSTUP_TOOLCHAIN: stable
     steps:
@@ -116,8 +99,14 @@ jobs:
           tool: cargo-expand
       - uses: Swatinem/rust-cache@v2
       - name: Run tests
-        run: cargo test --locked --workspace --all-features
+        # macrotest uses cargo-expand, whose output changes regularly in between compiler versions.
+        # Skip these tests here. They are covered by the pinned Rust version.
+        run: cargo test --locked --workspace --all-features -- --skip expand::test_snapshots
 
+  # === Latest stable: advisory checks ===
+  # New Rust releases can break unchanged code (macrotest, fmt and clippy can be
+  # somewhat brittle). continue-on-error ensures this still passes CI, but is at
+  # least somewhat noticeable.
   stable-fmt:
     name: "stable: Rustfmt (advisory)"
     runs-on: ubuntu-26.04
