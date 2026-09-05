@@ -104,6 +104,7 @@ jobs:
   stable-test:
     name: "stable: Test (advisory)"
     runs-on: ubuntu-26.04
+    continue-on-error: true
     env:
       RUSTUP_TOOLCHAIN: stable
     steps:
