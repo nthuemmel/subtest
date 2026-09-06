@@ -18,6 +18,10 @@ fn a_test_function_with_a_panicking_subtest() {
 
 #[subtest]
 #[test]
+#[expect(
+    clippy::unnecessary_wraps,
+    reason = "the return type exists for the subtest below"
+)]
 fn a_test_function_with_a_subtest_returning_an_error() -> Result<(), String> {
     let list: Vec<u32> = Vec::new();
 

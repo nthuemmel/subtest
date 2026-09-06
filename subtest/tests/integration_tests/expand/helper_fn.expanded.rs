@@ -25,7 +25,15 @@ fn helper_fn() {
     let local_var = double(1);
     /// Helper functions may carry doc comments as well as lint & configuration attributes
     #[allow(dead_code)]
+    #[expect(
+        clippy::items_after_statements,
+        reason = "declaring a helper function between statements is what this fixture is about"
+    )]
     fn noop() {}
+    #[expect(
+        clippy::items_after_statements,
+        reason = "declaring a helper function after the statements above is the point here"
+    )]
     fn triple(value: u32) -> u32 {
         value * 3
     }
@@ -97,9 +105,9 @@ mod helper_fn_subtests {
             ignore: false,
             ignore_message: ::core::option::Option::None,
             source_file: "./tests/integration_tests/expand/helper_fn.rs",
-            start_line: 20usize,
+            start_line: 24usize,
             start_col: 8usize,
-            end_line: 20usize,
+            end_line: 24usize,
             end_col: 34usize,
             compile_fail: false,
             no_run: false,
@@ -119,6 +127,10 @@ mod helper_fn_subtests {
         let local_var = double(1);
         /// Helper functions may carry doc comments as well as lint & configuration attributes
         #[allow(dead_code)]
+        #[expect(
+            clippy::items_after_statements,
+            reason = "declaring a helper function between statements is what this fixture is about"
+        )]
         fn noop() {}
         noop();
         match (&double(local_var), &4) {

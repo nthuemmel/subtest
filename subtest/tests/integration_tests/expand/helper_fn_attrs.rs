@@ -74,5 +74,10 @@ fn helper_fn_attrs() {
     // declared after the subtest, so it is never copied - the dead code expectation below is
     // fulfilled exactly once
     #[expect(dead_code)]
+    #[expect(
+        clippy::items_after_statements,
+        reason = "the helper is declared after statements on purpose, to place it behind the \
+                  subtest above"
+    )]
     fn expects_to_be_dead() {}
 }

@@ -14,6 +14,10 @@ fn helper_fn() {
 
     /// Helper functions may carry doc comments as well as lint & configuration attributes
     #[allow(dead_code)]
+    #[expect(
+        clippy::items_after_statements,
+        reason = "declaring a helper function between statements is what this fixture is about"
+    )]
     fn noop() {}
 
     #[subtest]
@@ -23,6 +27,10 @@ fn helper_fn() {
     }
 
     // helper functions declared after a subtest are not copied into it
+    #[expect(
+        clippy::items_after_statements,
+        reason = "declaring a helper function after the statements above is the point here"
+    )]
     fn triple(value: u32) -> u32 {
         value * 3
     }

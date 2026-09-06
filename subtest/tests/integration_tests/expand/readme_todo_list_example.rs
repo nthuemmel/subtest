@@ -14,7 +14,7 @@ impl fmt::Display for TaskStatus {
             TaskStatus::Completed => "Completed",
             TaskStatus::Cancelled => "Cancelled",
         };
-        write!(f, "{}", label)
+        write!(f, "{label}")
     }
 }
 
@@ -43,9 +43,9 @@ pub enum TodoError {
 impl fmt::Display for TodoError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            TodoError::TaskNotFound(id) => write!(f, "task {} not found", id),
+            TodoError::TaskNotFound(id) => write!(f, "task {id} not found"),
             TodoError::InvalidTransition { id, from, to } => {
-                write!(f, "cannot transition task {} from {} to {}", id, from, to)
+                write!(f, "cannot transition task {id} from {from} to {to}")
             }
         }
     }

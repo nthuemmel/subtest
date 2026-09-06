@@ -71,6 +71,11 @@ fn helper_fn_attrs() {
         + cold();
     assert_positive(sum);
     #[expect(dead_code)]
+    #[expect(
+        clippy::items_after_statements,
+        reason = "the helper is declared after statements on purpose, to place it behind the \
+                  subtest above"
+    )]
     fn expects_to_be_dead() {}
 }
 mod helper_fn_attrs_subtests {

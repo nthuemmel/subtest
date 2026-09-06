@@ -95,9 +95,9 @@ pub const a_test_function_with_a_subtest_returning_an_error: test::TestDescAndFn
         ignore: false,
         ignore_message: ::core::option::Option::None,
         source_file: "./tests/integration_tests/expand/failing_subtest.rs",
-        start_line: 21usize,
+        start_line: 25usize,
         start_col: 4usize,
-        end_line: 21usize,
+        end_line: 25usize,
         end_col: 53usize,
         compile_fail: false,
         no_run: false,
@@ -109,6 +109,10 @@ pub const a_test_function_with_a_subtest_returning_an_error: test::TestDescAndFn
         || test::assert_test_result(a_test_function_with_a_subtest_returning_an_error()),
     ),
 };
+#[expect(
+    clippy::unnecessary_wraps,
+    reason = "the return type exists for the subtest below"
+)]
 fn a_test_function_with_a_subtest_returning_an_error() -> Result<(), String> {
     let list: Vec<u32> = Vec::new();
     if !list.is_empty() {
@@ -131,9 +135,9 @@ mod a_test_function_with_a_subtest_returning_an_error_subtests {
                 "fails on purpose, run in a child process by tests/integration_tests/run.rs",
             ),
             source_file: "./tests/integration_tests/expand/failing_subtest.rs",
-            start_line: 28usize,
+            start_line: 32usize,
             start_col: 8usize,
-            end_line: 28usize,
+            end_line: 32usize,
             end_col: 36usize,
             compile_fail: false,
             no_run: false,
@@ -145,6 +149,10 @@ mod a_test_function_with_a_subtest_returning_an_error_subtests {
             || test::assert_test_result(a_subtest_returning_an_error()),
         ),
     };
+    #[allow(
+        clippy::unnecessary_wraps,
+        reason = "the return type exists for the subtest below"
+    )]
     #[ignore = "fails on purpose, run in a child process by tests/integration_tests/run.rs"]
     fn a_subtest_returning_an_error() -> Result<(), String> {
         #[allow(unused_variables)]
@@ -177,9 +185,9 @@ pub const a_panicking_test_function: test::TestDescAndFn = test::TestDescAndFn {
             "fails on purpose, run in a child process by tests/integration_tests/run.rs",
         ),
         source_file: "./tests/integration_tests/expand/failing_subtest.rs",
-        start_line: 41usize,
+        start_line: 45usize,
         start_col: 4usize,
-        end_line: 41usize,
+        end_line: 45usize,
         end_col: 29usize,
         compile_fail: false,
         no_run: false,
@@ -210,9 +218,9 @@ mod a_panicking_test_function_subtests {
             ignore: false,
             ignore_message: ::core::option::Option::None,
             source_file: "./tests/integration_tests/expand/failing_subtest.rs",
-            start_line: 45usize,
+            start_line: 49usize,
             start_col: 8usize,
-            end_line: 45usize,
+            end_line: 49usize,
             end_col: 46usize,
             compile_fail: false,
             no_run: false,
