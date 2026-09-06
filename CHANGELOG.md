@@ -2,6 +2,8 @@
 
 ## Next Release
 
+## v1.0.2 (2026-09-06)
+
 ### Fixed
 
 * Items (`use` declarations, helper functions, constants) at the start of a nested subtest no longer trigger the `clippy::items_after_statements` lint. Limitation: Does not work in a crate which sets `#![forbid(clippy::items_after_statements)]`, as `forbid` rejects the generated `#[allow]` attribute, and the suppression may leak into nested statements
