@@ -19,6 +19,9 @@ proc-macro2 = { workspace = true }
 insta = { workspace = true }
 prettyplease = { workspace = true }
 syn = { workspace = true, features = ["extra-traits"] }
+# outside a real macro expansion, `proc-macro2` falls back to an implementation whose spans carry
+# no source location at all - which the span tests need to tell a kept location from a lost one
+proc-macro2 = { workspace = true, features = ["span-locations"] }
 
 [lints]
 workspace = true

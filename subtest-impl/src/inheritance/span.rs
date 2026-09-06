@@ -216,6 +216,40 @@ mod tests {
         assert_syntax_is_preserved(&expression);
     }
 
+    /// Marking has to keep pointing at the source the token came from, so that diagnostics which
+    /// survive it still name the line the author wrote. Parsing from a string is what gives the
+    /// tokens a location in the first place - `quote!` builds them without one.
+    #[test]
+    fn mark_tokens_keeps_the_source_location_of_every_token() {
+        let tokens: TokenStream = "let value = [ { (1) } ];".parse().unwrap();
+
+        assert_locations_are_kept(tokens.clone(), mark_tokens_as_macro_generated(tokens));
+    }
+
+    fn assert_locations_are_kept(original: TokenStream, marked: TokenStream) {
+        let original: Vec<TokenTree> = original.into_iter().collect();
+        let marked: Vec<TokenTree> = marked.into_iter().collect();
+
+        assert_eq!(
+            original.len(),
+            marked.len(),
+            "marking dropped or added tokens"
+        );
+
+        for (original, marked) in original.into_iter().zip(marked) {
+            assert_eq!(
+                (marked.span().start(), marked.span().end()),
+                (original.span().start(), original.span().end()),
+                "marking lost the location of `{marked}`"
+            );
+
+            // the tokens a group encloses are marked separately from the group itself
+            if let (TokenTree::Group(original), TokenTree::Group(marked)) = (original, marked) {
+                assert_locations_are_kept(original.stream(), marked.stream());
+            }
+        }
+    }
+
     #[test]
     fn mark_tokens_keeps_every_token_and_delimiter() {
         let tokens = quote! {
