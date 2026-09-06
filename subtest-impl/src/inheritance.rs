@@ -1,3 +1,5 @@
+mod span;
+
 use crate::config::SubtestConfig;
 use crate::unused_variables::{mask_unused_parameters, mask_unused_variables};
 use proc_macro2::Ident;
