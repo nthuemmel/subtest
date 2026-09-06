@@ -45,7 +45,7 @@ impl InheritableFunctionAspects {
 
         // Inherit function parameters if the subtest fn does not specify any.
         let new_inheritable_parameters = if to_function.sig.inputs.is_empty() {
-            to_function.sig.inputs = self.parameters.clone();
+            to_function.sig.inputs.clone_from(&self.parameters);
             self.parameters.clone()
         } else {
             // mask unused params - as long as the params are used in the parent, they should not show up as unused just because one of the subtests doesn't make use of them!
@@ -83,7 +83,7 @@ impl InheritableFunctionAspects {
             to_function.sig.output.clone()
         };
 
-        to_function.block.stmts = self.statements.clone();
+        to_function.block.stmts.clone_from(&self.statements);
 
         Self {
             attributes: new_inheritable_attributes,

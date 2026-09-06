@@ -153,7 +153,7 @@ fn allow_unused_assignments() -> Attribute {
     parse_quote!(#[allow(unused_assignments)])
 }
 
-/// The attribute which exempts a single declaration from the unused_mut lint.
+/// The attribute which exempts a single declaration from the `unused_mut` lint.
 ///
 /// Note that this does not work in a crate which sets `#![forbid(unused_mut)]`, because
 /// `forbid` rejects any `allow` below it. We'll think about how to solve this once a user complains.

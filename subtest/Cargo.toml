@@ -26,3 +26,6 @@ rstest = { workspace = true }
 serial_test = { workspace = true }
 anyhow = { workspace = true }
 assert2 = { workspace = true }
+
+[lints]
+workspace = true

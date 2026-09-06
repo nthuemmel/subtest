@@ -11,10 +11,12 @@ use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 use syn::{Item, ItemFn, Stmt, parse_quote};
 
+#[must_use]
 pub fn expand_subtest_main_fn(args: TokenStream, input: TokenStream) -> TokenStream {
     expand_subtest_main_fn_fallible(args, input).unwrap_or_else(|err| err.to_compile_error())
 }
 
+#[expect(clippy::needless_pass_by_value, reason = "cleaner interface")]
 fn expand_subtest_main_fn_fallible(
     args: TokenStream,
     input: TokenStream,

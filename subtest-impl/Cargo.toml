@@ -19,3 +19,6 @@ proc-macro2 = { workspace = true }
 insta = { workspace = true }
 prettyplease = { workspace = true }
 syn = { workspace = true, features = ["extra-traits"] }
+
+[lints]
+workspace = true
