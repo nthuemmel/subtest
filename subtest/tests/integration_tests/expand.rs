@@ -119,6 +119,12 @@ mod rstest_tests;
 mod too_many_lines_expectation;
 mod two_subtests;
 mod uninherited_test_attrs;
+mod unnecessary_wraps;
+#[deny(
+    clippy::unnecessary_wraps,
+    reason = "disallow false positives for inherited return types"
+)]
+mod unnecessary_wraps_inherited;
 #[deny(
     unused_assignments,
     reason = "values assigned in the parent test function must not be reported as never read \

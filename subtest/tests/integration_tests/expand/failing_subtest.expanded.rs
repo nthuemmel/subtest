@@ -154,6 +154,7 @@ mod a_test_function_with_a_subtest_returning_an_error_subtests {
         reason = "the return type exists for the subtest below"
     )]
     #[ignore = "fails on purpose, run in a child process by tests/integration_tests/run.rs"]
+    #[allow(clippy::unnecessary_wraps)]
     fn a_subtest_returning_an_error() -> Result<(), String> {
         #[allow(unused_variables)]
         let list: Vec<u32> = Vec::new();

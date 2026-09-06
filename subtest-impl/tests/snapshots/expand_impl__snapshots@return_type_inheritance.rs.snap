@@ -8,10 +8,12 @@ fn parent() -> anyhow::Result<()> {}
 mod parent_subtests {
     use super::*;
     #[test]
+    #[allow(clippy::unnecessary_wraps)]
     fn child() -> anyhow::Result<()> {}
     mod child_subtests {
         use super::*;
         #[test]
+        #[allow(clippy::unnecessary_wraps)]
         fn grandchild() -> anyhow::Result<()> {}
     }
 }

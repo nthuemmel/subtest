@@ -55,6 +55,17 @@ impl InheritableFunctionAspects {
         // Inherit function return type if the subtest fn does not specify any
         if matches!(to_function.sig.output, ReturnType::Default) {
             to_function.sig.output = self.return_type.clone();
+
+            if !matches!(to_function.sig.output, ReturnType::Default) {
+                // When a subtest inherits a `Result` or `Option` return type, but itself always
+                // returns `Ok` or `Some`, the `clippy::unnecessary_wraps` lint is triggered.
+                // However, the lint points at the parent. The user cannot change the parent if the
+                // parent later emits an `Err` or `None`, making this lint a false positive.
+                // Suppress it.
+                to_function
+                    .attrs
+                    .push(parse_quote!(#[allow(clippy::unnecessary_wraps)]));
+            }
         } else if is_unit(&to_function.sig.output)
             && !matches!(self.return_type, ReturnType::Default)
         {

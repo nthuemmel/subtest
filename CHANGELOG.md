@@ -6,6 +6,7 @@
 
 * Items (`use` declarations, helper functions, constants) at the start of a nested subtest no longer trigger the `clippy::items_after_statements` lint. Limitation: Does not work in a crate which sets `#![forbid(clippy::items_after_statements)]`, as `forbid` rejects the generated `#[allow]` attribute, and the suppression may leak into nested statements
 * A nested subtest resetting its return type to `()` no longer triggers the `clippy::unused_unit` lint. Limitation: Does not work in a crate which sets `#![forbid(clippy::unused_unit)]`, as `forbid` rejects the generated `#[allow]` attribute, and the suppression may leak into nested statements
+* A nested subtest which inherits a `Result` or `Option` return type no longer triggers the `clippy::unnecessary_wraps` lint when it always returns `Ok` or `Some`. Limitation: Does not work in a crate which sets `#![forbid(clippy::unnecessary_wraps)]`, as `forbid` rejects the generated `#[allow]` attribute, and the suppression may leak into nested statements
 
 ## v1.0.1 (2026-08-22)
 

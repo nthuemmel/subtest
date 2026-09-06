@@ -77,6 +77,7 @@ mod value_can_be_sent_async_subtests {
             || test::assert_test_result(value_can_be_received_inherit()),
         ),
     };
+    #[allow(clippy::unnecessary_wraps)]
     fn value_can_be_received_inherit() -> anyhow::Result<()> {
         let body = async {
             #[allow(unused_variables)]
