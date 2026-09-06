@@ -2,7 +2,7 @@ use crate::config::SubtestConfig;
 use crate::unused_variables::{mask_unused_parameters, mask_unused_variables};
 use proc_macro2::Ident;
 use syn::punctuated::Punctuated;
-use syn::{Attribute, FnArg, ItemFn, Meta, ReturnType, Stmt, Token};
+use syn::{Attribute, FnArg, ItemFn, Meta, ReturnType, Stmt, Token, Type, parse_quote};
 
 pub struct InheritableFunctionAspects {
     attributes: Vec<Attribute>,
@@ -55,8 +55,22 @@ impl InheritableFunctionAspects {
         // Inherit function return type if the subtest fn does not specify any
         if matches!(to_function.sig.output, ReturnType::Default) {
             to_function.sig.output = self.return_type.clone();
+        } else if is_unit(&to_function.sig.output)
+            && !matches!(self.return_type, ReturnType::Default)
+        {
+            // when explicitly resetting the return type, `clippy::unused_unit` is a false positive
+            // and must be suppressed
+            to_function
+                .attrs
+                .push(parse_quote!(#[allow(clippy::unused_unit)]));
         }
-        let new_inheritable_return_type = to_function.sig.output.clone();
+
+        let new_inheritable_return_type = if is_unit(&to_function.sig.output) {
+            // Inherit `-> ()` as the default return type, to not trigger `clippy::unused_unit`
+            ReturnType::Default
+        } else {
+            to_function.sig.output.clone()
+        };
 
         to_function.block.stmts = self.statements.clone();
 
@@ -110,6 +124,14 @@ fn downgrade_expect_to_allow(mut attr: Attribute) -> Attribute {
     }
 
     attr
+}
+
+/// Whether the return type is explicitly `-> ()`
+fn is_unit(return_type: &ReturnType) -> bool {
+    match return_type {
+        ReturnType::Default => false,
+        ReturnType::Type(_, ty) => matches!(&**ty, Type::Tuple(tuple) if tuple.elems.is_empty()),
+    }
 }
 
 #[cfg(test)]

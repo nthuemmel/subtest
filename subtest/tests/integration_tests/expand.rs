@@ -53,6 +53,29 @@ mod readme_uninherited_ignore_example;
 mod readme_unused_mut_solution1;
 mod readme_unused_mut_solution2;
 mod readme_unused_variables_solution;
+#[deny(
+    clippy::unused_unit,
+    reason = "a subtest resetting its return type to () must not be reported as an unneeded \
+                  unit return type"
+)]
+#[deny(
+    clippy::allow_attributes_without_reason,
+    reason = "the generated #[allow(clippy::unused_unit)] states no reason, which must stay \
+                  acceptable in a project requiring one - clippy does not apply the lint to \
+                  attributes coming out of a macro"
+)]
+#[deny(
+    clippy::allow_attributes,
+    reason = "the generated #[allow(clippy::unused_unit)] must stay acceptable in a project \
+                  requiring #[expect] instead - clippy does not apply the lint to attributes \
+                  coming out of a macro"
+)]
+mod return_type_reset;
+#[deny(
+    unfulfilled_lint_expectations,
+    reason = "a `-> ()` which resets no inherited return type is unneeded, and must be reported as such"
+)]
+mod return_type_unused_unit;
 mod rstest_tests;
 #[deny(
     clippy::too_many_lines,

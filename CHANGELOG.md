@@ -2,6 +2,10 @@
 
 ## Next Release
 
+### Fixed
+
+* A nested subtest resetting its return type to `()` no longer triggers the `clippy::unused_unit` lint. Limitation: Does not work in a crate which sets `#![forbid(clippy::unused_unit)]`, as `forbid` rejects the generated `#[allow]` attribute, and the suppression may leak into nested statements
+
 ## v1.0.1 (2026-08-22)
 
 ### Fixed
