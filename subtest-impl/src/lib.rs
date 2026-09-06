@@ -9,7 +9,7 @@ use attribute_parser::RemovedSubtestAttrs;
 use config::{MacroConfig, SubtestConfig};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
-use syn::{Item, ItemFn, Stmt};
+use syn::{Item, ItemFn, Stmt, parse_quote};
 
 pub fn expand_subtest_main_fn(args: TokenStream, input: TokenStream) -> TokenStream {
     expand_subtest_main_fn_fallible(args, input).unwrap_or_else(|err| err.to_compile_error())
@@ -59,6 +59,7 @@ impl Subtest {
         }
 
         let mut subtests = Vec::new();
+        let mut leading_items_after_statements = !function.block.stmts.is_empty();
 
         for statement in function_statements {
             let statement = match statement {
@@ -100,6 +101,24 @@ impl Subtest {
             };
 
             check_for_misplaced_subtests(&statement)?;
+
+            let statement = match statement {
+                Stmt::Item(item) if leading_items_after_statements => {
+                    // Items that are at the top of a nested subtests, but after statements
+                    // inherited from the parent, would trigger a 'clippy::items_after_statements'
+                    // false positive. Mask them.
+                    // Note that this does not work in a crate which sets `#![forbid(clippy::items_after_statements)]`,
+                    // because `forbid` rejects any `allow` below it. We'll think about how to solve this once a user
+                    // complains.
+                    parse_quote!(#[allow(clippy::items_after_statements)] #item)
+                }
+
+                other => {
+                    leading_items_after_statements = false;
+                    other
+                }
+            };
+
             inheritable_from_function.add_statement(statement.clone());
             function.block.stmts.push(statement);
         }

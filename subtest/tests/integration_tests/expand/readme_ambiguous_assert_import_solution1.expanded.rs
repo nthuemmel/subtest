@@ -58,6 +58,7 @@ mod value_can_be_sent_subtests {
         #[allow(unused_variables)]
         let (sender, receiver) = std::sync::mpsc::channel();
         sender.send("Hello!").unwrap();
+        #[allow(clippy::items_after_statements)]
         use assert2::assert;
         let value = receiver.recv().unwrap();
         match match (&(value), &("Hello!")) {

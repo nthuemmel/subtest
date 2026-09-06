@@ -1,0 +1,25 @@
+---
+source: subtest-impl/tests/expand_impl.rs
+expression: macro_output
+input_file: subtest-impl/tests/expand_impl/items_after_statements.rs
+---
+#[test]
+fn parent() {
+    let value = 1;
+}
+mod parent_subtests {
+    use super::*;
+    #[test]
+    fn child() {
+        #[allow(unused_variables)]
+        let value = 1;
+        #[allow(clippy::items_after_statements)]
+        use std::fmt::Write as _;
+        #[allow(clippy::items_after_statements)]
+        const SUFFIX: &str = "!";
+        #[allow(clippy::items_after_statements)]
+        fn render() {}
+        let rendered = render();
+        fn after_own_statement() {}
+    }
+}

@@ -69,6 +69,16 @@ mod helper_fn;
 )]
 mod helper_fn_attrs;
 mod inherited_lint_expectation;
+#[deny(
+    clippy::items_after_statements,
+    reason = "items after inherited statements should not trigger the lint"
+)]
+mod items_after_inherited_statements;
+#[expect(
+    clippy::items_after_statements,
+    reason = "items after non-inherited statements should trigger the lint"
+)]
+mod items_after_statements;
 #[expect(
     dead_code,
     reason = "since #[test] is missing, the function should lead to a dead code warning, \
@@ -82,14 +92,6 @@ mod missing_test_attr;
 )]
 mod missing_test_attr_on_nested_subtest;
 mod no_subtests;
-// TODO: the fixture's `use assert2::assert;` is the first thing in the subtest's body and only
-//  lands after statements because the macro prepends the parent's inherited statements to it. A
-//  user writing this cannot fix it - the macro should mask the lint on the leading items of a
-//  subtest body
-#[expect(
-    clippy::items_after_statements,
-    reason = "caused by the macro prepending inherited statements - see the TODO above"
-)]
 mod readme_ambiguous_assert_import_solution1;
 mod readme_ambiguous_assert_import_solution2;
 mod readme_async_example;
