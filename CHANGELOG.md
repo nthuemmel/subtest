@@ -2,6 +2,10 @@
 
 ## Next Release
 
+### Fixed
+
+* Future linting errors in code inherited by nested subtests should be less likely, as inherited code is now marked as macro-generated. As an annoying side effect, this may lead to duplicate error messages if inherited code fails to compile
+
 ## v1.0.2 (2026-09-06)
 
 ### Fixed

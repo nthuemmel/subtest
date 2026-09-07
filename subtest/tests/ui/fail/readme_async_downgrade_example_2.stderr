@@ -1,8 +1,13 @@
 error[E0728]: `await` is only allowed inside `async` functions and blocks
   --> tests/ui/fail/readme_async_downgrade_example_2.rs:9:27
    |
+ 5 | #[subtest(allow_missing_test_attribute)]
+   | ---------------------------------------- in this attribute macro expansion
+...
  9 |     sender.send("Hello!").await.unwrap();
    |                           ^^^^^ only allowed inside `async` functions and blocks
 ...
 13 |     fn value_can_be_received() {
    |     -------------------------- this is not `async`
+   |
+   = note: this error originates in the attribute macro `subtest` (in Nightly builds, run with -Z macro-backtrace for more info)

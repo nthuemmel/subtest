@@ -1,11 +1,17 @@
 mod span;
 
 use crate::config::SubtestConfig;
+use crate::inheritance::span::Spanned;
 use crate::unused_variables::{mask_unused_parameters, mask_unused_variables};
 use proc_macro2::Ident;
 use syn::punctuated::Punctuated;
-use syn::{Attribute, FnArg, ItemFn, Meta, ReturnType, Stmt, Token, Type, parse_quote};
+use syn::token::{Brace, Paren};
+use syn::{
+    Attribute, Block, FnArg, Generics, ItemFn, Meta, ReturnType, Signature, Stmt, Token, Type,
+    Visibility, parse_quote,
+};
 
+#[derive(Clone)]
 pub struct InheritableFunctionAspects {
     attributes: Vec<Attribute>,
     parameters: Punctuated<FnArg, Token![,]>,
@@ -26,6 +32,18 @@ impl InheritableFunctionAspects {
     /// Applies inheritable aspects to the given `to_function`, and derives and returns new
     /// inheritable function aspects for the given `to_function`
     pub fn apply(&self, to_function: &mut ItemFn, config: &SubtestConfig) -> Self {
+        // By marking inherited aspects as macro-generated, linting is later suppressed for them.
+        // They should only be linted in the context of the parent function, but not in nested
+        // subtests, where we can get many false positives, like:
+        // - unused_variables, unused_mut, unused_assignments, all for variables or parameters
+        //   only used in the parent later
+        // - unfulfilled_lint_expectations for expects which only hold in the parent
+        self.clone()
+            .mark_as_macro_generated()
+            .apply_impl(to_function, config)
+    }
+
+    fn apply_impl(&self, to_function: &mut ItemFn, config: &SubtestConfig) -> Self {
         let new_inheritable_attributes;
         if config.inherit_attributes {
             new_inheritable_attributes = self
@@ -100,6 +118,48 @@ impl InheritableFunctionAspects {
     }
 }
 
+impl Spanned for InheritableFunctionAspects {
+    fn mark_as_macro_generated(self) -> Self {
+        let Self {
+            attributes,
+            parameters,
+            return_type,
+            statements,
+        } = self;
+
+        let wrapper_function = ItemFn {
+            attrs: attributes,
+            vis: Visibility::Inherited,
+            sig: Signature {
+                constness: None,
+                asyncness: None,
+                unsafety: None,
+                abi: None,
+                fn_token: syn::token::Fn::default(),
+                ident: parse_quote!(dummy),
+                generics: Generics::default(),
+                paren_token: Paren::default(),
+                inputs: parameters,
+                variadic: None,
+                output: return_type,
+            },
+            block: Box::new(Block {
+                brace_token: Brace::default(),
+                stmts: statements,
+            }),
+        };
+
+        let wrapper_function = wrapper_function.mark_as_macro_generated();
+
+        Self {
+            attributes: wrapper_function.attrs,
+            parameters: wrapper_function.sig.inputs,
+            return_type: wrapper_function.sig.output,
+            statements: wrapper_function.block.stmts,
+        }
+    }
+}
+
 /// Return only the attributes from the given list of `attributes` that a nested subtest can
 /// inherit
 fn inheritable_attributes(attributes: Vec<Attribute>) -> Vec<Attribute> {
@@ -151,6 +211,44 @@ fn is_unit(return_type: &ReturnType) -> bool {
 mod tests {
     use super::*;
     use syn::parse_quote;
+
+    /// Everything a subtest can inherit, in a shape which does not round trip through a token
+    /// stream on its own: attributes and parameters have no `Parse` implementation, and the
+    /// trailing `Ok(())` would fail when parsed by itself
+    fn every_aspect() -> InheritableFunctionAspects {
+        let body: Block = parse_quote!({
+            let (sender, mut receiver) = channel();
+            fn helper() {}
+            Ok(())
+        });
+
+        InheritableFunctionAspects {
+            attributes: vec![
+                parse_quote!(#[tokio::test]),
+                parse_quote!(#[expect(unused_mut, reason = "a reason")]),
+            ],
+            parameters: parse_quote!(#[case] mut status: TaskStatus, other: u32),
+            return_type: parse_quote!(-> anyhow::Result<()>),
+            statements: body.stmts,
+        }
+    }
+
+    /// Spans take no part in syn's `PartialEq`, so this compares the syntax itself - which marking
+    /// has to leave untouched. That the spans *are* marked cannot be observed from a unit test,
+    /// see the note on `span::tests`.
+    fn assert_aspects_are_preserved(aspects: &InheritableFunctionAspects) {
+        let marked = aspects.clone().mark_as_macro_generated();
+
+        assert_eq!(marked.attributes, aspects.attributes, "attributes");
+        assert_eq!(marked.parameters, aspects.parameters, "parameters");
+        assert_eq!(marked.return_type, aspects.return_type, "return type");
+        assert_eq!(marked.statements, aspects.statements, "statements");
+    }
+
+    #[test]
+    fn mark_every_aspect_at_once() {
+        assert_aspects_are_preserved(&every_aspect());
+    }
 
     #[test]
     fn inheritable_attributes_drop_doc_comments() {

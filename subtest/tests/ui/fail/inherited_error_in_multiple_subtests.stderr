@@ -1,0 +1,16 @@
+error[E0425]: cannot find function `missing_fn` in this scope
+  --> tests/ui/fail/inherited_error_in_multiple_subtests.rs:10:5
+   |
+10 |     missing_fn();
+   |     ^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `missing_fn` in this scope
+  --> tests/ui/fail/inherited_error_in_multiple_subtests.rs:10:5
+   |
+ 8 | #[subtest::subtest(allow_missing_test_attribute)]
+   | ------------------------------------------------- in this attribute macro expansion
+ 9 | fn parent() {
+10 |     missing_fn();
+   |     ^^^^^^^^^^ not found in this scope
+   |
+   = note: this error originates in the attribute macro `subtest::subtest` (in Nightly builds, run with -Z macro-backtrace for more info)
