@@ -39,7 +39,7 @@ You will need:
 * [cargo-expand](https://github.com/dtolnay/cargo-expand) (`cargo install cargo-expand`)
 * [cargo-rdme](https://github.com/orium/cargo-rdme) (`cargo install cargo-rdme`)
 
-```
+```shell
 cargo check --locked --workspace --all-targets --all-features
 cargo test --locked --workspace --all-features 
 cargo fmt --all -- --check
@@ -49,7 +49,7 @@ cargo rdme --check --workspace-project subtest
 
 ### Fix Issues
 
-```
+```shell
 cargo fmt --all
 cargo clippy --locked --all-targets --fix --allow-dirty --allow-staged
 ```
@@ -58,7 +58,15 @@ cargo clippy --locked --all-targets --fix --allow-dirty --allow-staged
 
 **For the cargo-insta snapshots in [subtest-impl/tests/snapshots/](subtest-impl/tests/snapshots)**:
 
-`cd subtest-impl; cargo insta review`
+```shell
+cd subtest-impl; cargo insta review
+```
+
+**For the UI test snapshots in [subtest/tests/ui/](subtest/tests/ui)**:
+
+```shell
+TRYBUILD=overwrite cargo test -p subtest --test ui ui
+```
 
 **For the macrotest snapshots in [subtest/tests/integration_tests/expand/](subtest/tests/integration_tests/expand)**:
 
