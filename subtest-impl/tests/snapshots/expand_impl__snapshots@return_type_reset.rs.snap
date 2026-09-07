@@ -8,7 +8,6 @@ fn parent() -> anyhow::Result<()> {}
 mod parent_subtests {
     use super::*;
     #[test]
-    #[allow(clippy::unused_unit)]
     fn child() -> () {}
     mod child_subtests {
         use super::*;

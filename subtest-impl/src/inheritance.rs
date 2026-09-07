@@ -89,9 +89,7 @@ impl InheritableFunctionAspects {
         {
             // when explicitly resetting the return type, `clippy::unused_unit` is a false positive
             // and must be suppressed
-            to_function
-                .attrs
-                .push(parse_quote!(#[allow(clippy::unused_unit)]));
+            to_function.sig.output = to_function.sig.output.clone().mark_as_macro_generated();
         }
 
         let new_inheritable_return_type = if is_unit(&to_function.sig.output) {

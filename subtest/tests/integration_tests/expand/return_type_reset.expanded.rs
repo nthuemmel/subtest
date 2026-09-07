@@ -67,7 +67,6 @@ mod a_number_can_be_parsed_subtests {
             || test::assert_test_result(the_number_is_one()),
         ),
     };
-    #[allow(clippy::unused_unit)]
     fn the_number_is_one() -> () {
         let number = 1;
         match (&number, &1) {
