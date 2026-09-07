@@ -68,6 +68,8 @@ mod helper_fn;
                   deny is about the ones the macro generates"
 )]
 mod helper_fn_attrs;
+mod inherited_expect_fulfilled;
+mod inherited_expect_unfulfilled;
 mod inherited_lint_expectation;
 #[deny(
     clippy::items_after_statements,
