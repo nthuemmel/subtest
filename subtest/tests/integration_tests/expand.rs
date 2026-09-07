@@ -154,3 +154,9 @@ mod unused_mut_in_subtest_parameter;
                   unused in a subtest which does not use them"
 )]
 mod unused_variables_in_subtest;
+#[deny(
+    unused_variables,
+    reason = "parameters inherited from the parent test function must not be reported as \
+                  unused in a subtest which does not use them"
+)]
+mod unused_variables_in_subtest_parameters;
