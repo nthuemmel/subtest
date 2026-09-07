@@ -2,6 +2,8 @@
 
 ## Next Release
 
+## v1.0.3 (2026-09-07)
+
 ### Fixed
 
 * `#[expect]`s that are fulfilled in a parent test function, but not a subtest, are no longer reported as unfulfilled

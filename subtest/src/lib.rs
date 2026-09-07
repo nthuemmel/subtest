@@ -48,7 +48,7 @@
 //!
 //! ```toml
 //! [dev-dependencies]
-//! subtest = "1.0.2"
+//! subtest = "1.0.3"
 //! ```
 //!
 //! `subtest` requires Rust 1.85 or newer.
