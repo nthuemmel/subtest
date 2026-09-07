@@ -66,7 +66,6 @@ mod a_number_can_be_rendered_subtests {
         ),
     };
     fn the_number_renders_as_one() {
-        #[allow(unused_variables)]
         let number = 1;
         #[allow(clippy::items_after_statements)]
         use std::fmt::Write as _;
@@ -120,7 +119,6 @@ mod a_number_can_be_rendered_subtests {
             ),
         };
         fn the_number_still_renders_as_one() {
-            #[allow(unused_variables)]
             let number = 1;
             #[allow(clippy::items_after_statements)]
             use std::fmt::Write as _;

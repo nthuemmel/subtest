@@ -7,6 +7,7 @@
 * `#[expect]`s that are fulfilled in a parent test function, but not a subtest, are no longer reported as unfulfilled
 * Variables defined via a macro (like `assert2::assert!(let Ok(value) = result);`) are no longer reported as unused if they are unused in a nested subtest, but used in the parent test function.
 * Future linting errors in code inherited by nested subtests should be less likely, as inherited code is now marked as macro-generated. As an annoying side effect, this may lead to duplicate error messages if inherited code fails to compile
+* `subtest` now also works for crates setting `#![forbid(unused_variables)]`, `#![forbid(unused_assignments)]` or `#![forbid(unused_mut)]`
 
 ## v1.0.2 (2026-09-06)
 

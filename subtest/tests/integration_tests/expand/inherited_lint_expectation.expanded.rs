@@ -68,7 +68,6 @@ mod a_test_function_with_an_unused_variable_subtests {
     };
     #[allow(unused_variables, reason = "kept for a later commit")]
     fn a_subtest_which_does_not_trigger_the_lint() {
-        #[allow(unused_variables)]
         let unused = 1;
         match (&(1 + 1), &2) {
             (left_val, right_val) => {

@@ -221,7 +221,6 @@ mod fibonacci_test_subtests {
     use super::*;
     fn next(input: u32, expected: u32) {
         {
-            #[allow(unused_variables)]
             let number = fibonacci(input);
             match (&expected, &number) {
                 (left_val, right_val) => {

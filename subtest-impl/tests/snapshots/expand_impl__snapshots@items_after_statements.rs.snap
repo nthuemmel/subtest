@@ -11,7 +11,6 @@ mod parent_subtests {
     use super::*;
     #[test]
     fn child() {
-        #[allow(unused_variables)]
         let value = 1;
         #[allow(clippy::items_after_statements)]
         use std::fmt::Write as _;

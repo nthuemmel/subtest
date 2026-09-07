@@ -77,7 +77,6 @@ mod a_top_level_test_function_returning_unit_subtests {
               and has to keep being reported as unneeded"
     )]
     fn the_inherited_number_is_one() {
-        #[allow(unused_variables)]
         let number = 1;
         match (&number, &1) {
             (left_val, right_val) => {
@@ -165,7 +164,6 @@ mod a_test_function_with_a_subtest_returning_unit_subtests {
         reason = "this `-> ()` resets nothing, as the parent test function returns () anyway"
     )]
     fn the_declared_number_is_one() -> () {
-        #[allow(unused_variables)]
         let number = 1;
         match (&number, &1) {
             (left_val, right_val) => {

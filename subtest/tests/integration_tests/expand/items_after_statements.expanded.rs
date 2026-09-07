@@ -67,7 +67,6 @@ mod a_number_can_be_doubled_subtests {
         ),
     };
     fn the_number_doubles_to_four() {
-        #[allow(unused_variables)]
         let number = 2;
         let doubled = number * 2;
         fn quadruple(value: i32) -> i32 {

@@ -13,7 +13,6 @@ mod value_can_be_sent_subtests {
     use super::*;
     #[test]
     fn value_can_be_received() {
-        #[allow(unused_variables)]
         let (sender, receiver) = std::sync::mpsc::channel();
         sender.send("Hello!").unwrap();
         let value = receiver.recv().unwrap();

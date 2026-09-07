@@ -79,37 +79,20 @@ mod values_are_assigned_subtests {
         ),
     };
     fn subtest_reads_none_of_them() {
-        #[allow(unused_variables)]
         let deferred;
-        #[allow(unused_assignments)]
-        {
-            deferred = "a";
-        }
-        #[allow(unused_variables)]
+        deferred = "a";
         let nested;
-        #[allow(unused_assignments)]
         {
-            {
-                nested = "b";
-            };
+            nested = "b";
         }
-        #[allow(unused_variables)]
         let branched;
-        #[allow(unused_assignments)]
-        {
-            if deferred == "a" {
-                branched = "c";
-            } else {
-                branched = "d";
-            };
+        if deferred == "a" {
+            branched = "c";
+        } else {
+            branched = "d";
         }
-        #[allow(unused_variables)]
-        #[allow(unused_mut)]
         let mut counter = 0;
-        #[allow(unused_assignments)]
-        {
-            counter += 1;
-        }
+        counter += 1;
         match (&(1 + 1), &2) {
             (left_val, right_val) => {
                 if !(*left_val == *right_val) {

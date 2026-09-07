@@ -77,7 +77,6 @@ mod an_ignored_test_function_subtests {
         ),
     };
     fn a_subtest_of_an_ignored_test_function() {
-        #[allow(unused_variables)]
         let value = 1;
         match (&value, &1) {
             (left_val, right_val) => {
@@ -167,7 +166,6 @@ mod a_test_function_which_should_panic_subtests {
         ),
     };
     fn a_subtest_of_a_test_function_which_should_panic() {
-        #[allow(unused_variables)]
         let value = 1;
         match (&value, &1) {
             (left_val, right_val) => {

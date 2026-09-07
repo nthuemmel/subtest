@@ -25,37 +25,20 @@ mod values_are_assigned_subtests {
     use super::*;
     #[test]
     fn subtest_reads_none_of_them() {
-        #[allow(unused_variables)]
         let deferred;
-        #[allow(unused_assignments)]
-        {
-            deferred = "a";
-        }
-        #[allow(unused_variables)]
+        deferred = "a";
         let nested;
-        #[allow(unused_assignments)]
         {
-            {
-                nested = "b";
-            };
+            nested = "b";
         }
-        #[allow(unused_variables)]
         let branched;
-        #[allow(unused_assignments)]
-        {
-            if deferred == "a" {
-                branched = "c";
-            } else {
-                branched = "d";
-            };
+        if deferred == "a" {
+            branched = "c";
+        } else {
+            branched = "d";
         }
-        #[allow(unused_variables)]
-        #[allow(unused_mut)]
         let mut counter = 0;
-        #[allow(unused_assignments)]
-        {
-            counter += 1;
-        }
+        counter += 1;
         assert_eq!(1 + 1, 2);
     }
 }

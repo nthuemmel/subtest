@@ -79,7 +79,6 @@ mod a_text_can_be_parsed_subtests {
     )]
     #[allow(clippy::unnecessary_wraps)]
     fn the_text_parses_to_one() -> Result<(), String> {
-        #[allow(unused_variables)]
         let text = "1";
         let parsed: i32 = text
             .parse()
@@ -170,7 +169,6 @@ mod a_number_is_one_subtests {
                   drop it without touching the parent"
     )]
     fn the_number_is_one() -> Result<(), String> {
-        #[allow(unused_variables)]
         let number = 1;
         match (&number, &1) {
             (left_val, right_val) => {

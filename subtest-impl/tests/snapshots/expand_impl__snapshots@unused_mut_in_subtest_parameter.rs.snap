@@ -13,12 +13,7 @@ mod value_can_be_incremented_subtests {
     use super::*;
     #[rstest]
     #[case(1)]
-    fn value_is_positive(
-        #[case]
-        #[allow(unused_variables)]
-        #[allow(unused_mut)]
-        mut value: u32,
-    ) {
+    fn value_is_positive(#[case] mut value: u32) {
         assert!(value > 0);
     }
 }

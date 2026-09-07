@@ -15,7 +15,6 @@ mod value_can_be_sent_async_subtests {
     #[tokio::test]
     #[allow(clippy::unnecessary_wraps)]
     async fn value_can_be_received() -> anyhow::Result<()> {
-        #[allow(unused_variables)]
         let (sender, receiver) = tokio::sync::mpsc::channel(5);
         sender.send("Hello!").await?;
         let mut receiver = receiver;

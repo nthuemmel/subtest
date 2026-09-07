@@ -55,7 +55,6 @@ mod value_can_be_sent_subtests {
         ),
     };
     fn value_can_be_received() {
-        #[allow(unused_variables)]
         let (sender, receiver) = std::sync::mpsc::channel();
         sender.send("Hello!").unwrap();
         #[allow(clippy::items_after_statements)]

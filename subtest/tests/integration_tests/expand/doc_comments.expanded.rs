@@ -65,7 +65,6 @@ mod doc_comments_subtests {
     /// A doc comment must not override the inherited `#[test]` attribute - otherwise this subtest
     /// would silently never run.
     fn documented() {
-        #[allow(unused_variables)]
         let i = 1;
         match (&i, &1) {
             (left_val, right_val) => {
@@ -123,7 +122,6 @@ mod doc_comments_subtests {
     /// Neither must a lint attribute.
     #[allow(clippy::eq_op)]
     fn documented_with_lint_attr() {
-        #[allow(unused_variables)]
         let i = 1;
         match (&i, &1) {
             (left_val, right_val) => {
@@ -180,7 +178,6 @@ mod doc_comments_subtests {
     /// Explicit test attributes still override.
     #[should_panic(expected = "my failure")]
     fn documented_with_override() {
-        #[allow(unused_variables)]
         let i = 1;
         match (&i, &1) {
             (left_val, right_val) => {

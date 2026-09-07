@@ -67,8 +67,6 @@ mod value_can_be_sent_subtests {
         ),
     };
     fn another_value_can_be_sent() {
-        #[allow(unused_variables)]
-        #[allow(unused_mut)]
         let mut value = 1;
         match (&value, &1) {
             (left_val, right_val) => {

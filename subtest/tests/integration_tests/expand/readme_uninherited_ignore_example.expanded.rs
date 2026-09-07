@@ -59,7 +59,6 @@ mod parent_subtests {
         testfn: test::StaticTestFn(#[coverage(off)] || test::assert_test_result(child())),
     };
     fn child() {
-        #[allow(unused_variables)]
         let value = 1;
         match (&value, &1) {
             (left_val, right_val) => {

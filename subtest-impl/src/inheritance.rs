@@ -2,7 +2,6 @@ mod span;
 
 use crate::config::SubtestConfig;
 use crate::inheritance::span::Spanned;
-use crate::unused_variables::{mask_unused_parameters, mask_unused_variables};
 use proc_macro2::Ident;
 use syn::punctuated::Punctuated;
 use syn::token::{Brace, Paren};
@@ -68,8 +67,7 @@ impl InheritableFunctionAspects {
             to_function.sig.inputs.clone_from(&self.parameters);
             self.parameters.clone()
         } else {
-            // mask unused params - as long as the params are used in the parent, they should not show up as unused just because one of the subtests doesn't make use of them!
-            mask_unused_parameters(&to_function.sig.inputs)
+            to_function.sig.inputs.clone()
         };
 
         // Inherit function return type if the subtest fn does not specify any
@@ -114,7 +112,7 @@ impl InheritableFunctionAspects {
     }
 
     pub fn add_statement(&mut self, stmt: Stmt) {
-        self.statements.push(mask_unused_variables(stmt));
+        self.statements.push(stmt);
     }
 }
 

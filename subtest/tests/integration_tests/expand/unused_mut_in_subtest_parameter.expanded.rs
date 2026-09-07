@@ -69,11 +69,7 @@ mod value_can_be_incremented {
 }
 mod value_can_be_incremented_subtests {
     use super::*;
-    fn value_is_positive(
-        #[allow(unused_variables)]
-        #[allow(unused_mut)]
-        mut value: u32,
-    ) {
+    fn value_is_positive(mut value: u32) {
         {
             if !(value > 0) {
                 ::core::panicking::panic("assertion failed: value > 0")

@@ -66,7 +66,7 @@ mod a_number_is_positive {
 }
 mod a_number_is_positive_subtests {
     use super::*;
-    fn a_subtest_ignores_the_parameter(#[allow(unused_variables)] number: i32) {
+    fn a_subtest_ignores_the_parameter(number: i32) {
         {
             let unrelated = "no number in sight";
             match (&unrelated, &"no number in sight") {

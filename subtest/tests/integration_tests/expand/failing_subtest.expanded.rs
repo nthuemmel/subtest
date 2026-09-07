@@ -69,7 +69,6 @@ mod a_test_function_with_a_panicking_subtest_subtests {
     };
     #[ignore = "fails on purpose, run in a child process by tests/integration_tests/run.rs"]
     fn a_subtest_panicking() {
-        #[allow(unused_variables)]
         let value = 1;
         match (&value, &2) {
             (left_val, right_val) => {
@@ -156,7 +155,6 @@ mod a_test_function_with_a_subtest_returning_an_error_subtests {
     #[ignore = "fails on purpose, run in a child process by tests/integration_tests/run.rs"]
     #[allow(clippy::unnecessary_wraps)]
     fn a_subtest_returning_an_error() -> Result<(), String> {
-        #[allow(unused_variables)]
         let list: Vec<u32> = Vec::new();
         let first = list.first().ok_or("the list is empty")?;
         match (&*first, &1) {

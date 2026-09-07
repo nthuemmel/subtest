@@ -118,49 +118,17 @@ mod a_long_test_function_subtests {
         ),
     };
     fn a_subtest_inheriting_more_lines_than_the_threshold() {
-        #[allow(unused_variables)]
-        #[allow(unused_mut)]
         let mut total = 0;
-        #[allow(unused_assignments)]
-        {
-            total += 1;
-        }
-        #[allow(unused_assignments)]
-        {
-            total += 2;
-        }
-        #[allow(unused_assignments)]
-        {
-            total += 3;
-        }
-        #[allow(unused_assignments)]
-        {
-            total += 4;
-        }
-        #[allow(unused_assignments)]
-        {
-            total += 5;
-        }
-        #[allow(unused_assignments)]
-        {
-            total += 6;
-        }
-        #[allow(unused_assignments)]
-        {
-            total += 7;
-        }
-        #[allow(unused_assignments)]
-        {
-            total += 8;
-        }
-        #[allow(unused_assignments)]
-        {
-            total += 9;
-        }
-        #[allow(unused_assignments)]
-        {
-            total += 10;
-        }
+        total += 1;
+        total += 2;
+        total += 3;
+        total += 4;
+        total += 5;
+        total += 6;
+        total += 7;
+        total += 8;
+        total += 9;
+        total += 10;
         match (&total, &55) {
             (left_val, right_val) => {
                 if !(*left_val == *right_val) {

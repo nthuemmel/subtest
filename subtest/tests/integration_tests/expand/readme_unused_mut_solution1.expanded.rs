@@ -66,7 +66,6 @@ mod value_can_be_incremented_subtests {
         ),
     };
     fn value_can_be_incremented_twice() {
-        #[allow(unused_variables)]
         let value = 1;
         let mut value = value;
         value += 1;

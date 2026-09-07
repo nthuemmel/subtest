@@ -72,7 +72,6 @@ mod a_text_can_be_parsed_subtests {
     };
     #[allow(clippy::unnecessary_wraps)]
     fn the_text_is_a_one() -> Result<(), String> {
-        #[allow(unused_variables)]
         let text = "1";
         match (&text, &"1") {
             (left_val, right_val) => {

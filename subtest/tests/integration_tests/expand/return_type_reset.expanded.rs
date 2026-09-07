@@ -69,7 +69,6 @@ mod a_number_can_be_parsed_subtests {
     };
     #[allow(clippy::unused_unit)]
     fn the_number_is_one() -> () {
-        #[allow(unused_variables)]
         let number = 1;
         match (&number, &1) {
             (left_val, right_val) => {
@@ -113,7 +112,6 @@ mod a_number_can_be_parsed_subtests {
             ),
         };
         fn the_number_is_positive() {
-            #[allow(unused_variables)]
             let number = 1;
             match (&number, &1) {
                 (left_val, right_val) => {

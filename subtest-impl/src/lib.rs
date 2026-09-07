@@ -1,7 +1,6 @@
 mod attribute_parser;
 mod config;
 mod inheritance;
-mod unused_variables;
 
 use crate::attribute_parser::{check_for_misplaced_subtests, has_test_attr, remove_subtest_attrs};
 use crate::inheritance::InheritableFunctionAspects;

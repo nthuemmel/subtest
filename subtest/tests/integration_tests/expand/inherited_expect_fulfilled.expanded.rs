@@ -55,7 +55,6 @@ mod a_value_is_declared_subtests {
     };
     fn a_subtest_does_not_use_it() {
         #[expect(unused_variables, reason = "declared for a later commit")]
-        #[allow(unused_variables)]
         let value = 1;
         let other = 2;
         match (&other, &2) {

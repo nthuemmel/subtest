@@ -70,7 +70,6 @@ mod a_helper_is_declared_subtests {
     fn a_subtest_calls_the_helper() {
         #[expect(dead_code, reason = "called only by the subtest below")]
         fn helper() {}
-        #[allow(unused_variables)]
         let value = 1;
         helper();
         match (&value, &1) {
