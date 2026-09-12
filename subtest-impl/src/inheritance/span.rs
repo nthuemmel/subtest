@@ -1,5 +1,3 @@
-#![allow(dead_code, reason = "wip")]
-
 use proc_macro2::{Delimiter, Group, Span, TokenStream, TokenTree, token_stream};
 use quote::ToTokens;
 use syn::parse::Parse;
