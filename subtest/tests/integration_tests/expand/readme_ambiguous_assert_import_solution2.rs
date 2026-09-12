@@ -1,4 +1,3 @@
-use assert2::assert;
 use subtest::subtest;
 
 #[subtest]
@@ -10,7 +9,7 @@ fn value_can_be_sent() {
     #[subtest]
     fn value_can_be_received() {
         let value = receiver.recv().unwrap();
-        super::assert!(value == "Hello!");
+        assert2::assert!(value == "Hello!");
     }
 
     drop(receiver);

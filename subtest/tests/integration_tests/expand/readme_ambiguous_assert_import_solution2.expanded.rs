@@ -1,4 +1,3 @@
-use assert2::assert;
 use subtest::subtest;
 extern crate test;
 #[rustc_test_marker = "value_can_be_sent"]
@@ -9,9 +8,9 @@ pub const value_can_be_sent: test::TestDescAndFn = test::TestDescAndFn {
         ignore: false,
         ignore_message: ::core::option::Option::None,
         source_file: "./tests/integration_tests/expand/readme_ambiguous_assert_import_solution2.rs",
-        start_line: 6usize,
+        start_line: 5usize,
         start_col: 4usize,
-        end_line: 6usize,
+        end_line: 5usize,
         end_col: 21usize,
         compile_fail: false,
         no_run: false,
@@ -41,9 +40,9 @@ mod value_can_be_sent_subtests {
             ignore: false,
             ignore_message: ::core::option::Option::None,
             source_file: "./tests/integration_tests/expand/readme_ambiguous_assert_import_solution2.rs",
-            start_line: 11usize,
+            start_line: 10usize,
             start_col: 8usize,
-            end_line: 11usize,
+            end_line: 10usize,
             end_col: 29usize,
             compile_fail: false,
             no_run: false,
@@ -71,7 +70,7 @@ mod value_can_be_sent_subtests {
                 ::assert2::__assert2_impl::print::FailedCheck {
                     macro_name: "assert",
                     file: "./tests/integration_tests/expand/readme_ambiguous_assert_import_solution2.rs",
-                    line: 13u32,
+                    line: 12u32,
                     column: 9u32,
                     predicates: &[
                         (

@@ -68,8 +68,7 @@ subtest = "1.0.3"
 * Statements *preceding* a nested `#[subtest]` function are **copied** into the nested function's body
 * This means you can freely use and mutate any local variables from the parent function in the nested function...
 * ... without affecting the parent function or sibling test functions
-* Statements *following* a nested `#[subtest]` function are **not** copied - they only run in the parent function
-* The parent function stays a test of its own, and every subtest becomes a new test
+* Every `#[subtest]` becomes its own test
 
 The above example gets expanded to:
 
@@ -100,7 +99,7 @@ mod add_creates_pending_task_subtests {
 }
 ```
 
-and therefore runs as three tests:
+It runs as three tests:
 
 ```text
 running 3 tests
@@ -108,8 +107,6 @@ test add_creates_pending_task ... ok
 test add_creates_pending_task_subtests::complete_marks_task_completed ... ok
 test add_creates_pending_task_subtests::cancel_marks_task_cancelled ... ok
 ```
-
-Since subtests live in a `<parent function>_subtests` module, `cargo test add_creates_pending_task` runs the parent test together with all of its subtests, while `cargo test add_creates_pending_task_subtests::complete_marks_task_completed` runs just that single subtest.
 
 ## What you can do
 
@@ -440,7 +437,7 @@ There are three exceptions:
 
 * `#[ignore]` and `#[should_panic]` are **not** passed down
 * Doc comments are not passed down
-* An `#[expect(<lint>)]` is passed down as an `#[allow(<lint>)]`, so that it is not reported as unfulfilled in a subtest which does not happen to trigger the lint
+* An `#[expect(<lint>)]` is passed down as an `#[allow(<lint>)]`, so that it is not reported as unfulfilled in a subtest which does not trigger the lint
 
 So marking a test `#[ignore]` does not ignore its subtests:
 
@@ -468,7 +465,6 @@ test parent_subtests::child ... ok
 To ignore the subtests as well, mark each of them `#[ignore]` too.
 
 For any *other* attribute, to apply it to the parent only, disable attribute inheritance on the nested subtest with `#[subtest(inherit_attributes = false)]` and re-specify the attributes you do want - including the test attribute.
-Note that this only turns off *attribute* inheritance - setup code is still inherited as usual!
 
 ### Do not omit test attribute altogether
 
@@ -598,8 +594,6 @@ The solution is to make the setup code safe to run concurrently with itself:
     }
     ```
 
-* or, as a last resort, run the whole test binary single-threaded via `cargo test -- --test-threads=1`
-
 ### Ambiguous macro import
 
 If you happen to use `assert2`'s `assert` macro, or any other macro that has a name similar to a macro from the stdlib's auto-imported prelude, you will get a conflict compiler error when using the macro in a nested `#[subtest]`.
@@ -692,13 +686,13 @@ There are two possible solutions for this:
         }
     ```
 
-* Or qualify the invocation with `super`:
+* Or use the full path:
 
     ```rust
         #[subtest]
         fn value_can_be_received() {
             let value = receiver.recv().unwrap();
-            super::assert!(value == "Hello!");
+            assert2::assert!(value == "Hello!");
         }
     ```
 
